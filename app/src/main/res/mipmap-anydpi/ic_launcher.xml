@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Companion fallback icon: full-bleed Q artwork (see mipmap-anydpi-v26). -->
+    <background android:drawable="@drawable/original_app_icon" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground_empty" />
+</adaptive-icon>

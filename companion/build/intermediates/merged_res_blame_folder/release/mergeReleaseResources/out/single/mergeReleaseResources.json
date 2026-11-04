@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "com.antutu.ABenchMark.companion-release-4:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.antutu.ABenchMark.companion-main-5:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.antutu.ABenchMark.companion-release-4:/drawable-nodpi_companion_icon_art.jpg.flat",
+        "source": "com.antutu.ABenchMark.companion-main-5:/drawable-nodpi/companion_icon_art.jpg"
+    },
+    {
+        "merged": "com.antutu.ABenchMark.companion-release-4:/drawable_companion_icon_foreground.xml.flat",
+        "source": "com.antutu.ABenchMark.companion-main-5:/drawable/companion_icon_foreground.xml"
+    },
+    {
+        "merged": "com.antutu.ABenchMark.companion-release-4:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.antutu.ABenchMark.companion-main-5:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.antutu.ABenchMark.companion-release-4:/drawable-nodpi_companion_icon_canvas.jpg.flat",
+        "source": "com.antutu.ABenchMark.companion-main-5:/drawable-nodpi/companion_icon_canvas.jpg"
+    }
+]

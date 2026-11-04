@@ -1,0 +1,4 @@
+#Wed Nov 04 17:57:45 IST 2026
+base.0=/home/unknown/AndroidStudioProjects/QSpoof/companion/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

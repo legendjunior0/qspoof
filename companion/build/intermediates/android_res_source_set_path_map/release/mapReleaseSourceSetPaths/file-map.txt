@@ -1,0 +1,9 @@
+com.antutu.ABenchMark.companion-pngs-0 /home/unknown/AndroidStudioProjects/QSpoof/companion/build/generated/res/pngs/release
+com.antutu.ABenchMark.companion-updated_navigation_xml-1 /home/unknown/AndroidStudioProjects/QSpoof/companion/build/generated/updated_navigation_xml/release
+com.antutu.ABenchMark.companion-packageReleaseResources-2 /home/unknown/AndroidStudioProjects/QSpoof/companion/build/intermediates/incremental/release/packageReleaseResources/merged.dir
+com.antutu.ABenchMark.companion-packageReleaseResources-3 /home/unknown/AndroidStudioProjects/QSpoof/companion/build/intermediates/incremental/release/packageReleaseResources/stripped.dir
+com.antutu.ABenchMark.companion-merged-not-compiled-resources-4 /home/unknown/AndroidStudioProjects/QSpoof/companion/build/intermediates/merged-not-compiled-resources/release
+com.antutu.ABenchMark.companion-release-5 /home/unknown/AndroidStudioProjects/QSpoof/companion/build/intermediates/merged_res/release/mergeReleaseResources
+com.antutu.ABenchMark.companion-main-6 /home/unknown/AndroidStudioProjects/QSpoof/companion/src/main/res
+com.antutu.ABenchMark.companion-release-7 /home/unknown/AndroidStudioProjects/QSpoof/companion/src/release/res
+gradleHome-0 /home/unknown/.gradle

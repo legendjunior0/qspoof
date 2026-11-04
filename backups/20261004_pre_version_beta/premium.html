@@ -1,0 +1,1710 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>QSpoof Premium Review</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f5f8;
+      color: #202a3a;
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body { max-width: 1040px; margin: 0 auto; padding: 34px 22px 60px; }
+    .site-header { display: flex; align-items: center; gap: 14px; margin-bottom: 30px; }
+    .brand-mark { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 15px; background: #e9eefb; color: #405995; font-size: 1.45rem; font-weight: 800; }
+    .brand-copy { flex: 1; }
+    .eyebrow { margin: 0 0 4px; color: #687790; font-size: .72rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.45rem, 4vw, 1.9rem); letter-spacing: -.035em; }
+    .header-tools-block { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-end; gap: 9px; }
+    .header-note { display: inline-flex; align-items: center; gap: 8px; color: #59677b; font-size: .86rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #39a87b; box-shadow: 0 0 0 4px #e1f2ea; }
+    .intro { margin: -18px 0 26px 60px; max-width: 620px; color: #69778b; line-height: 1.6; }
+    .card { background: #fff; border: 1px solid #e2e7ef; border-radius: 18px; padding: 24px; margin: 18px 0; box-shadow: 0 8px 24px rgb(30 45 75 / 4%); }
+    #login-card { max-width: 480px; margin: 44px auto; padding: 30px; }
+    h2 { margin: 0 0 7px; font-size: 1.14rem; letter-spacing: -.015em; }
+    .card-copy { margin: 0 0 20px; color: #718096; font-size: .92rem; line-height: 1.55; }
+    form { display: grid; gap: 15px; }
+    label { display: grid; gap: 7px; color: #48566b; font-size: .86rem; font-weight: 650; }
+    input, select, button { min-height: 44px; border-radius: 11px; padding: 10px 13px; font: inherit; }
+    input, select { width: 100%; color: #202a3a; background: #fbfcfe; border: 1px solid #dce3ed; outline: none; }
+    input:focus { border-color: #7189c4; box-shadow: 0 0 0 3px #eaf0fc; }
+    button { color: #fff; background: #465f9d; border: 1px solid #465f9d; font-weight: 650; cursor: pointer; transition: background .16s ease, transform .16s ease; }
+    button:hover:not(:disabled) { background: #394f86; transform: translateY(-1px); }
+    button:focus-visible { outline: 3px solid #b9c9ed; outline-offset: 2px; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .secondary { color: #46566f; background: #fff; border-color: #dfe5ee; }
+    .secondary:hover:not(:disabled) { color: #344c83; background: #f5f7fb; }
+    .danger { color: #a64048; background: #fff; border-color: #edcfd1; }
+    .danger:hover:not(:disabled) { color: #fff; background: #a64048; border-color: #a64048; }
+    .toolbar { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid #edf0f4; }
+    .toolbar span { flex: 1; min-width: 180px; color: #647289; font-size: .9rem; }
+    .toolbar button { min-height: 38px; padding: 7px 12px; font-size: .86rem; }
+    .message { min-height: 1.5em; margin: 0 0 14px; color: #68778d; font-size: .9rem; white-space: pre-wrap; }
+    .request { padding: 18px 0; display: grid; gap: 9px; border-bottom: 1px solid #edf0f4; }
+    .request:last-child { border-bottom: 0; }
+    .reference { color: #273650; font-weight: 750; letter-spacing: .015em; overflow-wrap: anywhere; }
+    .meta { color: #758297; font-size: .86rem; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+    .actions button { min-height: 38px; padding: 7px 12px; font-size: .86rem; }
+    .quick-approve { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+    .warning { padding: 12px 14px; border: 1px solid #eee3c9; border-radius: 12px; background: #fcf9f1; color: #78643b; font-size: .88rem; line-height: 1.5; }
+    #quick-approve-card { padding: 20px 0; }
+    #app-settings-card { position: sticky; top: 8px; z-index: 5; padding: 15px; border: 1px solid #dce3ed; border-radius: 16px; margin: 14px 0 20px; background: #f7f9fc; box-shadow: 0 8px 22px rgb(30 45 75 / 10%); }
+    #app-settings-card > h2 { margin-bottom: 12px; }
+    .app-settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .app-setting { min-width: 0; padding: 14px; border: 1px solid #e2e7ef; border-radius: 13px; background: #fff; }
+    .app-setting .card-copy { margin-bottom: 12px; }
+    #premium-management { padding: 20px 0; border-bottom: 1px solid #edf0f4; }
+    .settings-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+    .settings-actions button { min-width: 140px; }
+    .settings-status { min-height: 1.4em; margin: 10px 0 0; }
+    .toggle-row { display: flex; align-items: center; gap: 12px; }
+    .toggle-row input { width: 20px; min-height: 20px; accent-color: #465f9d; }
+    .empty-state { padding: 28px 12px; color: #758297; text-align: center; }
+    #analytics-management { padding: 20px 0; }
+    .analytics-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+    .analytics-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+    .filter-group { min-width: 0; padding: 12px; border: 1px solid #e4e9f1; border-radius: 12px; background: #fbfcfe; }
+    .filter-group legend { padding: 0 5px; color: #53627a; font-size: .8rem; font-weight: 700; }
+    .checkbox-options { display: grid; gap: 7px; max-height: 150px; overflow: auto; }
+    .checkbox-option { display: flex; align-items: center; gap: 8px; color: #53627a; font-size: .84rem; }
+    .checkbox-option input, .sort-option input { width: 17px; min-height: 17px; accent-color: #465f9d; }
+    .filter-search { margin: 0 0 8px; }
+    .sort-option { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 14px; color: #53627a; font-size: .9rem; }
+    .device-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: 12px 0; }
+    .device-pagination span { color: #718096; font-size: .85rem; }
+    .analytics-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+    .metric { padding: 13px; border: 1px solid #e4e9f1; border-radius: 13px; background: #fbfcfe; }
+    .metric strong { display: block; color: #283c64; font-size: 1.35rem; }
+    .metric span { color: #718096; font-size: .8rem; }
+    .usage-chart { width: 100%; height: 400px; display: flex; align-items: stretch; gap: clamp(6px, 1.2vw, 16px); padding: 16px 16px 24px; border: 1px solid #e2e7ef; border-radius: 15px; background: linear-gradient(to bottom, #fbfcfe, #f4f7fc); overflow: hidden; }
+    .chart-column { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: end; align-items: center; gap: 8px; }
+    .chart-value { color: #53657f; font-size: .78rem; line-height: 1; }
+    .chart-bar { width: min(58%, 64px); min-height: 4px; flex: 0 0 auto; border-radius: 7px 7px 2px 2px; background: #526fba; }
+    .chart-label { color: #78869a; font-size: .82rem; white-space: nowrap; }
+    .chart-empty { align-self: center; margin: auto; color: #8b929f; font-size: .95rem; text-align: center; }
+    .device-table-wrap { overflow-x: auto; border: 1px solid #e2e7ef; border-radius: 14px; }
+    .device-table { width: 100%; border-collapse: collapse; font-size: .87rem; }
+    .device-table th, .device-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #edf0f4; white-space: nowrap; }
+    .device-table th { color: #53627a; background: #f8faff; font-size: .76rem; letter-spacing: .04em; text-transform: uppercase; }
+    .device-table tr:last-child td { border-bottom: 0; }
+    @media (max-width: 640px) {
+      body { padding: 24px 15px 40px; }
+      .intro { margin: -18px 0 22px 0; }
+      .card, #login-card { padding: 20px; }
+      .quick-approve { grid-template-columns: 1fr; }
+      .quick-approve button { width: 100%; }
+      .toolbar span { flex-basis: 100%; }
+      #app-settings-card { position: static; }
+      .app-settings-grid { grid-template-columns: 1fr; }
+      .analytics-controls { grid-template-columns: 1fr 1fr; }
+      .analytics-filter-grid { grid-template-columns: 1fr 1fr; }
+      .analytics-summary { grid-template-columns: 1fr; }
+      .usage-chart { height: 340px; padding-inline: 8px; gap: 4px; }
+      .chart-label { font-size: .7rem; }
+    }
+    [hidden] { display: none !important; }
+    :root {
+      color-scheme: dark;
+      background: #090a0c;
+      color: #f2f2f3;
+    }
+    body { color: #f2f2f3; }
+    .brand-mark { color: #fff; background: linear-gradient(135deg, #f23832, #ff7900); }
+    .eyebrow, .header-note, .intro, .card-copy, .meta, .toolbar span,
+    .settings-status, .filter-group legend, .checkbox-option,
+    .sort-option, .device-pagination span, .metric span, .chart-value,
+    .chart-label { color: #a1a1aa; }
+    .card { background: #111214; border-color: #292a2e; box-shadow: 0 12px 32px rgb(0 0 0 / 24%); }
+    input, select { color: #f2f2f3; background: #191a1e; border-color: #34353a; }
+    input:focus { border-color: #ff5a32; box-shadow: 0 0 0 3px rgb(255 90 50 / 18%); }
+    button { color: #fff; border: 1px solid #f34b31; background: linear-gradient(110deg, #f23832, #ff7900); }
+    button:hover:not(:disabled) { background: linear-gradient(110deg, #d92c29, #e76700); }
+    button:focus-visible { outline-color: #ff8057; }
+    .secondary { color: #e5e5e7; background: #1b1c20; border-color: #38393e; }
+    .secondary:hover:not(:disabled) { color: #fff; background: #292a2f; }
+    .danger { color: #ff9a91; background: #211719; border-color: #69302e; }
+    .danger:hover:not(:disabled) { color: #fff; background: #a9322c; border-color: #a9322c; }
+    .toolbar { border-color: #292a2e; }
+    .reference { color: #f5f5f5; }
+    .request { border-color: #292a2e; }
+    .warning { color: #f4c67a; background: #211c12; border-color: #594522; }
+    #app-settings-card { background: #151619; border-color: #38393e; }
+    .app-setting, .filter-group, .metric { color: #ededee; background: #191a1e; border-color: #33343a; }
+    .toggle-row input, .checkbox-option input, .sort-option input { accent-color: #ff5932; }
+    .usage-chart { background: linear-gradient(180deg, #17181b, #111214); border-color: #33343a; }
+    .chart-bar { background: linear-gradient(180deg, #ff7900, #f23832); }
+    .chart-empty { color: #a1a1aa; }
+    .metric strong { color: #ff7651; }
+    .device-table-wrap { border-color: #33343a; }
+    .device-table th, .device-table td { border-color: #292a2e; }
+    .device-table th { color: #d4d4d8; background: #1b1c20; }
+    .empty-state { color: #a1a1aa; }
+    .admin-toolbar { display: flex; justify-content: flex-start; align-items: flex-start; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #292a2e; }
+    .admin-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .admin-tabs button { color: #d4d4d8; background: #1b1c20; border-color: #38393e; }
+    .admin-tabs button[aria-current="page"] { color: #fff; border-color: #f34b31; background: linear-gradient(110deg, #f23832, #ff7900); }
+    .toolbar-actions { display: flex; gap: 8px; align-items: center; }
+    .icon-button, .account-menu > summary { display: grid; place-items: center; width: 42px; min-width: 42px; min-height: 42px; padding: 8px; color: #f4f4f5; background: #1b1c20; border: 1px solid #38393e; border-radius: 50%; cursor: pointer; }
+    .icon-button svg, .account-menu svg { width: 20px; height: 20px; fill: currentColor; }
+    .account-menu { position: relative; }
+    .account-menu > summary { list-style: none; }
+    .account-menu > summary::-webkit-details-marker { display: none; }
+    .account-popover { position: absolute; z-index: 20; top: calc(100% + 9px); right: 0; width: 230px; padding: 14px; border: 1px solid #38393e; border-radius: 14px; background: #17181b; box-shadow: 0 12px 28px rgb(0 0 0 / 40%); }
+    .account-popover { display: grid; gap: 8px; }
+    .account-popover #signed-in { display: block; margin: 0 0 12px; color: #dedee1; font-size: .86rem; overflow-wrap: anywhere; }
+    .account-popover button { width: 100%; }
+    #profile-management { padding: 20px 0; }
+    .profile-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin:16px 0; }
+    .profile-card { max-width:none; }
+    .admin-permission-list { display:grid; gap:7px; margin:12px 0; }
+    .admin-permission-list label { display:flex; align-items:center; gap:8px; }
+    .admin-permission-list input { width:17px; min-height:17px; accent-color:#ff5932; }
+    .admin-row { display:grid; grid-template-columns:minmax(140px,1fr) minmax(220px,2fr) auto; gap:14px; align-items:center; padding:14px 0; border-top:1px solid #33343a; }
+    .admin-row .admin-permission-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .active-premium-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; }
+    .active-premium-actions .remove-premium-access { margin-left:auto; }
+    @media(max-width:700px) { .admin-row { grid-template-columns:1fr; } }
+    .profile-card { max-width: none; padding: 20px; border: 1px solid #33343a; border-radius: 14px; background: #191a1e; }
+    .profile-details { display: grid; grid-template-columns: minmax(120px, .4fr) 1fr; gap: 12px; margin: 18px 0; }
+    .profile-details dt { color: #a1a1aa; }
+    .profile-details dd { margin: 0; color: #f2f2f3; overflow-wrap: anywhere; }
+    .chart-options { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 16px 0; }
+    .segmented-control { display: inline-flex; gap: 5px; padding: 4px; border: 1px solid #33343a; border-radius: 13px; background: #191a1e; }
+    .segmented-control button { min-height: 36px; padding: 6px 13px; color: #d4d4d8; background: transparent; border-color: transparent; }
+    .segmented-control button[aria-pressed="true"] { color: #fff; background: linear-gradient(110deg, #f23832, #ff7900); }
+    .chart-audience { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .chart-audience .checkbox-option { margin: 0; }
+    .filter-panel { margin: 12px 0 18px; padding: 14px; border: 1px solid #33343a; border-radius: 14px; background: #151619; }
+    .filter-panel > summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; color: #e4e4e7; font-weight: 700; }
+    .filter-panel > summary span { color: #a1a1aa; font-size: .85rem; font-weight: 500; }
+    .device-filter-toolbar { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
+    .device-filter-toolbar input { flex: 1; }
+    .analytics-filter-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .filter-group { margin: 0; }
+    .filter-group > summary { cursor: pointer; color: #e4e4e7; font-weight: 650; }
+    .filter-group[open] > summary { margin-bottom: 10px; }
+    .filter-group .checkbox-options { max-height: 180px; }
+    .device-list-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    @media (max-width: 640px) {
+      .site-header { align-items: flex-start; }
+      .header-note { max-width: 150px; text-align: right; }
+      .admin-toolbar { align-items: center; }
+      .admin-tabs { gap: 6px; }
+      .admin-tabs button { padding: 8px 10px; }
+      .device-filter-toolbar { align-items: stretch; flex-direction: column; }
+      .chart-options { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-mark" aria-hidden="true">Q</div>
+    <div class="brand-copy">
+      <p class="eyebrow">QSpoof · Admin</p>
+      <h1>Premium access</h1>
+    </div>
+    <div class="header-tools-block">
+      <div class="header-note"><span class="status-dot"></span>Private review console</div>
+      <div id="header-toolbar-actions" class="toolbar-actions" hidden>
+        <button id="refresh-button" class="icon-button" type="button" title="Refresh current section" aria-label="Refresh current section">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.93 9h-2.02A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/></svg>
+        </button>
+        <details id="account-menu" class="account-menu">
+          <summary title="Account" aria-label="Account menu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z"/></svg>
+          </summary>
+          <div class="account-popover">
+            <span id="signed-in"></span>
+            <button id="profile-button" class="secondary" type="button">Profile</button>
+            <button id="signout-button" class="secondary" type="button">Sign out</button>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+  <p class="intro">Review payment references and manage premium access for devices. Always verify payments in your UPI account before granting access.</p>
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+
+  <section id="login-card" class="card">
+    <h2>Welcome back</h2>
+    <p class="card-copy">Sign in with your administrator account to continue.</p>
+    <form id="login-form">
+      <label>Email <input id="email" type="email" autocomplete="username" required></label>
+      <label>Password <input id="password" type="password" autocomplete="current-password" required></label>
+      <button id="login-button" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <section id="review-card" class="card" hidden>
+    <div class="admin-toolbar">
+      <nav class="admin-tabs" aria-label="Admin sections">
+        <button id="pending-tab" type="button" aria-current="page">Pending</button>
+        <button id="active-tab" type="button">Active premium</button>
+        <button id="premium-tab" type="button">Premium</button>
+        <button id="analytics-tab" type="button">Analytics</button>
+        <button id="devices-tab" type="button">Devices</button>
+        <button id="updates-tab" type="button">Updates</button>
+        <button id="beta-tab" type="button">Beta</button>
+        <button id="links-tab" type="button">Links</button>
+      </nav>
+    </div>
+    <section id="quick-approve-card">
+      <h2>Approve by transaction reference</h2>
+      <p class="card-copy">Find a pending request and grant premium directly after confirming the payment.</p>
+      <p class="warning">This action does not verify payment with UPI. Confirm the payment in your account before granting access.</p>
+      <form id="quick-approve-form" class="quick-approve">
+        <label>Payment reference ID <input id="quick-transaction-id" autocomplete="off" required></label>
+        <button id="quick-approve-button" type="submit">Grant premium</button>
+      </form>
+    </section>
+    <div id="requests-heading"><h2>Pending requests</h2></div>
+    <div id="active-heading" hidden><h2>Active premium</h2><p class="card-copy">Revoke a grant to restore ads and let that device submit a new payment reference.</p></div>
+    <div id="requests"></div>
+    <div id="active-entitlements" hidden></div>
+    <section id="premium-management" hidden>
+      <section id="app-settings-card" aria-label="Premium settings">
+        <h2>Premium settings</h2>
+        <div class="app-settings-grid">
+          <section id="global-ads-card" class="app-setting">
+            <h2>Global advertising</h2>
+            <p class="card-copy">One switch controls ads for every non-premium app user. Changes apply at the next app launch.</p>
+            <div class="settings-actions">
+              <button id="toggle-ads-button" type="button">Loading ad setting…</button>
+            </div>
+            <p id="ads-settings-status" class="meta settings-status" role="status" aria-live="polite"></p>
+          </section>
+          <section id="premium-only-access-card" class="app-setting">
+            <h2>Premium-only app access</h2>
+            <p class="card-copy">When enabled, devices without active premium are exited on launch. Devices must be online for verification.</p>
+            <div class="settings-actions">
+              <button id="toggle-premium-access-button" type="button">Loading app access setting…</button>
+            </div>
+            <p id="premium-access-settings-status" class="meta settings-status" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </section>
+      <div id="manual-premium-controls"><h2>Add premium reference</h2>
+      <p class="card-copy">Register a verified payment reference. The user enters this reference in the app to activate premium on their device. This works without an existing app request.</p>
+      <form id="manual-premium-form">
+        <label for="manual-transaction-id">Payment reference ID
+          <input id="manual-transaction-id" maxlength="80" autocomplete="off" required>
+        </label>
+        <label class="toggle-row" for="show-donor-name">
+          <input id="show-donor-name" type="checkbox">
+          Display donor name in the app’s donor list
+        </label>
+        <label for="manual-donor-name">Donor name
+          <input id="manual-donor-name" maxlength="40" autocomplete="off" placeholder="Optional name">
+        </label>
+        <label class="toggle-row" for="partial-donor-name">
+          <input id="partial-donor-name" type="checkbox">
+          Partially mask the displayed name
+        </label>
+        <button id="add-premium-button" type="submit">Add premium reference</button>
+      </form>
+      <p id="premium-settings-status" class="meta settings-status" role="status" aria-live="polite"></p>
+      <section id="email-premium-card" class="profile-card">
+        <h2>Grant premium by verified email</h2>
+        <p class="card-copy">Enter an email already verified in the app profile. This grants premium directly to that one registered device and does not create a pending payment request.</p>
+        <form id="email-premium-form">
+          <label>Verified email <input id="email-premium-address" type="email" autocomplete="off" required></label>
+          <button id="email-premium-button" type="submit">Grant premium by email</button>
+        </form>
+        <p id="email-premium-status" class="meta settings-status" role="status" aria-live="polite"></p>
+      </section>
+      <div class="toolbar"><h2>Registered references</h2><button id="refresh-premium-button" class="secondary" type="button">Refresh list</button></div>
+      <div id="manual-premium-list"></div></div>
+      <section id="clear-data-card">
+        <h2>Clear all premium data</h2>
+        <p class="warning">Permanently deletes all premium requests, active entitlements, and unclaimed manual references. Admin accounts and global ad settings are preserved.</p>
+        <button id="clear-data-button" class="danger" type="button">Clear all premium data</button>
+      </section>
+    </section>
+    <section id="analytics-management" hidden>
+      <h2>App usage analytics</h2>
+      <p class="card-copy">The chart shows unique devices. Daily view keeps the latest seven dates; weekly view groups Sunday through Saturday.</p>
+      <div id="usage-chart" class="usage-chart" role="img" aria-label="Daily unique app users"></div>
+      <div class="chart-options">
+        <div class="segmented-control" role="group" aria-label="Chart period">
+          <button id="daily-chart-button" type="button" aria-pressed="true">Daily · 7 days</button>
+          <button id="weekly-chart-button" type="button" aria-pressed="false">Weekly · 7 weeks</button>
+        </div>
+        <fieldset class="chart-audience filter-group"><legend>Chart audience</legend><div id="analytics-audience-options" class="checkbox-options"></div></fieldset>
+      </div>
+      <p id="weekly-data-note" class="meta"></p>
+      <div id="analytics-summary" class="analytics-summary" aria-live="polite"></div>
+    </section>
+    <section id="devices-management" hidden>
+      <h2>Registered devices</h2>
+      <p id="device-list-status" class="card-copy">Device profile details appear after users save their name and email in the app.</p>
+      <details id="device-filter-panel" class="filter-panel">
+        <summary>Device filters <span id="device-filter-count">All devices</span></summary>
+        <div class="device-filter-toolbar">
+          <input id="device-search" type="search" placeholder="Search model, name, reference, email, IP or processor" aria-label="Search devices">
+          <button id="clear-device-filters" class="secondary" type="button">Clear filters</button>
+        </div>
+        <div class="analytics-filter-grid">
+          <details class="filter-group"><summary>Premium status</summary><div id="analytics-premium-options" class="checkbox-options"></div></details>
+          <details class="filter-group"><summary>RAM</summary><div id="analytics-ram-options" class="checkbox-options"></div></details>
+          <details class="filter-group"><summary>Storage</summary><div id="analytics-storage-options" class="checkbox-options"></div></details>
+          <details class="filter-group"><summary>Processor</summary><div id="analytics-cpu-options" class="checkbox-options"></div></details>
+          <details class="filter-group"><summary>Device model</summary>
+            <input id="analytics-model-search" class="filter-search" type="search" placeholder="Find a model">
+            <div id="analytics-model-options" class="checkbox-options"></div>
+          </details>
+        </div>
+      </details>
+      <div class="device-list-meta">
+        <span id="device-filter-result-count" class="meta"></span>
+      </div>
+      <div class="device-table-wrap">
+        <table class="device-table">
+          <thead><tr><th>Device</th><th>RAM</th><th>Storage</th><th>Name</th><th>Reference ID</th><th>Gmail</th><th>Latest IP</th><th>Access</th></tr></thead>
+          <tbody id="device-list"></tbody>
+        </table>
+      </div>
+      <div class="device-pagination"><button id="device-page-previous" class="secondary" type="button">Previous</button><span id="device-page-label"></span><button id="device-page-next" class="secondary" type="button">Next</button></div>
+    </section>
+    <section id="updates-management" hidden>
+      <h2>App updates</h2>
+      <p class="card-copy">Set the current release and the lowest version allowed to open. If a device is older than the minimum, it closes and opens the update link. Set minimum to 0 to turn off forced updates.</p>
+      <form id="updates-form" class="profile-card">
+        <label>Latest version code <input id="latest-version-code" type="number" min="0" step="1" required></label>
+        <label>Minimum version code (0 = no forced update) <input id="minimum-version-code" type="number" min="0" step="1" required></label>
+        <label>Update destination (HTTPS) <input id="update-url" type="url" placeholder="https://…" autocomplete="url"></label>
+        <p class="meta">Current update destination: <a id="current-update-link" target="_blank" rel="noopener noreferrer">Not configured</a></p>
+        <label>Update message <input id="update-message" maxlength="240" placeholder="An update is required to continue."></label>
+        <button type="submit">Save update settings</button>
+      </form>
+      <p id="updates-status" class="meta settings-status" role="status" aria-live="polite"></p>
+    </section>
+    <section id="beta-management" hidden>
+      <h2>Open beta</h2>
+      <p class="card-copy">The first selected non-premium devices to open this exact version will be enrolled. Premium devices bypass the cap. Close Open Beta to revoke access for non-premium devices on this version and redirect them to the channel link.</p>
+      <form id="beta-form" class="profile-card">
+        <label class="toggle-row"><input id="beta-enabled" type="checkbox"> Enable capped beta enrollment</label>
+        <label>Beta version code <input id="beta-version-code" type="number" min="0" step="1"></label>
+        <label>Maximum non-premium devices <input id="beta-device-limit" type="number" min="1" max="10000" step="1" required></label>
+        <button type="submit">Save beta settings</button>
+        <button id="close-beta-button" class="danger" type="button">Close Open Beta</button>
+      </form>
+      <p id="beta-status" class="meta settings-status" role="status" aria-live="polite"></p>
+      <p class="meta">Current channel redirect: <a id="current-beta-channel-link" target="_blank" rel="noopener noreferrer">Not configured</a></p>
+      <section class="profile-card">
+        <div class="toolbar"><h3>Beta access log</h3><button id="export-beta-logs" class="secondary" type="button">Export Data</button></div>
+        <p id="beta-log-status" class="meta">Loading beta log…</p>
+        <div class="device-table-wrap"><table class="device-table"><thead><tr><th>Device ID</th><th>Version</th><th>Device</th><th>RAM</th><th>Storage</th><th>Name</th><th>Email</th><th>IP</th><th>Premium</th><th>Access</th><th>First seen</th><th>Last seen</th></tr></thead><tbody id="beta-log-list"></tbody></table></div>
+      </section>
+    </section>
+    <section id="links-management" hidden>
+      <h2>App links</h2>
+      <p class="card-copy">These HTTPS links power the Telegram channel and discussion rows in the app. The channel is also the fallback destination when access is denied.</p>
+      <form id="links-form" class="profile-card">
+        <label>Channel link <input id="channel-url" type="url" required></label>
+        <label>Discussion group link <input id="group-url" type="url" required></label>
+        <p class="meta">Current channel: <a id="current-channel-link" target="_blank" rel="noopener noreferrer">Not configured</a></p>
+        <p class="meta">Current discussion group: <a id="current-group-link" target="_blank" rel="noopener noreferrer">Not configured</a></p>
+        <button type="submit">Save app links</button>
+      </form>
+      <p id="links-status" class="meta settings-status" role="status" aria-live="polite"></p>
+    </section>
+    <section id="profile-management" hidden>
+      <h2>Admin profile</h2>
+      <p class="card-copy">Update your sign-in email or password, and manage delegated administrators if you are an owner.</p>
+      <div class="profile-grid">
+        <section class="profile-card">
+          <dl class="profile-details"><dt>Email</dt><dd id="profile-email"></dd><dt>Role</dt><dd id="profile-role"></dd></dl>
+          <form id="profile-update-form">
+            <label>Current password <input id="profile-current-password" type="password" autocomplete="current-password" required></label>
+            <label>New email (optional) <input id="profile-new-email" type="email" autocomplete="email"></label>
+            <label>New password (optional, 12+ characters) <input id="profile-new-password" type="password" autocomplete="new-password" minlength="12"></label>
+            <button type="submit">Update my account</button>
+          </form>
+        </section>
+        <section id="admin-management-card" class="profile-card" hidden>
+          <h2>Delegated administrators</h2>
+          <p class="card-copy">Grant only the permissions each admin needs. Owners can manage accounts and permissions.</p>
+          <form id="create-admin-form">
+            <label>Admin email <input id="new-admin-email" type="email" required></label>
+            <label>Temporary password (12+ characters) <input id="new-admin-password" type="password" minlength="12" required></label>
+            <fieldset class="admin-permission-list"><legend>Permissions</legend>
+              <label><input type="checkbox" value="review_payments"> Review payments</label>
+              <label><input type="checkbox" value="manage_premium"> Manage premium</label>
+              <label><input type="checkbox" value="manage_settings"> Manage app settings</label>
+              <label><input type="checkbox" value="view_analytics"> View analytics</label>
+            </fieldset>
+            <button type="submit">Create admin</button>
+          </form>
+          <div id="admin-list"></div>
+        </section>
+      </div>
+      <button id="profile-back-button" class="secondary" type="button">Back to requests</button>
+    </section>
+  </section>
+
+  <script type="module">
+    const supabaseUrl = "https://aearzrtzrtyvuywjcwni.supabase.co";
+    const publishableKey = "sb_publishable_hi9tDuZNDMr8vF0vAwF5wg_s-XsIn6J";
+    const loginCard = document.querySelector("#login-card");
+    const reviewCard = document.querySelector("#review-card");
+    const loginForm = document.querySelector("#login-form");
+    const loginButton = document.querySelector("#login-button");
+    const refreshButton = document.querySelector("#refresh-button");
+    const headerToolbarActions = document.querySelector("#header-toolbar-actions");
+    const pendingTab = document.querySelector("#pending-tab");
+    const activeTab = document.querySelector("#active-tab");
+    const premiumTab = document.querySelector("#premium-tab");
+    const analyticsTab = document.querySelector("#analytics-tab");
+    const devicesTab = document.querySelector("#devices-tab");
+    const updatesTab = document.querySelector("#updates-tab");
+    const betaTab = document.querySelector("#beta-tab");
+    const linksTab = document.querySelector("#links-tab");
+    const quickApproveForm = document.querySelector("#quick-approve-form");
+    const quickApproveButton = document.querySelector("#quick-approve-button");
+    const quickTransactionId = document.querySelector("#quick-transaction-id");
+    const quickApproveCard = document.querySelector("#quick-approve-card");
+    const signoutButton = document.querySelector("#signout-button");
+    const profileButton = document.querySelector("#profile-button");
+    const profileManagement = document.querySelector("#profile-management");
+    const profileEmail = document.querySelector("#profile-email");
+    const profileBackButton = document.querySelector("#profile-back-button");
+    const accountMenu = document.querySelector("#account-menu");
+    const message = document.querySelector("#message");
+    const requests = document.querySelector("#requests");
+    const activeEntitlements = document.querySelector("#active-entitlements");
+    const requestsHeading = document.querySelector("#requests-heading");
+    const activeHeading = document.querySelector("#active-heading");
+    const signedIn = document.querySelector("#signed-in");
+    const premiumManagement = document.querySelector("#premium-management");
+    const manualPremiumForm = document.querySelector("#manual-premium-form");
+    const manualTransactionId = document.querySelector("#manual-transaction-id");
+    const showDonorName = document.querySelector("#show-donor-name");
+    const manualDonorName = document.querySelector("#manual-donor-name");
+    const partialDonorName = document.querySelector("#partial-donor-name");
+    const addPremiumButton = document.querySelector("#add-premium-button");
+    const refreshPremiumButton = document.querySelector("#refresh-premium-button");
+    const emailPremiumForm = document.querySelector("#email-premium-form");
+    const emailPremiumStatus = document.querySelector("#email-premium-status");
+    const manualPremiumList = document.querySelector("#manual-premium-list");
+    const premiumSettingsStatus = document.querySelector("#premium-settings-status");
+    const clearDataButton = document.querySelector("#clear-data-button");
+    const toggleAdsButton = document.querySelector("#toggle-ads-button");
+    const adsSettingsStatus = document.querySelector("#ads-settings-status");
+    const togglePremiumAccessButton = document.querySelector("#toggle-premium-access-button");
+    const premiumAccessSettingsStatus = document.querySelector("#premium-access-settings-status");
+    const analyticsManagement = document.querySelector("#analytics-management");
+    const devicesManagement = document.querySelector("#devices-management");
+    const updatesManagement = document.querySelector("#updates-management");
+    const betaManagement = document.querySelector("#beta-management");
+    const closeBetaButton = document.querySelector("#close-beta-button");
+    const betaLogStatus = document.querySelector("#beta-log-status");
+    const betaLogList = document.querySelector("#beta-log-list");
+    const exportBetaLogsButton = document.querySelector("#export-beta-logs");
+    let betaLogs = [];
+    const linksManagement = document.querySelector("#links-management");
+    const analyticsAudienceOptions = document.querySelector("#analytics-audience-options");
+    const analyticsPremiumOptions = document.querySelector("#analytics-premium-options");
+    const analyticsRamOptions = document.querySelector("#analytics-ram-options");
+    const analyticsStorageOptions = document.querySelector("#analytics-storage-options");
+    const analyticsCpuOptions = document.querySelector("#analytics-cpu-options");
+    const analyticsModelOptions = document.querySelector("#analytics-model-options");
+    const analyticsModelSearch = document.querySelector("#analytics-model-search");
+    const deviceSearch = document.querySelector("#device-search");
+    const clearDeviceFiltersButton = document.querySelector("#clear-device-filters");
+    const deviceFilterCount = document.querySelector("#device-filter-count");
+    const deviceFilterResultCount = document.querySelector("#device-filter-result-count");
+    const analyticsSummary = document.querySelector("#analytics-summary");
+    const usageChart = document.querySelector("#usage-chart");
+    const dailyChartButton = document.querySelector("#daily-chart-button");
+    const weeklyChartButton = document.querySelector("#weekly-chart-button");
+    const weeklyDataNote = document.querySelector("#weekly-data-note");
+    const deviceListStatus = document.querySelector("#device-list-status");
+    const deviceList = document.querySelector("#device-list");
+    const devicePagePrevious = document.querySelector("#device-page-previous");
+    const devicePageNext = document.querySelector("#device-page-next");
+    const devicePageLabel = document.querySelector("#device-page-label");
+    const updatesForm = document.querySelector("#updates-form");
+    const betaForm = document.querySelector("#beta-form");
+    const betaEnabledInput = document.querySelector("#beta-enabled");
+    const betaVersionInput = document.querySelector("#beta-version-code");
+    const linksForm = document.querySelector("#links-form");
+    const updatesStatus = document.querySelector("#updates-status");
+    const betaStatus = document.querySelector("#beta-status");
+    const linksStatus = document.querySelector("#links-status");
+    let adminCredentials = null;
+    let adminProfile = null;
+    let adsEnabled = true;
+    let premiumOnlyAccess = false;
+    let analyticsData = null;
+    let devicePage = 0;
+    let selectedModels = new Set();
+    let chartMode = "daily";
+    const DEVICE_PAGE_SIZE = 100;
+
+    function setBusy(busy) {
+      loginButton.disabled = busy;
+      refreshButton.disabled = busy;
+      pendingTab.disabled = busy;
+      activeTab.disabled = busy;
+      premiumTab.disabled = busy;
+      analyticsTab.disabled = busy;
+      devicesTab.disabled = busy;
+      quickApproveButton.disabled = busy;
+      signoutButton.disabled = busy;
+      profileButton.disabled = busy;
+      addPremiumButton.disabled = busy;
+      refreshPremiumButton.disabled = busy;
+      clearDataButton.disabled = busy;
+      toggleAdsButton.disabled = busy;
+      togglePremiumAccessButton.disabled = busy;
+      [analyticsManagement, devicesManagement, updatesManagement, betaManagement, linksManagement].forEach((section) => section.querySelectorAll("input, button").forEach((control) => {
+        control.disabled = busy;
+      }));
+      requests.querySelectorAll("button").forEach((button) => {
+        button.disabled = busy;
+      });
+      activeEntitlements.querySelectorAll("button").forEach((button) => {
+        button.disabled = busy;
+      });
+    }
+
+    async function callPremium(action, extra = {}) {
+      if (!adminCredentials) throw new Error("Sign in again to continue.");
+      const response = await fetch(`${supabaseUrl}/functions/v1/premium`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": publishableKey,
+          "Authorization": `Bearer ${publishableKey}`,
+        },
+        body: JSON.stringify({ action, ...adminCredentials, ...extra }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (
+          (action.startsWith("admin-") || action.startsWith("beta-") || action.startsWith("updates-") || action.startsWith("links-")) &&
+          data.error === "Invalid device identifier"
+        ) {
+          throw new Error(
+            "The deployed premium Edge Function or database migration is out of date. Apply the pending migrations in supabase/migrations/, deploy supabase/functions/premium/index.ts, then refresh this page.",
+          );
+        }
+        if (response.status === 401 || response.status === 403) {
+          adminCredentials = null;
+          loginCard.hidden = false;
+          reviewCard.hidden = true;
+        }
+        throw new Error(data.error || `Request failed (HTTP ${response.status}).`);
+      }
+      return data;
+    }
+
+    async function loadGlobalAds() {
+      adsSettingsStatus.textContent = "Loading global ad setting…";
+      try {
+        const data = await callPremium("admin-ads-get");
+        adsEnabled = data.adsEnabled;
+        renderAdsSetting();
+      } catch (error) {
+        adsSettingsStatus.textContent = error.message;
+      }
+    }
+
+    function renderAdsSetting() {
+      toggleAdsButton.textContent = adsEnabled ? "Disable ads for all users" : "Enable ads for all users";
+      adsSettingsStatus.textContent = adsEnabled
+        ? "Ads are enabled for non-premium users. The app reads this setting at launch."
+        : "Ads are disabled for non-premium users. Already-open apps apply this at next launch.";
+    }
+
+    async function loadPremiumOnlyAccess() {
+      premiumAccessSettingsStatus.textContent = "Loading app access setting…";
+      togglePremiumAccessButton.disabled = true;
+      try {
+        const data = await callPremium("admin-app-access-get");
+        premiumOnlyAccess = data.premiumOnlyAccess;
+        renderPremiumOnlyAccess();
+      } catch (error) {
+        premiumAccessSettingsStatus.textContent = error.message;
+      } finally {
+        togglePremiumAccessButton.disabled = false;
+      }
+    }
+
+    function renderPremiumOnlyAccess() {
+      togglePremiumAccessButton.textContent = premiumOnlyAccess
+        ? "Allow all users to open QSpoof"
+        : "Require premium to open QSpoof";
+      premiumAccessSettingsStatus.textContent = premiumOnlyAccess
+        ? "Premium-only access is enabled. Non-premium devices will be exited from the app."
+        : "All users can open the app; premium features remain unchanged.";
+    }
+
+    const RAM_SIZE_BUCKETS_GB = [2, 4, 6, 8, 12, 16];
+    const STORAGE_SIZE_BUCKETS_GB = [32, 64, 128, 256, 512, 1024];
+
+    function capacityBucket(megabytes, buckets) {
+      const gigabytes = Number(megabytes) / 1024;
+      return buckets.reduce((closest, bucket) =>
+        Math.abs(bucket - gigabytes) < Math.abs(closest - gigabytes) ? bucket : closest,
+      );
+    }
+
+    function formatCapacity(gigabytes) {
+      return `${gigabytes} GB`;
+    }
+
+    function checkedValues(container) {
+      return new Set([...container.querySelectorAll("input[type=checkbox]:checked")]
+        .map((input) => input.value));
+    }
+
+    function renderCheckboxes(container, values, formatter = (value) => value, selected = checkedValues(container)) {
+      container.replaceChildren();
+      for (const value of values) {
+        const label = document.createElement("label");
+        label.className = "checkbox-option";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = String(value);
+        input.checked = selected.has(String(value));
+        const text = document.createElement("span");
+        text.textContent = formatter(value);
+        label.append(input, text);
+        container.append(label);
+      }
+      if (values.length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "meta";
+        empty.textContent = "No devices have reported this yet.";
+        container.append(empty);
+      }
+    }
+
+    function populateAnalyticsFilters() {
+      const devices = analyticsData?.devices || [];
+      const uniqueSorted = (values) => [...new Set(values.filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
+      const ramBuckets = uniqueSorted(devices.map((device) => capacityBucket(device.ramMb, RAM_SIZE_BUCKETS_GB)));
+      const storageBuckets = uniqueSorted(devices.map((device) => capacityBucket(device.storageMb, STORAGE_SIZE_BUCKETS_GB)));
+      const visibleModelValues = new Set([...analyticsModelOptions.querySelectorAll("input[type=checkbox]")]
+        .map((input) => input.value));
+      visibleModelValues.forEach((value) => selectedModels.delete(value));
+      checkedValues(analyticsModelOptions).forEach((value) => selectedModels.add(value));
+      renderCheckboxes(analyticsAudienceOptions, ["all", "premium", "nonPremium"], (value) => ({
+        all: "All users", premium: "Premium", nonPremium: "Non-premium",
+      })[value], checkedValues(analyticsAudienceOptions).size
+        ? checkedValues(analyticsAudienceOptions)
+        : new Set(["all"]));
+      renderCheckboxes(analyticsPremiumOptions, ["premium", "nonPremium"], (value) => ({
+        premium: "Premium", nonPremium: "Non-premium",
+      })[value]);
+      renderCheckboxes(analyticsRamOptions, ramBuckets.map(String), (value) => `${value} GB`);
+      renderCheckboxes(analyticsStorageOptions, storageBuckets.map(String), (value) => `${value} GB`);
+      renderCheckboxes(analyticsCpuOptions, uniqueSorted(devices.map((device) => device.cpu)));
+      renderModelCheckboxes(selectedModels);
+    }
+
+    function renderModelCheckboxes(selected = selectedModels) {
+      const models = [...new Set((analyticsData?.devices || []).map((device) => device.model).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+      const query = analyticsModelSearch.value.trim().toLocaleLowerCase();
+      const matches = query ? models.filter((model) => model.toLocaleLowerCase().includes(query)) : models;
+      renderCheckboxes(analyticsModelOptions, matches.slice(0, 100), (value) => value, selected);
+      if (matches.length > 100) {
+        const note = document.createElement("span");
+        note.className = "meta";
+        note.textContent = `Showing 100 of ${matches.length} models; narrow the search to find another.`;
+        analyticsModelOptions.append(note);
+      }
+    }
+
+    function selectedAudience() {
+      const selected = checkedValues(analyticsAudienceOptions);
+      if (selected.has("premium")) return "premium";
+      if (selected.has("nonPremium")) return "nonPremium";
+      return "all";
+    }
+
+    function selectedDevices() {
+      if (!analyticsData) return [];
+      const premium = checkedValues(analyticsPremiumOptions);
+      const ram = checkedValues(analyticsRamOptions);
+      const storage = checkedValues(analyticsStorageOptions);
+      const cpus = checkedValues(analyticsCpuOptions);
+      const query = deviceSearch.value.trim().toLocaleLowerCase();
+      return (analyticsData.devices || []).filter((device) => {
+        const premiumKey = device.premium ? "premium" : "nonPremium";
+        const matchesSearch = !query || [device.model, device.name, device.referenceId, device.email, device.ipAddress, device.cpu]
+          .some((value) => String(value || "").toLocaleLowerCase().includes(query));
+        return matchesSearch && (!premium.size || premium.has(premiumKey)) &&
+          (!ram.size || ram.has(String(capacityBucket(device.ramMb, RAM_SIZE_BUCKETS_GB)))) &&
+          (!storage.size || storage.has(String(capacityBucket(device.storageMb, STORAGE_SIZE_BUCKETS_GB)))) &&
+          (!cpus.size || cpus.has(device.cpu)) &&
+          (!selectedModels.size || selectedModels.has(device.model));
+      });
+    }
+
+    function renderAnalytics() {
+      if (!analyticsData) return;
+      const audience = selectedAudience();
+      const metric = audience === "premium" ? "premiumUsers" : audience === "nonPremium" ? "nonPremiumUsers" : "allUsers";
+      const points = chartMode === "daily"
+        ? (analyticsData.daily || []).slice(-7)
+        : (analyticsData.weekly || []).slice(-7);
+      const latest = points.at(-1) || { allUsers: 0, premiumUsers: 0, nonPremiumUsers: 0 };
+      const total = points.reduce((sum, item) => sum + Number(item[metric] || 0), 0);
+      const max = Math.max(1, ...points.map((item) => Number(item[metric] || 0)));
+      const audienceName = audience === "all" ? "devices" : audience === "premium" ? "premium devices" : "non-premium devices";
+
+      dailyChartButton.setAttribute("aria-pressed", String(chartMode === "daily"));
+      weeklyChartButton.setAttribute("aria-pressed", String(chartMode === "weekly"));
+      usageChart.setAttribute("aria-label", `${chartMode === "daily" ? "Daily" : "Weekly"} unique app devices`);
+      weeklyDataNote.textContent = chartMode === "weekly"
+        ? `Calendar weeks run Sunday–Saturday in ${analyticsData.timezone || "Asia/Kolkata"}. Exact weekly tracking starts with this rollout; earlier weeks may be empty.`
+        : `Daily totals cover the latest seven dates through today (${analyticsData.timezone || "Asia/Kolkata"}).`;
+
+      analyticsSummary.replaceChildren();
+      [
+        [latest[metric] || 0, `${chartMode === "daily" ? "Latest day" : "Current week"} · ${audienceName}`],
+        [total, chartMode === "daily" ? "7-day device-days" : "7-week device-weeks"],
+        [(analyticsData.devices || []).length, "Registered devices"],
+      ].forEach(([value, label]) => {
+        const metricCard = document.createElement("div");
+        metricCard.className = "metric";
+        const number = document.createElement("strong");
+        number.textContent = String(value);
+        const copy = document.createElement("span");
+        copy.textContent = label;
+        metricCard.append(number, copy);
+        analyticsSummary.append(metricCard);
+      });
+
+      usageChart.replaceChildren();
+      if (points.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "chart-empty";
+        empty.textContent = chartMode === "weekly"
+          ? "Weekly data is not available from the current server yet."
+          : "No daily data is available yet.";
+        usageChart.append(empty);
+      }
+      for (const point of points) {
+        const value = Number(point[metric] || 0);
+        const period = chartMode === "daily" ? point.date : `${point.weekStart} – ${point.weekEnd}`;
+        const column = document.createElement("div");
+        column.className = "chart-column";
+        column.title = `${period}: ${value} unique ${audienceName}`;
+        const number = document.createElement("span");
+        number.className = "chart-value";
+        number.textContent = String(value);
+        const bar = document.createElement("div");
+        bar.className = "chart-bar";
+        bar.style.height = `${Math.max(4, Math.round((value / max) * 280))}px`;
+        const label = document.createElement("span");
+        label.className = "chart-label";
+        label.textContent = chartMode === "daily" ? String(point.date).slice(5) : String(point.weekStart).slice(5);
+        column.append(number, bar, label);
+        usageChart.append(column);
+      }
+    }
+
+    function renderDevices() {
+      if (!analyticsData) return;
+      const allDevices = analyticsData.devices || [];
+      const filtered = selectedDevices();
+      const activeFilters = [
+        checkedValues(analyticsPremiumOptions).size,
+        checkedValues(analyticsRamOptions).size,
+        checkedValues(analyticsStorageOptions).size,
+        checkedValues(analyticsCpuOptions).size,
+        selectedModels.size,
+        deviceSearch.value.trim() ? 1 : 0,
+      ].reduce((sum, count) => sum + count, 0);
+      deviceFilterCount.textContent = activeFilters ? `${activeFilters} active filter${activeFilters === 1 ? "" : "s"}` : "All devices";
+      deviceFilterResultCount.textContent = `${filtered.length} of ${allDevices.length} devices`;
+
+      const sorted = [...filtered].sort((a, b) =>
+        String(a.model || "").localeCompare(String(b.model || "")));
+      deviceList.replaceChildren();
+      if (sorted.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 8;
+        cell.className = "empty-state";
+        cell.textContent = allDevices.length ? "No devices match these filters." : "No devices have reported usage yet.";
+        row.append(cell);
+        deviceList.append(row);
+        devicePagePrevious.disabled = true;
+        devicePageNext.disabled = true;
+        devicePageLabel.textContent = "Page 0 of 0";
+        deviceListStatus.textContent = allDevices.length
+          ? "No registered devices match the selected filters."
+          : "Device details appear here after the app reports usage; name and email appear after users link their profile.";
+        return;
+      }
+
+      const pageCount = Math.max(1, Math.ceil(sorted.length / DEVICE_PAGE_SIZE));
+      devicePage = Math.min(devicePage, pageCount - 1);
+      const firstItem = devicePage * DEVICE_PAGE_SIZE + 1;
+      const lastItem = Math.min((devicePage + 1) * DEVICE_PAGE_SIZE, sorted.length);
+      const pageItems = sorted.slice(devicePage * DEVICE_PAGE_SIZE, (devicePage + 1) * DEVICE_PAGE_SIZE);
+      devicePagePrevious.disabled = devicePage === 0;
+      devicePageNext.disabled = devicePage >= pageCount - 1;
+      devicePageLabel.textContent = `Page ${devicePage + 1} of ${pageCount}`;
+      for (const device of pageItems) {
+        const row = document.createElement("tr");
+        const values = [
+          device.model,
+          formatCapacity(capacityBucket(device.ramMb, RAM_SIZE_BUCKETS_GB)),
+          formatCapacity(capacityBucket(device.storageMb, STORAGE_SIZE_BUCKETS_GB)),
+          device.name || "—",
+          device.referenceId || "—",
+          device.email || "—",
+          device.ipAddress || "Not available",
+          device.premium ? "Premium" : "Non-premium",
+        ];
+        values.forEach((value) => {
+          const cell = document.createElement("td");
+          cell.textContent = value || "—";
+          row.append(cell);
+        });
+        deviceList.append(row);
+      }
+      deviceListStatus.textContent = `Showing ${firstItem}–${lastItem} of ${filtered.length} device(s). Name and email are supplied by the device profile.`;
+    }
+
+    function prepareAdminView(tab) {
+      [pendingTab, activeTab, premiumTab, analyticsTab, devicesTab, updatesTab, betaTab, linksTab].forEach((button) => {
+        button.setAttribute("aria-current", button === tab ? "page" : "false");
+      });
+      requests.hidden = true;
+      requestsHeading.hidden = true;
+      activeEntitlements.hidden = true;
+      activeHeading.hidden = true;
+      quickApproveCard.hidden = true;
+      premiumManagement.hidden = true;
+      analyticsManagement.hidden = true;
+      devicesManagement.hidden = true;
+      updatesManagement.hidden = true;
+      betaManagement.hidden = true;
+      linksManagement.hidden = true;
+      profileManagement.hidden = true;
+    }
+
+    async function loadAnalytics() {
+      prepareAdminView(analyticsTab);
+      message.textContent = "Loading usage analytics…";
+      analyticsManagement.hidden = false;
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-analytics");
+        analyticsData = data.analytics;
+        populateAnalyticsFilters();
+        renderAnalytics();
+        message.textContent = "Analytics updated.";
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadDevices() {
+      prepareAdminView(devicesTab);
+      message.textContent = "Loading registered devices…";
+      devicesManagement.hidden = false;
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-analytics");
+        analyticsData = data.analytics;
+        populateAnalyticsFilters();
+        renderDevices();
+        message.textContent = "Device list updated.";
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadManualPremium() {
+      premiumSettingsStatus.textContent = "Loading registered premium references…";
+      manualPremiumList.replaceChildren();
+      try {
+        const data = await callPremium("admin-premium-list");
+        if (data.references.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.textContent = "No manually registered premium references.";
+          manualPremiumList.append(empty);
+        }
+        for (const item of data.references) {
+          const row = document.createElement("article");
+          row.className = "request";
+          const reference = document.createElement("div");
+          reference.className = "reference";
+          reference.textContent = item.transaction_id;
+          if (item.display_name) {
+            reference.textContent += ` — ${item.display_name}`;
+          }
+          const info = document.createElement("div");
+          info.className = "meta";
+          info.textContent = item.claimed_at
+            ? `Reference ${item.transaction_id} · Connected ${new Date(item.claimed_at).toLocaleString()}`
+            : `Reference ${item.transaction_id} · Waiting for user to enter reference`;
+          row.append(reference, info);
+          if (!item.claimed_at) {
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "danger";
+            remove.textContent = "Remove unclaimed reference";
+            remove.addEventListener("click", () => removeManualPremium(item.transaction_id));
+            row.append(remove);
+          }
+          manualPremiumList.append(row);
+        }
+        premiumSettingsStatus.textContent = `${data.references.length} registered reference(s).`;
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      }
+    }
+
+    async function loadRequests() {
+      prepareAdminView(pendingTab);
+      message.textContent = "Loading pending requests…";
+      requestsHeading.hidden = false;
+      requests.hidden = false;
+      quickApproveCard.hidden = false;
+      requests.replaceChildren();
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-list");
+        if (data.requests.length === 0) {
+          const emptyState = document.createElement("div");
+          emptyState.className = "empty-state";
+          emptyState.textContent = "You’re all caught up. No pending requests.";
+          requests.replaceChildren(emptyState);
+          message.textContent = "No pending payment requests.";
+          return;
+        }
+        message.textContent = `${data.requests.length} pending request(s).`;
+        for (const item of data.requests) {
+          const row = document.createElement("article");
+          row.className = "request";
+          const reference = document.createElement("div");
+          reference.className = "reference";
+          reference.textContent = item.isEmailGrant
+            ? `${item.display_name || "Name not set"} — ${item.email}`
+            : `${item.display_name || "Name not set"} — ${item.transaction_id}`;
+          const details = [];
+          if (item.isEmailGrant) details.push("Premium granted through verified email; no payment request was created.");
+          if (item.profile_email) details.push(`Email: ${item.profile_email}`);
+          const date = document.createElement("div");
+          date.className = "meta";
+          date.textContent = new Date(item.submitted_at).toLocaleString();
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          const approve = document.createElement("button");
+          approve.type = "button";
+          approve.textContent = "Approve — grant ad-free";
+          approve.addEventListener("click", () => reviewRequest(item, "admin-approve"));
+          const reject = document.createElement("button");
+          reject.type = "button";
+          reject.className = "danger";
+          reject.textContent = "Reject";
+          reject.addEventListener("click", () => reviewRequest(item, "admin-reject"));
+          actions.append(approve, reject);
+          row.append(reference);
+          if (details.length) {
+            const nameNote = document.createElement("div");
+            nameNote.className = "meta";
+            nameNote.textContent = details.join(" · ");
+            row.append(nameNote);
+          }
+          row.append(date, actions);
+          requests.append(row);
+        }
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadActiveEntitlements() {
+      prepareAdminView(activeTab);
+      message.textContent = "Loading active entitlements…";
+      activeHeading.hidden = false;
+      activeEntitlements.hidden = false;
+      activeEntitlements.replaceChildren();
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-list-active");
+        if (data.entitlements.length === 0) {
+          const emptyState = document.createElement("div");
+          emptyState.className = "empty-state";
+          emptyState.textContent = "No active premium grants.";
+          activeEntitlements.replaceChildren(emptyState);
+          message.textContent = "No active premium entitlements.";
+          return;
+        }
+        message.textContent = `${data.entitlements.length} active entitlement(s).`;
+        for (const item of data.entitlements) {
+          const row = document.createElement("article");
+          row.className = "request";
+          const reference = document.createElement("div");
+          reference.className = "reference";
+          reference.textContent = item.isEmailGrant
+            ? `${item.display_name || "Name not set"} — ${item.email}`
+            : `${item.display_name || "Name not set"} — ${item.transaction_id}`;
+          const details = [];
+          if (item.isEmailGrant) {
+            details.push("Premium granted to this device through its verified email; no payment request was created.");
+          }
+          if (item.isEmailGrant) details.push(`Verified email: ${item.email}`);
+          else if (item.profileEmail) details.push(`Email: ${item.profileEmail}`);
+          const date = document.createElement("div");
+          date.className = "meta";
+          date.textContent = `Granted ${new Date(item.granted_at).toLocaleString()}`;
+          const actions = document.createElement("div");
+          actions.className = "active-premium-actions";
+          const revoke = document.createElement("button");
+          revoke.type = "button";
+          revoke.className = "danger remove-premium-access";
+          revoke.textContent = "Remove premium access";
+          revoke.addEventListener("click", () => revokeEntitlement(item));
+          if (item.canClearDeviceRegistration) {
+            const clearRegistration = document.createElement("button");
+            clearRegistration.type = "button";
+            clearRegistration.className = "danger";
+            clearRegistration.textContent = "Remove registered device";
+            clearRegistration.addEventListener("click", () => clearReferenceRegistration(item));
+            actions.append(clearRegistration);
+          }
+          actions.append(revoke);
+          row.append(reference);
+          if (details.length) {
+            const nameNote = document.createElement("div");
+            nameNote.className = "meta";
+            nameNote.textContent = details.join(" · ");
+            row.append(nameNote);
+          }
+          row.append(date, actions);
+          activeEntitlements.append(row);
+        }
+      } catch (error) {
+        message.textContent = error.message;
+        const errorState = document.createElement("div");
+        errorState.className = "empty-state";
+        errorState.textContent = `Could not load Active Premium: ${error.message}`;
+        activeEntitlements.append(errorState);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function revokeEntitlement(item) {
+      const grantLabel = item.isEmailGrant
+        ? `verified email ${item.email}`
+        : `transaction ${item.transaction_id}`;
+      if (!window.confirm(
+        `Remove premium access for ${grantLabel}? This immediately restores ads for the linked device.`,
+      )) return;
+      message.textContent = "Removing premium access…";
+      setBusy(true);
+      try {
+        await callPremium("admin-revoke", { transactionId: item.transaction_id });
+        message.textContent = item.isEmailGrant
+          ? "Email-based premium access removed. The verified email remains linked to the device."
+          : "Premium access removed. The linked device can submit a new transaction reference.";
+        await loadActiveEntitlements();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function clearReferenceRegistration(item) {
+      if (!window.confirm(
+        `Clear the device linked to ${item.transaction_id}? This removes premium from that device and makes the same reference available to register on a device again. The donor name and reference will be kept.`,
+      )) return;
+      message.textContent = "Clearing device registration…";
+      setBusy(true);
+      try {
+        await callPremium("admin-unlink-reference", { transactionId: item.transaction_id });
+        message.textContent = "Device registration cleared. The reference and donor name were kept and can be registered again.";
+        await loadActiveEntitlements();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function reviewRequest(item, action) {
+      const approve = action === "admin-approve";
+      const confirmed = window.confirm(
+        approve
+          ? `Confirm payment ${item.transaction_id} in your UPI records before granting premium?`
+          : `Reject payment request ${item.transaction_id}?`,
+      );
+      if (!confirmed) return;
+      message.textContent = approve ? "Approving…" : "Rejecting…";
+      setBusy(true);
+      try {
+        await callPremium(action, { requestId: item.id });
+        message.textContent = approve
+          ? "Approved. The device will become ad-free when it next checks the server."
+          : "Request rejected.";
+        await loadRequests();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function showSession(session) {
+      const hasSession = session;
+      loginCard.hidden = hasSession;
+      reviewCard.hidden = !hasSession;
+      headerToolbarActions.hidden = !hasSession;
+      if (!hasSession) return;
+      adminProfile = session;
+      signedIn.textContent = `Signed in as ${session.email}`;
+      profileEmail.textContent = session.email;
+      document.querySelector("#profile-role").textContent = session.role === "owner" ? "Owner · full access" : "Administrator";
+      document.querySelector("#admin-management-card").hidden = session.role !== "owner";
+      document.querySelector("#global-ads-card").hidden = !session.permissions.includes("manage_settings") && session.role !== "owner";
+      document.querySelector("#premium-only-access-card").hidden = !session.permissions.includes("manage_settings") && session.role !== "owner";
+      document.querySelector("#manual-premium-controls").hidden = !session.permissions.includes("manage_premium") && session.role !== "owner";
+      document.querySelector("#email-premium-card").hidden = !session.permissions.includes("manage_premium") && session.role !== "owner";
+      document.querySelector("#clear-data-card").hidden = !session.permissions.includes("manage_premium") && session.role !== "owner";
+      pendingTab.hidden = !session.permissions.includes("review_payments") && session.role !== "owner";
+      quickApproveCard.hidden = true;
+      activeTab.hidden = !session.permissions.includes("manage_premium") && session.role !== "owner";
+      premiumTab.hidden = !session.permissions.includes("manage_premium") && !session.permissions.includes("manage_settings") && session.role !== "owner";
+      analyticsTab.hidden = !session.permissions.includes("view_analytics") && session.role !== "owner";
+      devicesTab.hidden = !session.permissions.includes("view_analytics") && session.role !== "owner";
+      updatesTab.hidden = !session.permissions.includes("manage_settings") && session.role !== "owner";
+      betaTab.hidden = !session.permissions.includes("manage_settings") && session.role !== "owner";
+      linksTab.hidden = !session.permissions.includes("manage_settings") && session.role !== "owner";
+      await Promise.all([
+        session.permissions.includes("review_payments") || session.role === "owner" ? loadRequests() : Promise.resolve(),
+        (session.permissions.includes("manage_settings") || session.role === "owner") ? Promise.all([loadGlobalAds(), loadPremiumOnlyAccess()]) : Promise.resolve(),
+      ]);
+    }
+
+    function showAdminProfile() {
+      prepareAdminView(null);
+      accountMenu.open = false;
+      profileManagement.hidden = false;
+      profileEmail.textContent = adminProfile?.email || adminCredentials?.adminEmail || "";
+      message.textContent = "Admin profile.";
+      if (adminProfile?.role === "owner") void loadAdminAccounts();
+    }
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      message.textContent = "Signing in…";
+      loginButton.disabled = true;
+      const credentials = {
+        adminEmail: document.querySelector("#email").value.trim(),
+        adminPassword: document.querySelector("#password").value,
+      };
+      try {
+        const response = await fetch(`${supabaseUrl}/functions/v1/premium`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": publishableKey,
+            "Authorization": `Bearer ${publishableKey}`,
+          },
+          body: JSON.stringify({ action: "admin-login", ...credentials }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.authorized !== true) {
+          throw new Error(data.error || "Invalid admin email or password.");
+        }
+        adminCredentials = credentials;
+        document.querySelector("#password").value = "";
+        await showSession(data.profile);
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        loginButton.disabled = false;
+      }
+    });
+
+    quickApproveForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const transactionId = quickTransactionId.value.trim();
+      if (!/^[A-Za-z0-9-]{6,80}$/.test(transactionId)) {
+        message.textContent = "Enter a valid payment reference ID.";
+        return;
+      }
+      if (!window.confirm(
+        `This will grant ad-free access for the device linked to ${transactionId}. Confirm payment in your UPI account first. Continue?`,
+      )) return;
+
+      setBusy(true);
+      message.textContent = "Finding the pending request…";
+      try {
+        await callPremium("admin-approve-reference", { transactionId });
+        quickTransactionId.value = "";
+        message.textContent = "Premium granted. The device will become ad-free on its next status check.";
+        await loadRequests();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    manualPremiumForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const transactionId = manualTransactionId.value.trim();
+      const displayName = manualDonorName.value.trim();
+      if (!/^[A-Za-z0-9-]{6,80}$/.test(transactionId)) {
+        premiumSettingsStatus.textContent = "Enter a valid payment reference ID.";
+        return;
+      }
+      if (showDonorName.checked && !displayName) {
+        premiumSettingsStatus.textContent = "Enter a donor name or turn off donor-name display.";
+        return;
+      }
+
+      setBusy(true);
+      premiumSettingsStatus.textContent = "Adding verified premium reference…";
+      try {
+        await callPremium("admin-premium-add", {
+          transactionId,
+          showName: showDonorName.checked,
+          displayName: showDonorName.checked ? displayName : null,
+          showNamePartially: showDonorName.checked && partialDonorName.checked,
+        });
+        manualTransactionId.value = "";
+        manualDonorName.value = "";
+        partialDonorName.checked = false;
+        premiumSettingsStatus.textContent = "Reference added. The user can enter it in the app to activate premium.";
+        await loadManualPremium();
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    async function removeManualPremium(transactionId) {
+      if (!window.confirm(`Remove unclaimed premium reference ${transactionId}?`)) {
+        return;
+      }
+      setBusy(true);
+      premiumSettingsStatus.textContent = "Removing unclaimed reference…";
+      try {
+        await callPremium("admin-premium-remove", { transactionId });
+        await loadManualPremium();
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function setGlobalAds(enabled) {
+      setBusy(true);
+      adsSettingsStatus.textContent = enabled ? "Enabling ads for non-premium users…" : "Disabling ads globally…";
+      try {
+        const updated = await callPremium("admin-ads-set", { adsEnabled: enabled });
+        if (updated.adsEnabled !== enabled) {
+          throw new Error("The server did not save the requested ad setting. Refresh and try again.");
+        }
+        adsEnabled = updated.adsEnabled;
+        const saved = await callPremium("admin-ads-get");
+        if (saved.adsEnabled !== enabled) {
+          adsEnabled = saved.adsEnabled;
+          renderAdsSetting();
+          throw new Error("The saved ad setting did not match. Refresh and try again.");
+        }
+        adsEnabled = saved.adsEnabled;
+        renderAdsSetting();
+      } catch (error) {
+        adsSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function setPremiumOnlyAccess(enabled) {
+      setBusy(true);
+      premiumAccessSettingsStatus.textContent = enabled
+        ? "Requiring premium for app access…"
+        : "Allowing all users to open the app…";
+      try {
+        const data = await callPremium("admin-app-access-set", {
+          premiumOnlyAccess: enabled,
+        });
+        premiumOnlyAccess = data.premiumOnlyAccess;
+        renderPremiumOnlyAccess();
+      } catch (error) {
+        premiumAccessSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadReleaseSettings(section) {
+      const status = section === "updates" ? updatesStatus : section === "beta" ? betaStatus : linksStatus;
+      status.textContent = "Loading settings…";
+      try {
+        const data = await callPremium(`${section}-get`);
+        if (section === "updates") {
+          document.querySelector("#latest-version-code").value = data.latestVersionCode ?? 0;
+          document.querySelector("#minimum-version-code").value = data.minimumVersionCode ?? 0;
+          document.querySelector("#update-url").value = data.updateUrl || "";
+          document.querySelector("#update-message").value = data.updateMessage || "";
+          setLinkPreview("#current-update-link", data.updateUrl || "");
+          status.textContent = `Latest ${data.latestVersionCode || 0}; minimum ${data.minimumVersionCode || 0}.`;
+        } else if (section === "beta") {
+          betaEnabledInput.checked = data.betaEnabled === true;
+          betaVersionInput.value = data.betaVersionCode || "";
+          betaVersionInput.min = betaEnabledInput.checked ? "1" : "0";
+          betaVersionInput.required = betaEnabledInput.checked;
+          document.querySelector("#beta-device-limit").value = data.betaDeviceLimit || 50;
+          closeBetaButton.disabled = data.betaClosed === true;
+          setLinkPreview("#current-beta-channel-link", data.channelUrl || "");
+          status.textContent = data.betaClosed
+            ? `Beta closed for version ${data.betaVersionCode || "—"}; enrolled non-premium devices are denied. Channel redirect is active.`
+            : `${data.betaRegisteredCount || 0} of ${data.betaDeviceLimit || 50} device slots used for version ${data.betaVersionCode || "—"}.`;
+          await loadBetaLogs();
+        } else {
+          document.querySelector("#channel-url").value = data.channelUrl || "";
+          document.querySelector("#group-url").value = data.groupUrl || "";
+          setLinkPreview("#current-channel-link", data.channelUrl || "");
+          setLinkPreview("#current-group-link", data.groupUrl || "");
+          status.textContent = "App links loaded.";
+        }
+      } catch (error) { status.textContent = error.message; }
+    }
+
+    function setLinkPreview(selector, url) {
+      const link = document.querySelector(selector);
+      link.href = url || "#";
+      link.textContent = url || "Not configured";
+      link.hidden = !url;
+    }
+
+    async function loadBetaLogs() {
+      betaLogStatus.textContent = "Loading beta access log…";
+      betaLogList.replaceChildren();
+      try {
+        const result = await callPremium("beta-logs-get");
+        betaLogs = result.logs || [];
+        betaLogs.forEach((item) => {
+          const row = document.createElement("tr");
+          const cells = [item.deviceId, item.versionCode, item.model || "—", item.ramMb ? `${Math.round(item.ramMb / 1024)} GB` : "—", item.storageMb ? `${Math.round(item.storageMb / 1024)} GB` : "—", item.name || "—", item.email || "—", item.ipAddress || "—", item.premium ? "Yes" : "No", item.accessAllowed ? "Allowed" : "Denied", item.firstSeenAt ? new Date(item.firstSeenAt).toLocaleString() : "—", item.lastSeenAt ? new Date(item.lastSeenAt).toLocaleString() : "—"];
+          cells.forEach((value) => { const cell = document.createElement("td"); cell.textContent = String(value); row.append(cell); });
+          betaLogList.append(row);
+        });
+        betaLogStatus.textContent = `${betaLogs.length} unique device(s) logged. Device ID is a short server-side hash, not a hardware identifier.`;
+      } catch (error) { betaLogStatus.textContent = error.message; }
+    }
+
+    function exportBetaLogs() {
+      if (!betaLogs.length) { betaLogStatus.textContent = "There are no beta records to export."; return; }
+      const fields = ["deviceId", "versionCode", "model", "ramMb", "storageMb", "cpu", "name", "email", "ipAddress", "premium", "accessAllowed", "firstSeenAt", "lastSeenAt"];
+      const csv = [fields.join(","), ...betaLogs.map((item) => fields.map((field) => `"${String(item[field] ?? "").replaceAll('"', '""')}"`).join(","))].join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a"); link.href = url; link.download = "qspoof-beta-access-log.csv"; link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function openSettingsTab(tab, section) {
+      prepareAdminView(tab);
+      const view = section === "updates" ? updatesManagement : section === "beta" ? betaManagement : linksManagement;
+      view.hidden = false;
+      void loadReleaseSettings(section);
+    }
+
+    toggleAdsButton.addEventListener("click", () => void setGlobalAds(!adsEnabled));
+    togglePremiumAccessButton.addEventListener(
+      "click",
+      () => void setPremiumOnlyAccess(!premiumOnlyAccess),
+    );
+    updatesForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      updatesStatus.textContent = "Saving update policy…";
+      try {
+        const result = await callPremium("updates-set", {
+          latestVersionCode: Number(document.querySelector("#latest-version-code").value),
+          minimumVersionCode: Number(document.querySelector("#minimum-version-code").value),
+          updateUrl: document.querySelector("#update-url").value.trim(),
+          updateMessage: document.querySelector("#update-message").value.trim(),
+        });
+        setLinkPreview("#current-update-link", document.querySelector("#update-url").value.trim());
+        updatesStatus.textContent = `Saved. Latest ${result.latestVersionCode}; minimum ${result.minimumVersionCode}.`;
+      } catch (error) { updatesStatus.textContent = error.message; }
+    });
+    betaForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      betaStatus.textContent = "Saving beta capacity…";
+      try {
+        const result = await callPremium("beta-set", {
+          betaEnabled: betaEnabledInput.checked,
+          betaVersionCode: betaEnabledInput.checked ? Number(betaVersionInput.value) : 0,
+          betaDeviceLimit: Number(document.querySelector("#beta-device-limit").value),
+        });
+        closeBetaButton.disabled = true;
+        betaStatus.textContent = `${result.betaRegisteredCount} of ${result.betaDeviceLimit} device slots used for version ${result.betaVersionCode}.`;
+        await loadBetaLogs();
+      } catch (error) { betaStatus.textContent = error.message; }
+    });
+    closeBetaButton.addEventListener("click", async () => {
+      if (!window.confirm("Close this beta now? Non-premium devices on its configured version will be denied and redirected to the current channel link.")) return;
+      closeBetaButton.disabled = true;
+      betaStatus.textContent = "Closing beta and revoking enrolled access…";
+      try {
+        const result = await callPremium("beta-close");
+        betaStatus.textContent = `Beta closed. Non-premium devices on version ${result.betaVersionCode} will be redirected to ${result.channelUrl}.`;
+        await loadReleaseSettings("beta");
+      } catch (error) { closeBetaButton.disabled = false; betaStatus.textContent = error.message; }
+    });
+    exportBetaLogsButton.addEventListener("click", exportBetaLogs);
+    betaEnabledInput.addEventListener("change", () => {
+      betaVersionInput.min = betaEnabledInput.checked ? "1" : "0";
+      betaVersionInput.required = betaEnabledInput.checked;
+      if (!betaEnabledInput.checked && betaVersionInput.value === "") betaVersionInput.value = "0";
+      if (betaEnabledInput.checked && Number(betaVersionInput.value) < 1) betaVersionInput.value = "";
+    });
+    linksForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      linksStatus.textContent = "Saving app links…";
+      try {
+        await callPremium("links-set", {
+          channelUrl: document.querySelector("#channel-url").value.trim(),
+          groupUrl: document.querySelector("#group-url").value.trim(),
+        });
+        setLinkPreview("#current-channel-link", document.querySelector("#channel-url").value.trim());
+        setLinkPreview("#current-group-link", document.querySelector("#group-url").value.trim());
+        linksStatus.textContent = "Channel and discussion links saved.";
+      } catch (error) { linksStatus.textContent = error.message; }
+    });
+    updatesTab.addEventListener("click", () => openSettingsTab(updatesTab, "updates"));
+    betaTab.addEventListener("click", () => openSettingsTab(betaTab, "beta"));
+    linksTab.addEventListener("click", () => openSettingsTab(linksTab, "links"));
+    refreshPremiumButton.addEventListener("click", () => void loadManualPremium());
+    emailPremiumForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      emailPremiumStatus.textContent = "Checking the verified email…";
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-email-premium-add", {
+          email: document.querySelector("#email-premium-address").value.trim(),
+        });
+        const grant = data.grant;
+        emailPremiumStatus.textContent = grant.alreadyGranted
+          ? `Premium is already active for ${grant.email}.`
+          : `Premium granted to ${grant.displayName || grant.email}; no pending request was created.`;
+        document.querySelector("#email-premium-address").value = "";
+      } catch (error) {
+        emailPremiumStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    });
+    premiumTab.addEventListener("click", () => {
+      prepareAdminView(premiumTab);
+      premiumManagement.hidden = false;
+      const work = [];
+      if (adminProfile?.role === "owner" || adminProfile?.permissions.includes("manage_premium")) work.push(loadManualPremium());
+      if (adminProfile?.role === "owner" || adminProfile?.permissions.includes("manage_settings")) work.push(loadGlobalAds(), loadPremiumOnlyAccess());
+      void Promise.all(work);
+    });
+    analyticsTab.addEventListener("click", () => void loadAnalytics());
+    devicesTab.addEventListener("click", () => void loadDevices());
+    dailyChartButton.addEventListener("click", () => {
+      chartMode = "daily";
+      renderAnalytics();
+    });
+    weeklyChartButton.addEventListener("click", () => {
+      chartMode = "weekly";
+      renderAnalytics();
+    });
+    analyticsAudienceOptions.addEventListener("change", (event) => {
+      const changed = event.target;
+      if (!(changed instanceof HTMLInputElement)) return;
+      const boxes = [...analyticsAudienceOptions.querySelectorAll("input[type=checkbox]")];
+      if (changed.checked) {
+        boxes.forEach((box) => { box.checked = box === changed; });
+      } else if (!boxes.some((box) => box.checked)) {
+        const allOption = boxes.find((box) => box.value === "all");
+        if (allOption) allOption.checked = true;
+      }
+      renderAnalytics();
+    });
+    [analyticsPremiumOptions, analyticsRamOptions, analyticsStorageOptions, analyticsCpuOptions]
+      .forEach((container) => container.addEventListener("change", () => {
+        devicePage = 0;
+        renderDevices();
+      }));
+    analyticsModelOptions.addEventListener("change", () => {
+      const visibleValues = new Set([...analyticsModelOptions.querySelectorAll("input[type=checkbox]")]
+        .map((input) => input.value));
+      visibleValues.forEach((value) => selectedModels.delete(value));
+      checkedValues(analyticsModelOptions).forEach((value) => selectedModels.add(value));
+      devicePage = 0;
+      renderDevices();
+    });
+    analyticsModelSearch.addEventListener("input", () => renderModelCheckboxes(selectedModels));
+    deviceSearch.addEventListener("input", () => {
+      devicePage = 0;
+      renderDevices();
+    });
+    clearDeviceFiltersButton.addEventListener("click", () => {
+      [analyticsPremiumOptions, analyticsRamOptions, analyticsStorageOptions, analyticsCpuOptions]
+        .forEach((container) => container.querySelectorAll("input[type=checkbox]")
+          .forEach((input) => { input.checked = false; }));
+      selectedModels.clear();
+      analyticsModelSearch.value = "";
+      deviceSearch.value = "";
+      renderModelCheckboxes(selectedModels);
+      devicePage = 0;
+      renderDevices();
+    });
+    devicePagePrevious.addEventListener("click", () => {
+      devicePage = Math.max(0, devicePage - 1);
+      renderDevices();
+    });
+    devicePageNext.addEventListener("click", () => {
+      devicePage += 1;
+      renderDevices();
+    });
+    clearDataButton.addEventListener("click", async () => {
+      const confirmation = window.prompt(
+        "This permanently deletes all premium requests, entitlements and manual references (but keeps admin accounts and ad settings). Type CLEAR to continue:",
+      );
+      if (confirmation !== "CLEAR") return;
+      if (!window.confirm("Final confirmation: clear all QSpoof premium user data? This cannot be undone.")) return;
+      setBusy(true);
+      premiumSettingsStatus.textContent = "Clearing premium records…";
+      try {
+        const data = await callPremium("admin-clear-data");
+        manualPremiumList.replaceChildren();
+        premiumSettingsStatus.textContent =
+          `Cleared ${data.cleared.requests} requests, ${data.cleared.entitlements} entitlements, and ${data.cleared.references} manual references.`;
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    refreshButton.addEventListener("click", () => {
+      if (!devicesManagement.hidden) void loadDevices();
+      else if (!analyticsManagement.hidden) void loadAnalytics();
+      else if (!updatesManagement.hidden) void loadReleaseSettings("updates");
+      else if (!betaManagement.hidden) void loadReleaseSettings("beta");
+      else if (!linksManagement.hidden) void loadReleaseSettings("links");
+      else if (!activeEntitlements.hidden) void loadActiveEntitlements();
+      else if (!premiumManagement.hidden) {
+        void loadManualPremium();
+        if (adminProfile?.role === "owner" || adminProfile?.permissions.includes("manage_settings")) {
+          void loadGlobalAds();
+          void loadPremiumOnlyAccess();
+        }
+      } else void loadRequests();
+    });
+    pendingTab.addEventListener("click", () => void loadRequests());
+    activeTab.addEventListener("click", () => void loadActiveEntitlements());
+    signoutButton.addEventListener("click", async () => {
+      adminCredentials = null;
+      adminProfile = null;
+      accountMenu.open = false;
+      await showSession(null);
+    });
+    const profileUpdateForm = document.querySelector("#profile-update-form");
+    const adminList = document.querySelector("#admin-list");
+    const permissionLabels = {
+      review_payments: "Review payments", manage_premium: "Manage premium",
+      manage_settings: "Manage app settings", view_analytics: "View analytics",
+    };
+    async function loadAdminAccounts() {
+      try {
+        const data = await callPremium("admin-list-admins");
+        adminList.replaceChildren();
+        for (const admin of data.admins || []) {
+          const row = document.createElement("div"); row.className = "admin-row";
+          const identity = document.createElement("strong"); identity.textContent = `${admin.email}${admin.role === "owner" ? " · Owner" : ""}`;
+          row.append(identity);
+          if (admin.role === "admin") {
+            const checks = document.createElement("div"); checks.className = "admin-permission-list";
+            for (const [permission, label] of Object.entries(permissionLabels)) {
+              const item = document.createElement("label"); const input = document.createElement("input");
+              input.type = "checkbox"; input.value = permission; input.checked = admin.permissions.includes(permission);
+              item.append(input, document.createTextNode(label)); checks.append(item);
+            }
+            row.append(checks);
+            const actions = document.createElement("div"); actions.className = "actions";
+            const save = document.createElement("button"); save.type = "button"; save.textContent = "Save permissions";
+            save.addEventListener("click", async () => {
+              try { await callPremium("admin-set-admin-permissions", { targetEmail: admin.email, permissions: [...checks.querySelectorAll("input:checked")].map((input) => input.value) }); message.textContent = `Permissions updated for ${admin.email}.`; }
+              catch (error) { message.textContent = error.message; }
+            });
+            const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger"; remove.textContent = "Remove admin";
+            remove.addEventListener("click", async () => {
+              if (!window.confirm(`Remove delegated admin ${admin.email}?`)) return;
+              try { await callPremium("admin-remove-admin", { targetEmail: admin.email }); await loadAdminAccounts(); message.textContent = "Admin removed."; }
+              catch (error) { message.textContent = error.message; }
+            });
+            actions.append(save, remove); row.append(actions);
+          } else { row.append(document.createTextNode("All permissions")); }
+          adminList.append(row);
+        }
+      } catch (error) { adminList.textContent = error.message; }
+    }
+    profileUpdateForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const oldPassword = document.querySelector("#profile-current-password").value;
+      const newEmail = document.querySelector("#profile-new-email").value.trim();
+      const newPassword = document.querySelector("#profile-new-password").value;
+      try {
+        const changed = await callPremium("admin-profile-update", { adminPassword: oldPassword, newEmail, newPassword });
+        adminCredentials = { adminEmail: changed.profile.email, adminPassword: newPassword || oldPassword };
+        adminProfile = changed.profile;
+        document.querySelector("#profile-current-password").value = "";
+        document.querySelector("#profile-new-password").value = "";
+        document.querySelector("#profile-new-email").value = "";
+        signedIn.textContent = `Signed in as ${adminProfile.email}`;
+        profileEmail.textContent = adminProfile.email;
+        message.textContent = "Admin account updated.";
+      } catch (error) { message.textContent = error.message; }
+    });
+    document.querySelector("#create-admin-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const permissions = [...event.currentTarget.querySelectorAll("input[type=checkbox]:checked")].map((input) => input.value);
+      try {
+        await callPremium("admin-create-admin", { targetEmail: document.querySelector("#new-admin-email").value.trim(), newPassword: document.querySelector("#new-admin-password").value, permissions });
+        event.currentTarget.reset(); await loadAdminAccounts(); message.textContent = "Delegated admin created.";
+      } catch (error) { message.textContent = error.message; }
+    });
+
+    profileButton.addEventListener("click", showAdminProfile);
+    profileBackButton.addEventListener("click", () => {
+      if (adminProfile?.role === "owner" || adminProfile?.permissions.includes("review_payments")) void loadRequests();
+      else if (adminProfile?.permissions.includes("view_analytics")) void loadAnalytics();
+      else if (adminProfile?.permissions.includes("manage_premium")) void loadActiveEntitlements();
+      else { prepareAdminView(null); message.textContent = "Admin profile."; }
+    });
+    void showSession(null);
+  </script>
+</body>
+</html>

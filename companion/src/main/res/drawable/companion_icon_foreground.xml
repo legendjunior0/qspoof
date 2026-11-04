@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- A tiny center fill keeps OEM icon renderers from treating this layer as empty.
+         It matches the supplied artwork at the center, leaving the image visually intact. -->
+    <path
+        android:fillColor="#EE6203"
+        android:pathData="M53,53h2v2h-2z" />
+</vector>

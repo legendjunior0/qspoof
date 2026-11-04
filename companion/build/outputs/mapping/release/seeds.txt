@@ -1,0 +1,2 @@
+com.antutu.ABenchMark.DeviceProfileActivity
+com.antutu.ABenchMark.DeviceProfileActivity: DeviceProfileActivity()

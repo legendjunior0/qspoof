@@ -1,0 +1,5 @@
+int drawable companion_icon_art 0x0
+int drawable companion_icon_canvas 0x0
+int drawable companion_icon_foreground 0x0
+int mipmap ic_launcher 0x0
+int mipmap ic_launcher_round 0x0

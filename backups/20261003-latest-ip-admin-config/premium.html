@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>QSpoof Premium Review</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f5f8;
+      color: #202a3a;
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body { max-width: 1040px; margin: 0 auto; padding: 34px 22px 60px; }
+    .site-header { display: flex; align-items: center; gap: 14px; margin-bottom: 30px; }
+    .brand-mark { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 15px; background: #e9eefb; color: #405995; font-size: 1.45rem; font-weight: 800; }
+    .brand-copy { flex: 1; }
+    .eyebrow { margin: 0 0 4px; color: #687790; font-size: .72rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.45rem, 4vw, 1.9rem); letter-spacing: -.035em; }
+    .header-note { display: inline-flex; align-items: center; gap: 8px; color: #59677b; font-size: .86rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #39a87b; box-shadow: 0 0 0 4px #e1f2ea; }
+    .intro { margin: -18px 0 26px 60px; max-width: 620px; color: #69778b; line-height: 1.6; }
+    .card { background: #fff; border: 1px solid #e2e7ef; border-radius: 18px; padding: 24px; margin: 18px 0; box-shadow: 0 8px 24px rgb(30 45 75 / 4%); }
+    #login-card { max-width: 480px; margin: 44px auto; padding: 30px; }
+    h2 { margin: 0 0 7px; font-size: 1.14rem; letter-spacing: -.015em; }
+    .card-copy { margin: 0 0 20px; color: #718096; font-size: .92rem; line-height: 1.55; }
+    form { display: grid; gap: 15px; }
+    label { display: grid; gap: 7px; color: #48566b; font-size: .86rem; font-weight: 650; }
+    input, select, button { min-height: 44px; border-radius: 11px; padding: 10px 13px; font: inherit; }
+    input, select { width: 100%; color: #202a3a; background: #fbfcfe; border: 1px solid #dce3ed; outline: none; }
+    input:focus { border-color: #7189c4; box-shadow: 0 0 0 3px #eaf0fc; }
+    button { color: #fff; background: #465f9d; border: 1px solid #465f9d; font-weight: 650; cursor: pointer; transition: background .16s ease, transform .16s ease; }
+    button:hover:not(:disabled) { background: #394f86; transform: translateY(-1px); }
+    button:focus-visible { outline: 3px solid #b9c9ed; outline-offset: 2px; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .secondary { color: #46566f; background: #fff; border-color: #dfe5ee; }
+    .secondary:hover:not(:disabled) { color: #344c83; background: #f5f7fb; }
+    .danger { color: #a64048; background: #fff; border-color: #edcfd1; }
+    .danger:hover:not(:disabled) { color: #fff; background: #a64048; border-color: #a64048; }
+    .toolbar { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid #edf0f4; }
+    .toolbar span { flex: 1; min-width: 180px; color: #647289; font-size: .9rem; }
+    .toolbar button { min-height: 38px; padding: 7px 12px; font-size: .86rem; }
+    .message { min-height: 1.5em; margin: 0 0 14px; color: #68778d; font-size: .9rem; white-space: pre-wrap; }
+    .request { padding: 18px 0; display: grid; gap: 9px; border-bottom: 1px solid #edf0f4; }
+    .request:last-child { border-bottom: 0; }
+    .reference { color: #273650; font-weight: 750; letter-spacing: .015em; overflow-wrap: anywhere; }
+    .meta { color: #758297; font-size: .86rem; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+    .actions button { min-height: 38px; padding: 7px 12px; font-size: .86rem; }
+    .quick-approve { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+    .warning { padding: 12px 14px; border: 1px solid #eee3c9; border-radius: 12px; background: #fcf9f1; color: #78643b; font-size: .88rem; line-height: 1.5; }
+    #quick-approve-card { padding: 20px 0; }
+    #global-ads-card, #premium-management { padding: 20px 0; border-bottom: 1px solid #edf0f4; }
+    .settings-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+    .settings-actions button { min-width: 140px; }
+    .settings-status { min-height: 1.4em; margin: 10px 0 0; }
+    .toggle-row { display: flex; align-items: center; gap: 12px; }
+    .toggle-row input { width: 20px; min-height: 20px; accent-color: #465f9d; }
+    .empty-state { padding: 28px 12px; color: #758297; text-align: center; }
+    #analytics-management { padding: 20px 0; }
+    .analytics-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+    .analytics-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+    .filter-group { min-width: 0; padding: 12px; border: 1px solid #e4e9f1; border-radius: 12px; background: #fbfcfe; }
+    .filter-group legend { padding: 0 5px; color: #53627a; font-size: .8rem; font-weight: 700; }
+    .checkbox-options { display: grid; gap: 7px; max-height: 150px; overflow: auto; }
+    .checkbox-option { display: flex; align-items: center; gap: 8px; color: #53627a; font-size: .84rem; }
+    .checkbox-option input, .sort-option input { width: 17px; min-height: 17px; accent-color: #465f9d; }
+    .filter-search { margin: 0 0 8px; }
+    .sort-option { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 14px; color: #53627a; font-size: .9rem; }
+    .device-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: 12px 0; }
+    .device-pagination span { color: #718096; font-size: .85rem; }
+    .analytics-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+    .metric { padding: 13px; border: 1px solid #e4e9f1; border-radius: 13px; background: #fbfcfe; }
+    .metric strong { display: block; color: #283c64; font-size: 1.35rem; }
+    .metric span { color: #718096; font-size: .8rem; }
+    .usage-chart { height: 250px; display: flex; align-items: end; gap: 4px; padding: 16px 8px 26px; border: 1px solid #e2e7ef; border-radius: 15px; background: linear-gradient(to bottom, #fbfcfe, #f4f7fc); overflow-x: auto; }
+    .chart-column { min-width: 20px; height: 100%; display: flex; flex-direction: column; justify-content: end; align-items: center; gap: 5px; }
+    .chart-value { color: #53657f; font-size: .68rem; line-height: 1; }
+    .chart-bar { width: 14px; min-height: 2px; border-radius: 6px 6px 2px 2px; background: #526fba; }
+    .chart-label { color: #78869a; font-size: .62rem; white-space: nowrap; transform: rotate(-45deg); transform-origin: center; margin-top: 5px; }
+    .device-table-wrap { overflow-x: auto; border: 1px solid #e2e7ef; border-radius: 14px; }
+    .device-table { width: 100%; border-collapse: collapse; font-size: .87rem; }
+    .device-table th, .device-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #edf0f4; white-space: nowrap; }
+    .device-table th { color: #53627a; background: #f8faff; font-size: .76rem; letter-spacing: .04em; text-transform: uppercase; }
+    .device-table tr:last-child td { border-bottom: 0; }
+    @media (max-width: 640px) {
+      body { padding: 24px 15px 40px; }
+      .header-note { display: none; }
+      .intro { margin: -18px 0 22px 0; }
+      .card, #login-card { padding: 20px; }
+      .quick-approve { grid-template-columns: 1fr; }
+      .quick-approve button { width: 100%; }
+      .toolbar span { flex-basis: 100%; }
+      .analytics-controls { grid-template-columns: 1fr 1fr; }
+      .analytics-filter-grid { grid-template-columns: 1fr 1fr; }
+      .analytics-summary { grid-template-columns: 1fr; }
+    }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-mark" aria-hidden="true">Q</div>
+    <div class="brand-copy">
+      <p class="eyebrow">QSpoof · Admin</p>
+      <h1>Premium access</h1>
+    </div>
+    <div class="header-note"><span class="status-dot"></span>Private review console</div>
+  </header>
+  <p class="intro">Review payment references and manage premium access for devices. Always verify payments in your UPI account before granting access.</p>
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+
+  <section id="login-card" class="card">
+    <h2>Welcome back</h2>
+    <p class="card-copy">Sign in with your administrator account to continue.</p>
+    <form id="login-form">
+      <label>Email <input id="email" type="email" autocomplete="username" required></label>
+      <label>Password <input id="password" type="password" autocomplete="current-password" required></label>
+      <button id="login-button" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <section id="review-card" class="card" hidden>
+    <div class="toolbar">
+      <span id="signed-in"></span>
+      <button id="pending-tab" class="secondary" type="button">Pending</button>
+      <button id="active-tab" class="secondary" type="button">Active premium</button>
+      <button id="premium-tab" class="secondary" type="button">Premium</button>
+      <button id="analytics-tab" class="secondary" type="button">Analytics</button>
+      <button id="refresh-button" class="secondary" type="button">Refresh</button>
+      <button id="signout-button" class="secondary" type="button">Sign out</button>
+    </div>
+    <section id="global-ads-card">
+      <h2>Global advertising</h2>
+      <p class="card-copy">One switch controls ads for every non-premium app user. Premium entitlements remain ad-free.</p>
+      <div class="settings-actions">
+        <button id="toggle-ads-button" type="button">Loading ad setting…</button>
+      </div>
+      <p id="ads-settings-status" class="meta settings-status" role="status" aria-live="polite"></p>
+    </section>
+    <section id="premium-only-access-card">
+      <h2>Premium-only app access</h2>
+      <p class="card-copy">When enabled, devices without an active premium entitlement are immediately exited from QSpoof on launch. Devices must be online so the app can verify their status.</p>
+      <div class="settings-actions">
+        <button id="toggle-premium-access-button" type="button">Loading app access setting…</button>
+      </div>
+      <p id="premium-access-settings-status" class="meta settings-status" role="status" aria-live="polite"></p>
+    </section>
+    <section id="quick-approve-card">
+      <h2>Approve by transaction reference</h2>
+      <p class="card-copy">Find a pending request and grant premium directly after confirming the payment.</p>
+      <p class="warning">This action does not verify payment with UPI. Confirm the payment in your account before granting access.</p>
+      <form id="quick-approve-form" class="quick-approve">
+        <label>Payment reference ID <input id="quick-transaction-id" autocomplete="off" required></label>
+        <button id="quick-approve-button" type="submit">Grant premium</button>
+      </form>
+    </section>
+    <div id="requests-heading"><h2>Pending requests</h2></div>
+    <div id="active-heading" hidden><h2>Active premium</h2><p class="card-copy">Revoke a grant to restore ads and let that device submit a new payment reference.</p></div>
+    <div id="requests"></div>
+    <div id="active-entitlements" hidden></div>
+    <section id="premium-management" hidden>
+      <h2>Add premium reference</h2>
+      <p class="card-copy">Register a verified payment reference. The user enters this reference in the app to activate premium on their device. This works without an existing app request.</p>
+      <form id="manual-premium-form">
+        <label for="manual-transaction-id">Payment reference ID
+          <input id="manual-transaction-id" maxlength="80" autocomplete="off" required>
+        </label>
+        <label class="toggle-row" for="show-donor-name">
+          <input id="show-donor-name" type="checkbox">
+          Display donor name in the app’s donor list
+        </label>
+        <label for="manual-donor-name">Donor name
+          <input id="manual-donor-name" maxlength="40" autocomplete="off" placeholder="Optional name">
+        </label>
+        <label class="toggle-row" for="partial-donor-name">
+          <input id="partial-donor-name" type="checkbox">
+          Partially mask the displayed name
+        </label>
+        <button id="add-premium-button" type="submit">Add premium reference</button>
+      </form>
+      <p id="premium-settings-status" class="meta settings-status" role="status" aria-live="polite"></p>
+      <div class="toolbar"><h2>Registered references</h2><button id="refresh-premium-button" class="secondary" type="button">Refresh list</button></div>
+      <div id="manual-premium-list"></div>
+      <section id="clear-data-card">
+        <h2>Clear all premium data</h2>
+        <p class="warning">Permanently deletes all premium requests, active entitlements, and unclaimed manual references. Admin accounts and global ad settings are preserved.</p>
+        <button id="clear-data-button" class="danger" type="button">Clear all premium data</button>
+      </section>
+    </section>
+    <section id="analytics-management" hidden>
+      <h2>App usage analytics</h2>
+      <p class="card-copy">Daily unique users and registered-device details. Device identifiers are stored only as a one-way server hash.</p>
+      <div class="analytics-filter-grid">
+        <fieldset class="filter-group"><legend>Chart audience</legend><div id="analytics-audience-options" class="checkbox-options"></div></fieldset>
+        <fieldset class="filter-group"><legend>Premium status</legend><div id="analytics-premium-options" class="checkbox-options"></div></fieldset>
+        <fieldset class="filter-group"><legend>RAM</legend><div id="analytics-ram-options" class="checkbox-options"></div></fieldset>
+        <fieldset class="filter-group"><legend>Storage</legend><div id="analytics-storage-options" class="checkbox-options"></div></fieldset>
+        <fieldset class="filter-group"><legend>Processor</legend><div id="analytics-cpu-options" class="checkbox-options"></div></fieldset>
+        <fieldset class="filter-group"><legend>Device name / model</legend>
+          <input id="analytics-model-search" class="filter-search" type="search" placeholder="Find a model">
+          <div id="analytics-model-options" class="checkbox-options"></div>
+        </fieldset>
+      </div>
+      <div id="analytics-summary" class="analytics-summary" aria-live="polite"></div>
+      <div id="usage-chart" class="usage-chart" role="img" aria-label="Daily unique app users for the past 30 days"></div>
+      <h2>Registered devices</h2>
+      <p id="device-list-status" class="card-copy">App opens are counted from the new tracking update; earlier opens cannot be reconstructed.</p>
+      <label class="sort-option"><input id="analytics-most-used-first" type="checkbox"> Most used first</label>
+      <div class="device-table-wrap">
+        <table class="device-table">
+          <thead><tr><th>Device</th><th>RAM</th><th>Storage</th><th>Processor</th><th>Access</th><th>App opens since update</th><th>Registered</th></tr></thead>
+          <tbody id="device-list"></tbody>
+        </table>
+      </div>
+      <div class="device-pagination"><button id="device-page-previous" class="secondary" type="button">Previous</button><span id="device-page-label"></span><button id="device-page-next" class="secondary" type="button">Next</button></div>
+    </section>
+  </section>
+
+  <script type="module">
+    const supabaseUrl = "https://aearzrtzrtyvuywjcwni.supabase.co";
+    const publishableKey = "sb_publishable_hi9tDuZNDMr8vF0vAwF5wg_s-XsIn6J";
+    const loginCard = document.querySelector("#login-card");
+    const reviewCard = document.querySelector("#review-card");
+    const loginForm = document.querySelector("#login-form");
+    const loginButton = document.querySelector("#login-button");
+    const refreshButton = document.querySelector("#refresh-button");
+    const pendingTab = document.querySelector("#pending-tab");
+    const activeTab = document.querySelector("#active-tab");
+    const premiumTab = document.querySelector("#premium-tab");
+    const analyticsTab = document.querySelector("#analytics-tab");
+    const quickApproveForm = document.querySelector("#quick-approve-form");
+    const quickApproveButton = document.querySelector("#quick-approve-button");
+    const quickTransactionId = document.querySelector("#quick-transaction-id");
+    const quickApproveCard = document.querySelector("#quick-approve-card");
+    const signoutButton = document.querySelector("#signout-button");
+    const message = document.querySelector("#message");
+    const requests = document.querySelector("#requests");
+    const activeEntitlements = document.querySelector("#active-entitlements");
+    const requestsHeading = document.querySelector("#requests-heading");
+    const activeHeading = document.querySelector("#active-heading");
+    const signedIn = document.querySelector("#signed-in");
+    const premiumManagement = document.querySelector("#premium-management");
+    const manualPremiumForm = document.querySelector("#manual-premium-form");
+    const manualTransactionId = document.querySelector("#manual-transaction-id");
+    const showDonorName = document.querySelector("#show-donor-name");
+    const manualDonorName = document.querySelector("#manual-donor-name");
+    const partialDonorName = document.querySelector("#partial-donor-name");
+    const addPremiumButton = document.querySelector("#add-premium-button");
+    const refreshPremiumButton = document.querySelector("#refresh-premium-button");
+    const manualPremiumList = document.querySelector("#manual-premium-list");
+    const premiumSettingsStatus = document.querySelector("#premium-settings-status");
+    const clearDataButton = document.querySelector("#clear-data-button");
+    const toggleAdsButton = document.querySelector("#toggle-ads-button");
+    const adsSettingsStatus = document.querySelector("#ads-settings-status");
+    const togglePremiumAccessButton = document.querySelector("#toggle-premium-access-button");
+    const premiumAccessSettingsStatus = document.querySelector("#premium-access-settings-status");
+    const analyticsManagement = document.querySelector("#analytics-management");
+    const analyticsAudienceOptions = document.querySelector("#analytics-audience-options");
+    const analyticsPremiumOptions = document.querySelector("#analytics-premium-options");
+    const analyticsRamOptions = document.querySelector("#analytics-ram-options");
+    const analyticsStorageOptions = document.querySelector("#analytics-storage-options");
+    const analyticsCpuOptions = document.querySelector("#analytics-cpu-options");
+    const analyticsModelOptions = document.querySelector("#analytics-model-options");
+    const analyticsModelSearch = document.querySelector("#analytics-model-search");
+    const analyticsMostUsedFirst = document.querySelector("#analytics-most-used-first");
+    const analyticsSummary = document.querySelector("#analytics-summary");
+    const usageChart = document.querySelector("#usage-chart");
+    const deviceListStatus = document.querySelector("#device-list-status");
+    const deviceList = document.querySelector("#device-list");
+    const devicePagePrevious = document.querySelector("#device-page-previous");
+    const devicePageNext = document.querySelector("#device-page-next");
+    const devicePageLabel = document.querySelector("#device-page-label");
+    let adminCredentials = null;
+    let adsEnabled = true;
+    let premiumOnlyAccess = false;
+    let analyticsData = null;
+    let devicePage = 0;
+    let selectedModels = new Set();
+    const DEVICE_PAGE_SIZE = 100;
+
+    function setBusy(busy) {
+      loginButton.disabled = busy;
+      refreshButton.disabled = busy;
+      pendingTab.disabled = busy;
+      activeTab.disabled = busy;
+      premiumTab.disabled = busy;
+      analyticsTab.disabled = busy;
+      quickApproveButton.disabled = busy;
+      signoutButton.disabled = busy;
+      addPremiumButton.disabled = busy;
+      refreshPremiumButton.disabled = busy;
+      clearDataButton.disabled = busy;
+      toggleAdsButton.disabled = busy;
+      togglePremiumAccessButton.disabled = busy;
+      analyticsManagement.querySelectorAll("input, button").forEach((control) => {
+        control.disabled = busy;
+      });
+      requests.querySelectorAll("button").forEach((button) => {
+        button.disabled = busy;
+      });
+      activeEntitlements.querySelectorAll("button").forEach((button) => {
+        button.disabled = busy;
+      });
+    }
+
+    async function callPremium(action, extra = {}) {
+      if (!adminCredentials) throw new Error("Sign in again to continue.");
+      const response = await fetch(`${supabaseUrl}/functions/v1/premium`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": publishableKey,
+          "Authorization": `Bearer ${publishableKey}`,
+        },
+        body: JSON.stringify({ action, ...adminCredentials, ...extra }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (
+          action.startsWith("admin-") &&
+          data.error === "Invalid device identifier"
+        ) {
+          throw new Error(
+            "The deployed premium Edge Function or database migration is out of date. Apply the pending migrations in supabase/migrations/, deploy supabase/functions/premium/index.ts, then refresh this page.",
+          );
+        }
+        if (response.status === 401 || response.status === 403) {
+          adminCredentials = null;
+          loginCard.hidden = false;
+          reviewCard.hidden = true;
+        }
+        throw new Error(data.error || `Request failed (HTTP ${response.status}).`);
+      }
+      return data;
+    }
+
+    async function loadGlobalAds() {
+      adsSettingsStatus.textContent = "Loading global ad setting…";
+      try {
+        const data = await callPremium("admin-ads-get");
+        adsEnabled = data.adsEnabled;
+        renderAdsSetting();
+      } catch (error) {
+        adsSettingsStatus.textContent = error.message;
+      }
+    }
+
+    function renderAdsSetting() {
+      toggleAdsButton.textContent = adsEnabled ? "Disable ads for all users" : "Enable ads for all users";
+      adsSettingsStatus.textContent = adsEnabled
+        ? "Ads are enabled for non-premium users. The app reads this setting at launch."
+        : "Ads are disabled for non-premium users. Already-open apps apply this at next launch.";
+    }
+
+    async function loadPremiumOnlyAccess() {
+      premiumAccessSettingsStatus.textContent = "Loading app access setting…";
+      togglePremiumAccessButton.disabled = true;
+      try {
+        const data = await callPremium("admin-app-access-get");
+        premiumOnlyAccess = data.premiumOnlyAccess;
+        renderPremiumOnlyAccess();
+      } catch (error) {
+        premiumAccessSettingsStatus.textContent = error.message;
+      } finally {
+        togglePremiumAccessButton.disabled = false;
+      }
+    }
+
+    function renderPremiumOnlyAccess() {
+      togglePremiumAccessButton.textContent = premiumOnlyAccess
+        ? "Allow all users to open QSpoof"
+        : "Require premium to open QSpoof";
+      premiumAccessSettingsStatus.textContent = premiumOnlyAccess
+        ? "Premium-only access is enabled. Non-premium devices will be exited from the app."
+        : "All users can open the app; premium features remain unchanged.";
+    }
+
+    const RAM_SIZE_BUCKETS_GB = [2, 4, 6, 8, 12, 16];
+    const STORAGE_SIZE_BUCKETS_GB = [32, 64, 128, 256, 512, 1024];
+
+    function capacityBucket(megabytes, buckets) {
+      const gigabytes = Number(megabytes) / 1024;
+      return buckets.reduce((closest, bucket) =>
+        Math.abs(bucket - gigabytes) < Math.abs(closest - gigabytes) ? bucket : closest,
+      );
+    }
+
+    function formatCapacity(gigabytes) {
+      return `${gigabytes} GB`;
+    }
+
+    function checkedValues(container) {
+      return new Set([...container.querySelectorAll("input[type=checkbox]:checked")]
+        .map((input) => input.value));
+    }
+
+    function renderCheckboxes(container, values, formatter = (value) => value, selected = checkedValues(container)) {
+      container.replaceChildren();
+      for (const value of values) {
+        const label = document.createElement("label");
+        label.className = "checkbox-option";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = String(value);
+        input.checked = selected.has(String(value));
+        const text = document.createElement("span");
+        text.textContent = formatter(value);
+        label.append(input, text);
+        container.append(label);
+      }
+      if (values.length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "meta";
+        empty.textContent = "No devices have reported this yet.";
+        container.append(empty);
+      }
+    }
+
+    function populateAnalyticsFilters() {
+      const devices = analyticsData?.devices || [];
+      const uniqueSorted = (values) => [...new Set(values.filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
+      const ramBuckets = uniqueSorted(devices.map((device) =>
+        capacityBucket(device.ramMb, RAM_SIZE_BUCKETS_GB),
+      ));
+      const storageBuckets = uniqueSorted(devices.map((device) =>
+        capacityBucket(device.storageMb, STORAGE_SIZE_BUCKETS_GB),
+      ));
+      const visibleModelValues = new Set([...analyticsModelOptions.querySelectorAll("input[type=checkbox]")]
+        .map((input) => input.value));
+      visibleModelValues.forEach((value) => selectedModels.delete(value));
+      checkedValues(analyticsModelOptions).forEach((value) => selectedModels.add(value));
+      renderCheckboxes(analyticsAudienceOptions, ["all", "premium", "nonPremium"], (value) => ({
+        all: "All users",
+        premium: "Premium users",
+        nonPremium: "Non-premium users",
+      })[value], checkedValues(analyticsAudienceOptions).size
+        ? checkedValues(analyticsAudienceOptions)
+        : new Set(["all"]));
+      renderCheckboxes(analyticsPremiumOptions, ["premium", "nonPremium"], (value) => ({
+        premium: "Premium",
+        nonPremium: "Non-premium",
+      })[value]);
+      renderCheckboxes(analyticsRamOptions, ramBuckets.map(String), (value) => `${value} GB`);
+      renderCheckboxes(analyticsStorageOptions, storageBuckets.map(String), (value) => `${value} GB`);
+      renderCheckboxes(analyticsCpuOptions, uniqueSorted(devices.map((device) => device.cpu)));
+      renderModelCheckboxes(selectedModels);
+    }
+
+    function renderModelCheckboxes(selected = selectedModels) {
+      const models = [...new Set((analyticsData?.devices || []).map((device) => device.model).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+      const query = analyticsModelSearch.value.trim().toLocaleLowerCase();
+      const matches = query ? models.filter((model) => model.toLocaleLowerCase().includes(query)) : models;
+      renderCheckboxes(analyticsModelOptions, matches.slice(0, 100), (value) => value, selected);
+      if (matches.length > 100) {
+        const note = document.createElement("span");
+        note.className = "meta";
+        note.textContent = `Showing 100 of ${matches.length} models; narrow the search to find another.`;
+        analyticsModelOptions.append(note);
+      }
+    }
+
+    function selectedAudience() {
+      const selected = checkedValues(analyticsAudienceOptions);
+      if (selected.has("premium")) return "premium";
+      if (selected.has("nonPremium")) return "nonPremium";
+      return "all";
+    }
+
+    function selectedDevices() {
+      if (!analyticsData) return [];
+      const premium = checkedValues(analyticsPremiumOptions);
+      const ram = checkedValues(analyticsRamOptions);
+      const storage = checkedValues(analyticsStorageOptions);
+      const cpus = checkedValues(analyticsCpuOptions);
+      const models = selectedModels;
+      return (analyticsData.devices || []).filter((device) => {
+        const premiumKey = device.premium ? "premium" : "nonPremium";
+        return (!premium.size || premium.has(premiumKey)) &&
+          (!ram.size || ram.has(String(capacityBucket(device.ramMb, RAM_SIZE_BUCKETS_GB)))) &&
+          (!storage.size || storage.has(String(capacityBucket(device.storageMb, STORAGE_SIZE_BUCKETS_GB)))) &&
+          (!cpus.size || cpus.has(device.cpu)) &&
+          (!models.size || models.has(device.model));
+      });
+    }
+
+    function renderAnalytics() {
+      if (!analyticsData) return;
+      const audience = selectedAudience();
+      const metric = audience === "premium"
+        ? "premiumUsers"
+        : audience === "nonPremium"
+          ? "nonPremiumUsers"
+          : "allUsers";
+      const daily = analyticsData.daily || [];
+      const today = daily.at(-1) || { allUsers: 0, premiumUsers: 0, nonPremiumUsers: 0 };
+      const monthTotal = daily.reduce((sum, item) => sum + Number(item[metric] || 0), 0);
+      const registered = (analyticsData.devices || []).length;
+      const filtered = selectedDevices();
+      const max = Math.max(1, ...daily.map((item) => Number(item[metric] || 0)));
+
+      analyticsSummary.replaceChildren();
+      [
+        [today[metric] || 0, `Today's ${audience === "all" ? "users" : audience === "premium" ? "premium users" : "non-premium users"}`],
+        [monthTotal, "30-day user days"],
+        [registered, "Registered devices"],
+      ].forEach(([value, label]) => {
+        const metricCard = document.createElement("div");
+        metricCard.className = "metric";
+        const number = document.createElement("strong");
+        number.textContent = String(value);
+        const copy = document.createElement("span");
+        copy.textContent = label;
+        metricCard.append(number, copy);
+        analyticsSummary.append(metricCard);
+      });
+
+      usageChart.replaceChildren();
+      for (const day of daily) {
+        const value = Number(day[metric] || 0);
+        const column = document.createElement("div");
+        column.className = "chart-column";
+        column.title = `${day.date}: ${value} unique user${value === 1 ? "" : "s"}`;
+        const number = document.createElement("span");
+        number.className = "chart-value";
+        number.textContent = String(value);
+        const bar = document.createElement("div");
+        bar.className = "chart-bar";
+        bar.style.height = `${Math.max(2, Math.round((value / max) * 170))}px`;
+        const label = document.createElement("span");
+        label.className = "chart-label";
+        label.textContent = String(day.date).slice(5);
+        column.append(number, bar, label);
+        usageChart.append(column);
+      }
+
+      deviceList.replaceChildren();
+      if (filtered.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 7;
+        cell.className = "empty-state";
+        cell.textContent = registered ? "No devices match these filters." : "No devices have reported usage yet.";
+        row.append(cell);
+        deviceList.append(row);
+        devicePagePrevious.disabled = true;
+        devicePageNext.disabled = true;
+        devicePageLabel.textContent = "Page 0 of 0";
+        deviceListStatus.textContent = `${registered} registered device(s). Daily counts reset at midnight ${analyticsData.timezone || "Asia/Kolkata"}.`;
+      } else {
+        const sorted = [...filtered].sort((a, b) => {
+          if (analyticsMostUsedFirst.checked) {
+            const countDifference = Number(b.launchCount || 0) - Number(a.launchCount || 0);
+            if (countDifference) return countDifference;
+          }
+          return new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime();
+        });
+        const pageCount = Math.max(1, Math.ceil(sorted.length / DEVICE_PAGE_SIZE));
+        devicePage = Math.min(devicePage, pageCount - 1);
+        const firstItem = devicePage * DEVICE_PAGE_SIZE + 1;
+        const lastItem = Math.min((devicePage + 1) * DEVICE_PAGE_SIZE, sorted.length);
+        const pageItems = sorted.slice(devicePage * DEVICE_PAGE_SIZE, (devicePage + 1) * DEVICE_PAGE_SIZE);
+        devicePagePrevious.disabled = devicePage === 0;
+        devicePageNext.disabled = devicePage >= pageCount - 1;
+        devicePageLabel.textContent = `Page ${devicePage + 1} of ${pageCount}`;
+        for (const device of pageItems) {
+          const row = document.createElement("tr");
+          const values = [
+            device.model,
+            formatCapacity(capacityBucket(device.ramMb, RAM_SIZE_BUCKETS_GB)),
+            formatCapacity(capacityBucket(device.storageMb, STORAGE_SIZE_BUCKETS_GB)),
+            device.cpu,
+            device.premium ? "Premium" : "Non-premium",
+            Number(device.launchCount || 0).toLocaleString(),
+            device.registeredAt ? new Date(device.registeredAt).toLocaleString() : "—",
+          ];
+          values.forEach((value) => {
+            const cell = document.createElement("td");
+            cell.textContent = value || "—";
+            row.append(cell);
+          });
+          deviceList.append(row);
+        }
+        deviceListStatus.textContent = `Showing ${firstItem}–${lastItem} of ${filtered.length} device(s). New registrations appear first; enable “Most used first” to rank by app opens. Open counts start with this update.`;
+      }
+    }
+
+    async function loadAnalytics() {
+      message.textContent = "Loading 30-day app analytics…";
+      requests.hidden = true;
+      requestsHeading.hidden = true;
+      activeHeading.hidden = true;
+      activeEntitlements.hidden = true;
+      premiumManagement.hidden = true;
+      quickApproveCard.hidden = true;
+      analyticsManagement.hidden = false;
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-analytics");
+        analyticsData = data.analytics;
+        populateAnalyticsFilters();
+        renderAnalytics();
+        message.textContent = "Analytics updated.";
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadManualPremium() {
+      premiumSettingsStatus.textContent = "Loading registered premium references…";
+      manualPremiumList.replaceChildren();
+      try {
+        const data = await callPremium("admin-premium-list");
+        if (data.references.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.textContent = "No manually registered premium references.";
+          manualPremiumList.append(empty);
+        }
+        for (const item of data.references) {
+          const row = document.createElement("article");
+          row.className = "request";
+          const reference = document.createElement("div");
+          reference.className = "reference";
+          reference.textContent = item.transaction_id;
+          if (item.display_name) {
+            reference.textContent += ` — ${item.display_name}`;
+          }
+          const info = document.createElement("div");
+          info.className = "meta";
+          info.textContent = [
+            item.display_name_partial ? "Name is partially masked in the public donor list" : "",
+            item.claimed_at ? `Connected ${new Date(item.claimed_at).toLocaleString()}` : "Waiting for user to enter reference",
+          ].filter(Boolean).join(" · ");
+          row.append(reference, info);
+          if (!item.claimed_at) {
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "danger";
+            remove.textContent = "Remove unclaimed reference";
+            remove.addEventListener("click", () => removeManualPremium(item.transaction_id));
+            row.append(remove);
+          }
+          manualPremiumList.append(row);
+        }
+        premiumSettingsStatus.textContent = `${data.references.length} registered reference(s).`;
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      }
+    }
+
+    async function loadRequests() {
+      message.textContent = "Loading pending requests…";
+      activeEntitlements.hidden = true;
+      activeHeading.hidden = true;
+      premiumManagement.hidden = true;
+      analyticsManagement.hidden = true;
+      requestsHeading.hidden = false;
+      requests.hidden = false;
+      quickApproveCard.hidden = false;
+      requests.replaceChildren();
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-list");
+        if (data.requests.length === 0) {
+          const emptyState = document.createElement("div");
+          emptyState.className = "empty-state";
+          emptyState.textContent = "You’re all caught up. No pending requests.";
+          requests.replaceChildren(emptyState);
+          message.textContent = "No pending payment requests.";
+          return;
+        }
+        message.textContent = `${data.requests.length} pending request(s).`;
+        for (const item of data.requests) {
+          const row = document.createElement("article");
+          row.className = "request";
+          const reference = document.createElement("div");
+          reference.className = "reference";
+          reference.textContent = item.display_name
+            ? `${item.transaction_id} — ${item.display_name}`
+            : item.transaction_id;
+          const details = [];
+          if (item.display_name_partial) {
+            details.push("Donor chose partial display in the public donor list.");
+          }
+          const date = document.createElement("div");
+          date.className = "meta";
+          date.textContent = new Date(item.submitted_at).toLocaleString();
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          const approve = document.createElement("button");
+          approve.type = "button";
+          approve.textContent = "Approve — grant ad-free";
+          approve.addEventListener("click", () => reviewRequest(item, "admin-approve"));
+          const reject = document.createElement("button");
+          reject.type = "button";
+          reject.className = "danger";
+          reject.textContent = "Reject";
+          reject.addEventListener("click", () => reviewRequest(item, "admin-reject"));
+          actions.append(approve, reject);
+          row.append(reference);
+          if (details.length) {
+            const nameNote = document.createElement("div");
+            nameNote.className = "meta";
+            nameNote.textContent = details.join(" · ");
+            row.append(nameNote);
+          }
+          row.append(date, actions);
+          requests.append(row);
+        }
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadActiveEntitlements() {
+      message.textContent = "Loading active entitlements…";
+      requests.hidden = true;
+      requestsHeading.hidden = true;
+      activeHeading.hidden = false;
+      premiumManagement.hidden = true;
+      analyticsManagement.hidden = true;
+      quickApproveCard.hidden = true;
+      activeEntitlements.hidden = false;
+      activeEntitlements.replaceChildren();
+      setBusy(true);
+      try {
+        const data = await callPremium("admin-list-active");
+        if (data.entitlements.length === 0) {
+          const emptyState = document.createElement("div");
+          emptyState.className = "empty-state";
+          emptyState.textContent = "No active premium grants.";
+          activeEntitlements.replaceChildren(emptyState);
+          message.textContent = "No active premium entitlements.";
+          return;
+        }
+        message.textContent = `${data.entitlements.length} active entitlement(s).`;
+        for (const item of data.entitlements) {
+          const row = document.createElement("article");
+          row.className = "request";
+          const reference = document.createElement("div");
+          reference.className = "reference";
+          reference.textContent = item.display_name
+            ? `${item.transaction_id} — ${item.display_name}`
+            : item.transaction_id;
+          const details = [];
+          if (item.display_name_partial) {
+            details.push("Donor chose partial display in the public donor list.");
+          }
+          const date = document.createElement("div");
+          date.className = "meta";
+          date.textContent = `Granted ${new Date(item.granted_at).toLocaleString()}`;
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          const revoke = document.createElement("button");
+          revoke.type = "button";
+          revoke.className = "danger";
+          revoke.textContent = "Remove premium access";
+          revoke.addEventListener("click", () => revokeEntitlement(item));
+          actions.append(revoke);
+          row.append(reference);
+          if (details.length) {
+            const nameNote = document.createElement("div");
+            nameNote.className = "meta";
+            nameNote.textContent = details.join(" · ");
+            row.append(nameNote);
+          }
+          row.append(date, actions);
+          activeEntitlements.append(row);
+        }
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function revokeEntitlement(item) {
+      if (!window.confirm(
+        `Remove premium access for transaction ${item.transaction_id}? This immediately restores ads for the linked device. The payment request will remain in history, and the device can submit a new transaction reference.`,
+      )) return;
+      message.textContent = "Removing premium access…";
+      setBusy(true);
+      try {
+        await callPremium("admin-revoke", { transactionId: item.transaction_id });
+        message.textContent = "Premium access removed. The linked device can submit a new transaction reference.";
+        await loadActiveEntitlements();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function reviewRequest(item, action) {
+      const approve = action === "admin-approve";
+      const confirmed = window.confirm(
+        approve
+          ? `Confirm payment ${item.transaction_id} in your UPI records before granting premium?`
+          : `Reject payment request ${item.transaction_id}?`,
+      );
+      if (!confirmed) return;
+      message.textContent = approve ? "Approving…" : "Rejecting…";
+      setBusy(true);
+      try {
+        await callPremium(action, { requestId: item.id });
+        message.textContent = approve
+          ? "Approved. The device will become ad-free when it next checks the server."
+          : "Request rejected.";
+        await loadRequests();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function showSession(session) {
+      const hasSession = session;
+      loginCard.hidden = hasSession;
+      reviewCard.hidden = !hasSession;
+      if (!hasSession) return;
+      signedIn.textContent = `Signed in as ${session.email}`;
+      await Promise.all([loadRequests(), loadGlobalAds(), loadPremiumOnlyAccess()]);
+    }
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      message.textContent = "Signing in…";
+      loginButton.disabled = true;
+      const credentials = {
+        adminEmail: document.querySelector("#email").value.trim(),
+        adminPassword: document.querySelector("#password").value,
+      };
+      try {
+        const response = await fetch(`${supabaseUrl}/functions/v1/premium`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": publishableKey,
+            "Authorization": `Bearer ${publishableKey}`,
+          },
+          body: JSON.stringify({ action: "admin-login", ...credentials }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.authorized !== true) {
+          throw new Error(data.error || "Invalid admin email or password.");
+        }
+        adminCredentials = credentials;
+        document.querySelector("#password").value = "";
+        await showSession({ email: credentials.adminEmail });
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        loginButton.disabled = false;
+      }
+    });
+
+    quickApproveForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const transactionId = quickTransactionId.value.trim();
+      if (!/^[A-Za-z0-9-]{6,80}$/.test(transactionId)) {
+        message.textContent = "Enter a valid payment reference ID.";
+        return;
+      }
+      if (!window.confirm(
+        `This will grant ad-free access for the device linked to ${transactionId}. Confirm payment in your UPI account first. Continue?`,
+      )) return;
+
+      setBusy(true);
+      message.textContent = "Finding the pending request…";
+      try {
+        await callPremium("admin-approve-reference", { transactionId });
+        quickTransactionId.value = "";
+        message.textContent = "Premium granted. The device will become ad-free on its next status check.";
+        await loadRequests();
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    manualPremiumForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const transactionId = manualTransactionId.value.trim();
+      const displayName = manualDonorName.value.trim();
+      if (!/^[A-Za-z0-9-]{6,80}$/.test(transactionId)) {
+        premiumSettingsStatus.textContent = "Enter a valid payment reference ID.";
+        return;
+      }
+      if (showDonorName.checked && !displayName) {
+        premiumSettingsStatus.textContent = "Enter a donor name or turn off donor-name display.";
+        return;
+      }
+
+      setBusy(true);
+      premiumSettingsStatus.textContent = "Adding verified premium reference…";
+      try {
+        await callPremium("admin-premium-add", {
+          transactionId,
+          showName: showDonorName.checked,
+          displayName: showDonorName.checked ? displayName : null,
+          showNamePartially: showDonorName.checked && partialDonorName.checked,
+        });
+        manualTransactionId.value = "";
+        manualDonorName.value = "";
+        partialDonorName.checked = false;
+        premiumSettingsStatus.textContent = "Reference added. The user can enter it in the app to activate premium.";
+        await loadManualPremium();
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    async function removeManualPremium(transactionId) {
+      if (!window.confirm(`Remove unclaimed premium reference ${transactionId}?`)) {
+        return;
+      }
+      setBusy(true);
+      premiumSettingsStatus.textContent = "Removing unclaimed reference…";
+      try {
+        await callPremium("admin-premium-remove", { transactionId });
+        await loadManualPremium();
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function setGlobalAds(enabled) {
+      setBusy(true);
+      adsSettingsStatus.textContent = enabled ? "Enabling ads for non-premium users…" : "Disabling ads globally…";
+      try {
+        const updated = await callPremium("admin-ads-set", { adsEnabled: enabled });
+        if (updated.adsEnabled !== enabled) {
+          throw new Error("The server did not save the requested ad setting. Refresh and try again.");
+        }
+        adsEnabled = updated.adsEnabled;
+        const saved = await callPremium("admin-ads-get");
+        if (saved.adsEnabled !== enabled) {
+          adsEnabled = saved.adsEnabled;
+          renderAdsSetting();
+          throw new Error("The saved ad setting did not match. Refresh and try again.");
+        }
+        adsEnabled = saved.adsEnabled;
+        renderAdsSetting();
+      } catch (error) {
+        adsSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function setPremiumOnlyAccess(enabled) {
+      setBusy(true);
+      premiumAccessSettingsStatus.textContent = enabled
+        ? "Requiring premium for app access…"
+        : "Allowing all users to open the app…";
+      try {
+        const data = await callPremium("admin-app-access-set", {
+          premiumOnlyAccess: enabled,
+        });
+        premiumOnlyAccess = data.premiumOnlyAccess;
+        renderPremiumOnlyAccess();
+      } catch (error) {
+        premiumAccessSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    toggleAdsButton.addEventListener("click", () => void setGlobalAds(!adsEnabled));
+    togglePremiumAccessButton.addEventListener(
+      "click",
+      () => void setPremiumOnlyAccess(!premiumOnlyAccess),
+    );
+    refreshPremiumButton.addEventListener("click", () => void loadManualPremium());
+    premiumTab.addEventListener("click", () => {
+      requests.hidden = true;
+      requestsHeading.hidden = true;
+      activeEntitlements.hidden = true;
+      activeHeading.hidden = true;
+      quickApproveCard.hidden = true;
+      premiumManagement.hidden = false;
+      analyticsManagement.hidden = true;
+      void loadManualPremium();
+    });
+    analyticsTab.addEventListener("click", () => void loadAnalytics());
+    analyticsAudienceOptions.addEventListener("change", (event) => {
+      const changed = event.target;
+      if (!(changed instanceof HTMLInputElement)) return;
+      const boxes = [...analyticsAudienceOptions.querySelectorAll("input[type=checkbox]")];
+      if (changed.checked) {
+        boxes.forEach((box) => { box.checked = box === changed; });
+      } else if (!boxes.some((box) => box.checked)) {
+        const allOption = boxes.find((box) => box.value === "all");
+        if (allOption) allOption.checked = true;
+      }
+      renderAnalytics();
+    });
+    [analyticsPremiumOptions, analyticsRamOptions, analyticsStorageOptions, analyticsCpuOptions]
+      .forEach((container) => container.addEventListener("change", () => {
+        devicePage = 0;
+        renderAnalytics();
+      }));
+    analyticsModelOptions.addEventListener("change", () => {
+      const visibleValues = new Set([...analyticsModelOptions.querySelectorAll("input[type=checkbox]")]
+        .map((input) => input.value));
+      visibleValues.forEach((value) => selectedModels.delete(value));
+      checkedValues(analyticsModelOptions).forEach((value) => selectedModels.add(value));
+      devicePage = 0;
+      renderAnalytics();
+    });
+    analyticsModelSearch.addEventListener("input", () => renderModelCheckboxes(selectedModels));
+    analyticsMostUsedFirst.addEventListener("change", () => {
+      devicePage = 0;
+      renderAnalytics();
+    });
+    devicePagePrevious.addEventListener("click", () => {
+      devicePage = Math.max(0, devicePage - 1);
+      renderAnalytics();
+    });
+    devicePageNext.addEventListener("click", () => {
+      devicePage += 1;
+      renderAnalytics();
+    });
+    clearDataButton.addEventListener("click", async () => {
+      const confirmation = window.prompt(
+        "This permanently deletes all premium requests, entitlements and manual references (but keeps admin accounts and ad settings). Type CLEAR to continue:",
+      );
+      if (confirmation !== "CLEAR") return;
+      if (!window.confirm("Final confirmation: clear all QSpoof premium user data? This cannot be undone.")) return;
+      setBusy(true);
+      premiumSettingsStatus.textContent = "Clearing premium records…";
+      try {
+        const data = await callPremium("admin-clear-data");
+        manualPremiumList.replaceChildren();
+        premiumSettingsStatus.textContent =
+          `Cleared ${data.cleared.requests} requests, ${data.cleared.entitlements} entitlements, and ${data.cleared.references} manual references.`;
+      } catch (error) {
+        premiumSettingsStatus.textContent = error.message;
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    refreshButton.addEventListener("click", () => {
+      if (!activeEntitlements.hidden) void loadActiveEntitlements();
+      else if (!premiumManagement.hidden) void loadManualPremium();
+      else if (!analyticsManagement.hidden) void loadAnalytics();
+      else void loadRequests();
+      void loadGlobalAds();
+      void loadPremiumOnlyAccess();
+    });
+    pendingTab.addEventListener("click", loadRequests);
+    activeTab.addEventListener("click", loadActiveEntitlements);
+    signoutButton.addEventListener("click", async () => {
+      adminCredentials = null;
+      await showSession(null);
+    });
+    void showSession(null);
+  </script>
+</body>
+</html>

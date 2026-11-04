@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Companion launcher: full-bleed Q artwork. Background is the Q photo
+         (replace companion/src/main/res/drawable-nodpi/original_app_icon.jpg
+         with the new Q image); empty foreground keeps it uncropped. -->
+    <background android:drawable="@drawable/original_app_icon" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground_empty" />
+</adaptive-icon>

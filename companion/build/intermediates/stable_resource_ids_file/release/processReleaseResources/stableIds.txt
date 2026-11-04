@@ -1,0 +1,5 @@
+qspoof.companion:mipmap/ic_launcher = 0x7f020000
+qspoof.companion:drawable/companion_icon_foreground = 0x7f010002
+qspoof.companion:drawable/companion_icon_canvas = 0x7f010001
+qspoof.companion:mipmap/ic_launcher_round = 0x7f020001
+qspoof.companion:drawable/companion_icon_art = 0x7f010000

@@ -1,0 +1,5 @@
+drawable:companion_icon_canvas:2130771969 reachable from res/mipmap-anydpi-v26/ic_launcher.xml
+drawable:companion_icon_foreground:2130771970 reachable from res/mipmap-anydpi-v26/ic_launcher.xml
+mipmap:ic_launcher:2130837504 reachable from AndroidManifest.xml
+mipmap:ic_launcher_round:2130837505 reachable from AndroidManifest.xml
+drawable:companion_icon_art:2130771968 is not reachable.

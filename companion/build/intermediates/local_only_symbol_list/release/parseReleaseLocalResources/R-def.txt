@@ -1,0 +1,7 @@
+R_DEF: Internal format may change without notice
+local
+drawable companion_icon_art
+drawable companion_icon_canvas
+drawable companion_icon_foreground
+mipmap ic_launcher
+mipmap ic_launcher_round
