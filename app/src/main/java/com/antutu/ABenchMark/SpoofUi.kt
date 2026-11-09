@@ -1072,12 +1072,27 @@ object SpoofUi {
                 gravity = Gravity.CENTER_VERTICAL
                 setPadding(dp(activity, 12), 0, 0, 0)
             }
-            titleStack.addView(TextView(activity).apply {
+            val titleRow = LinearLayout(activity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            titleRow.addView(TextView(activity).apply {
                 text = title
                 textSize = 20f
                 setTextColor(TEXT_PRIMARY)
                 typeface = Typeface.DEFAULT_BOLD
+                maxLines = 1
             })
+            if (version != null) {
+                titleRow.addView(TextView(activity).apply {
+                    text = version
+                    textSize = 10f
+                    setTextColor(AppTheme.accentOrange)
+                    typeface = Typeface.DEFAULT_BOLD
+                    setPadding(dp(activity, 5), 0, 0, 0)
+                })
+            }
+            titleStack.addView(titleRow)
             titleStack.addView(TextView(activity).apply {
                 text = subtitle
                 textSize = 11f
@@ -1088,14 +1103,6 @@ object SpoofUi {
                 textSize = 9f
                 setTextColor(TEXT_MUTED)
             })
-            if (version != null) {
-                titleStack.addView(TextView(activity).apply {
-                    text = version
-                    textSize = 10f
-                    setTextColor(ACCENT_INDIGO)
-                    typeface = Typeface.DEFAULT_BOLD
-                })
-            }
             card.addView(titleStack, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         }
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">QSpoof v5.0</string>
+    <string name="app_name">QSpoof</string>
     <string name="performance_service_channel_name">Performance Service</string>
     <string name="performance_service_channel_description">Notification channel for the performance service</string>
     <string name="performance_service_notification_title">Performance service active</string>

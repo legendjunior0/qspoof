@@ -1072,11 +1072,11 @@ button:hover:not(:disabled){box-shadow:none!important}
           <div class="section-heading"><div><p class="eyebrow">RELEASE MANAGEMENT</p><h2>App updates</h2><p class="card-copy">Publish APK releases, configure the latest-release popup, and set a separate minimum-version redirect.</p></div></div>
           <form id="updates-form" class="subpanel form-grid">
             <h3>Version policy</h3>
-            <p class="meta">The minimum-version switch can require v5.0 for both package variants or be turned off for testing older builds. Devices below an active minimum go straight to the required update flow.</p>
+            <p class="meta">Leave strict blocking off to keep both package variants and existing supported builds working. When ready, enable the switch once to require the latest published build for both packages; turn it off to restore each package's configured minimum.</p>
             <label>Latest version code<input id="latest-version-code" type="number" min="0" step="1" required></label>
             <label>Minimum version code (0 = no forced update)<input id="minimum-version-code" type="number" min="0" step="1" required></label>
-            <label class="toggle-row check-label"><input id="enforce-minimum-version" type="checkbox"> Enforce the latest version for both package variants</label>
-            <p class="meta">When enabled, older builds are blocked after their next successful access check. Turn it off to test older builds; the configured minimum version still applies.</p>
+            <label class="toggle-row check-label"><input id="enforce-minimum-version" type="checkbox"> Block older builds for both packages</label>
+            <p class="meta">This switch applies to Antutu and Ludashi together. Keep it off for now; enable it later to block builds below each package's published latest version.</p>
             <label>Display version<input id="display-version" maxlength="32" placeholder="5.0"></label>
             <label>Update message<input id="update-message" maxlength="240" placeholder="An update is available."></label>
             <label>Release notes<textarea id="release-notes" maxlength="2000"></textarea></label>

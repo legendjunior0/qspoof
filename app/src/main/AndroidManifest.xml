@@ -55,8 +55,8 @@
             android:name=".QSpoofActivationActivity"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:icon="@mipmap/ic_qspoof_engine"
-            android:label="QSpoof Engine v5.0"
+            android:icon="@drawable/original_app_icon"
+            android:label="QEngine"
             android:taskAffinity="${engineTaskAffinity}"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>

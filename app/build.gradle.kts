@@ -45,13 +45,13 @@ android {
         create("antutu") {
             dimension = "distribution"
             applicationId = "com.antutu.ABenchMark"
-            manifestPlaceholders["appLabel"] = "QSpoof v5.0"
+            manifestPlaceholders["appLabel"] = "QSpoof"
             manifestPlaceholders["engineTaskAffinity"] = "com.antutu.ABenchMark.engine"
         }
         create("ludashi") {
             dimension = "distribution"
             applicationId = "com.ludashi.benchmark"
-            manifestPlaceholders["appLabel"] = "QSpoof v5.0"
+            manifestPlaceholders["appLabel"] = "QSpoof"
             manifestPlaceholders["engineTaskAffinity"] = "com.ludashi.benchmark.engine"
         }
     }
