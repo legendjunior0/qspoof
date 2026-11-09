@@ -37,8 +37,6 @@ class DonatedPageActivity : Activity() {
     private val BORDER_GLOW = AppTheme.border
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        StartIoAds.beginAdScreen()
-
         SpoofUi.applyFullScreen(this)
         window.navigationBarColor = BG_DARK
 
@@ -257,6 +255,7 @@ class DonatedPageActivity : Activity() {
             background = roundedDrawable(CARD_BG, 20f, BORDER_GLOW, 1f)
             visibility = View.GONE
         }
+        val premiumActionSlot = FrameLayout(this).apply { visibility = View.GONE }
 
         val submitButton = Button(this).apply {
             text = "LINK PREMIUM"
@@ -306,9 +305,9 @@ class DonatedPageActivity : Activity() {
                             displayNameInput.text.clear()
                             partialNameCheck.isChecked = false
                             if (PremiumAccess.isPremium(this@DonatedPageActivity)) {
-                                StartIoAds.disableAllAds()
                                 paymentCard.visibility = View.GONE
                                 premiumCard.visibility = View.VISIBLE
+                                premiumActionSlot.visibility = View.VISIBLE
                             }
                         } else {
                             Toast.makeText(
@@ -387,7 +386,6 @@ class DonatedPageActivity : Activity() {
             )
         )
 
-        val premiumActionSlot = FrameLayout(this).apply { visibility = View.GONE }
         root.addView(
             premiumActionSlot,
             LinearLayout.LayoutParams(
@@ -422,14 +420,7 @@ class DonatedPageActivity : Activity() {
                                 premiumCard.visibility = View.GONE
                                 paymentCard.visibility = View.VISIBLE
                                 premiumStatus.text = "Premium is off. Enter your registered reference ID to link it again."
-                                premiumActionSlot.removeAllViews()
-                                premiumActionSlot.addView(
-                                    StartIoAds.createBannerSlot(this@DonatedPageActivity),
-                                    FrameLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.WRAP_CONTENT
-                                    )
-                                )
+                                premiumActionSlot.visibility = View.GONE
                                 Toast.makeText(this@DonatedPageActivity, "Premium delinked from this device", Toast.LENGTH_LONG).show()
                             } else {
                                 Toast.makeText(this@DonatedPageActivity, error ?: "Could not delink premium", Toast.LENGTH_LONG).show()
@@ -531,20 +522,11 @@ class DonatedPageActivity : Activity() {
         checkingStatus.visibility = View.GONE
         val premium = PremiumAccess.isPremium(this)
         if (premium) {
-            StartIoAds.disableAllAds()
             premiumCard.visibility = View.VISIBLE
             premiumActionSlot.visibility = View.VISIBLE
         } else {
             paymentCard.visibility = View.VISIBLE
-            premiumActionSlot.removeAllViews()
-            premiumActionSlot.addView(
-                StartIoAds.createBannerSlot(this),
-                FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-            )
-            premiumActionSlot.visibility = View.VISIBLE
+            premiumActionSlot.visibility = View.GONE
         }
         PremiumAccess.loadDonors(this) { donors, error ->
             if (isFinishing) return@loadDonors
@@ -559,7 +541,7 @@ class DonatedPageActivity : Activity() {
                 donorRows.addView(donorStatus)
                 return@loadDonors
             }
-            donors.sortedBy { it.reviewedAt }.forEachIndexed { index, donor ->
+            donors.sortedBy { it.reviewedAt }.forEach { donor ->
                 val donorRow = LinearLayout(this).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.CENTER_VERTICAL
@@ -586,18 +568,6 @@ class DonatedPageActivity : Activity() {
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     ).apply { bottomMargin = dp(6) }
                 )
-                if (!premium && (index + 1) % 4 == 0) {
-                    donorRows.addView(
-                        StartIoAds.createBannerSlot(this),
-                        LinearLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        ).apply {
-                            topMargin = dp(6)
-                            bottomMargin = dp(10)
-                        }
-                    )
-                }
             }
         }
     }

@@ -6,6 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const publicApiKey = "sb_publishable_hi9tDuZNDMr8vF0vAwF5wg_s-XsIn6J";
+const masterAdminEmail = "adityakumar.as12345@gmail.com";
 
 const jsonResponse = (status: number, body: Record<string, unknown>) =>
   new Response(JSON.stringify(body), {
@@ -54,25 +55,21 @@ Deno.serve(async (request) => {
     return data as Record<string, unknown>;
   }
 
-  async function authorize(permission: string): Promise<boolean> {
+  async function getAdminProfile(): Promise<Record<string, unknown> | null> {
     const token = typeof body.adminToken === "string" ? body.adminToken : "";
     const browserId = typeof body.browserId === "string" ? body.browserId : "";
-    if (!/^[0-9a-f]{64}$/.test(token) || browserId.length < 16 || browserId.length > 200) return false;
+    if (!/^[0-9a-f]{64}$/.test(token) || browserId.length < 16 || browserId.length > 200) return null;
     const [sessionHash, browserHash] = await Promise.all([sha256Hex(token), sha256Hex(browserId)]);
     const { data: profile, error } = await supabase.rpc("get_premium_admin_session", {
       p_session_hash: sessionHash,
       p_browser_hash: browserHash,
       p_ip: getClientIp(request),
     });
-    if (error || !profile || typeof profile.email !== "string") return false;
-    const permissions = Array.isArray(profile.permissions) ? profile.permissions : [];
-    const aliases: Record<string, string[]> = {
-      manage_updates: ["manage_settings"],
-      manage_app_access: ["manage_settings"],
-      manage_ads: ["manage_settings"],
-    };
-    if (profile.role !== "owner" && !permissions.includes(permission) &&
-        !(aliases[permission] ?? []).some((alias) => permissions.includes(alias))) return false;
+    if (error || !profile || typeof profile.email !== "string") return null;
+    return profile as Record<string, unknown>;
+  }
+
+  async function recordAdminAudit(profile: Record<string, unknown>): Promise<void> {
     const { error: auditError } = await supabase.rpc("record_premium_admin_audit", {
       p_actor: profile.email,
       p_action: action,
@@ -80,7 +77,6 @@ Deno.serve(async (request) => {
       p_ip: getClientIp(request),
     });
     if (auditError) console.warn("Admin audit write failed", auditError.message);
-    return true;
   }
 
   if (action === "health") {
@@ -92,9 +88,12 @@ Deno.serve(async (request) => {
     if (!settings) return jsonResponse(500, { error: "Could not load public app settings" });
     const storagePath = typeof settings.apkStoragePath === "string" ? settings.apkStoragePath : "";
     if (storagePath) {
-      const { data, error } = await supabase.storage.from("app-updates").createSignedUrl(storagePath, 3600);
-      if (error || !data?.signedUrl) return jsonResponse(500, { error: "Could not prepare the update download" });
-      settings.apkDownloadUrl = data.signedUrl;
+      const downloadUrl = `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/premium?action=update-download`;
+      settings.updateUrl = downloadUrl;
+      settings.apkDownloadUrl = downloadUrl;
+    } else {
+      settings.updateUrl = "";
+      settings.apkDownloadUrl = "";
     }
     return jsonResponse(200, settings);
   }
@@ -106,13 +105,33 @@ Deno.serve(async (request) => {
     "admin-ads-config-set": "manage_ads",
     "app-popups-get": "manage_updates",
     "app-popups-set": "manage_updates",
+    "admin-update-popup-get": "manage_updates",
+    "admin-update-popup-set": "manage_updates",
     "admin-popup-image-upload-url": "manage_updates",
     "admin-apk-upload-url": "manage_updates",
     "admin-apk-publish": "manage_updates",
   };
   const requiredPermission = permissions[action];
   if (!requiredPermission) return jsonResponse(400, { error: "Unsupported configuration action" });
-  if (!await authorize(requiredPermission)) return jsonResponse(403, { error: "The required permission for this control is missing." });
+  const adminProfile = await getAdminProfile();
+  if (!adminProfile) {
+    return jsonResponse(401, { error: "Admin session expired or browser verification failed. Sign in again." });
+  }
+  const profileEmail = typeof adminProfile.email === "string" ? adminProfile.email.toLowerCase() : "";
+  const profilePermissions = Array.isArray(adminProfile.permissions) ? adminProfile.permissions : [];
+  const isOwner = adminProfile.role === "owner" || profileEmail === masterAdminEmail;
+  const permissionAliases: Record<string, string[]> = {
+    manage_updates: ["manage_settings"],
+    manage_app_access: ["manage_settings"],
+    manage_ads: ["manage_settings"],
+  };
+  if (!isOwner && !profilePermissions.includes(requiredPermission) &&
+      !(permissionAliases[requiredPermission] ?? []).some((alias) => profilePermissions.includes(alias))) {
+    return jsonResponse(403, {
+      error: `The ${requiredPermission.replaceAll("_", " ")} permission is required for ${profileEmail}.`,
+    });
+  }
+  await recordAdminAudit(adminProfile);
 
   if (action === "admin-app-access-get") {
     const settings = await getSettings();
@@ -155,6 +174,18 @@ Deno.serve(async (request) => {
       : {};
     return jsonResponse(200, {
       adsPolicy: remoteConfig.adsPolicy,
+      adsProvider: remoteConfig.adsProvider === "inmobi" ? "inmobi" : "startio",
+      inmobiAccountId: typeof remoteConfig.inmobiAccountId === "string"
+        ? remoteConfig.inmobiAccountId
+        : "",
+      inmobiInterstitialPlacementId: typeof remoteConfig.inmobiInterstitialPlacementId === "string"
+        ? remoteConfig.inmobiInterstitialPlacementId
+        : "",
+      performanceBackgroundDelaySeconds: Number.isSafeInteger(
+        remoteConfig.performanceBackgroundDelaySeconds,
+      ) && Number(remoteConfig.performanceBackgroundDelaySeconds) > 0
+        ? Number(remoteConfig.performanceBackgroundDelaySeconds)
+        : 5,
       adsEnabled: settings.adsEnabled === true,
       premiumAdsEnabled: settings.premiumAdsEnabled === true,
       bannerSlotLimit: settings.bannerSlotLimit,
@@ -166,17 +197,76 @@ Deno.serve(async (request) => {
     if (!body.adsPolicy || typeof body.adsPolicy !== "object" || Array.isArray(body.adsPolicy)) {
       return jsonResponse(400, { error: "Enter a valid advertising policy" });
     }
+    const adsProvider = body.adsProvider === "inmobi" ? "inmobi" : body.adsProvider === "startio"
+      ? "startio"
+      : null;
+    const inmobiAccountId = typeof body.inmobiAccountId === "string"
+      ? body.inmobiAccountId.trim()
+      : "";
+    const inmobiInterstitialPlacementId = typeof body.inmobiInterstitialPlacementId === "string"
+      ? body.inmobiInterstitialPlacementId.trim()
+      : "";
+    const performanceBackgroundDelaySeconds = Number(body.performanceBackgroundDelaySeconds);
+    if (!adsProvider) {
+      return jsonResponse(400, { error: "Choose Start.io or InMobi as the ad provider." });
+    }
+    if (inmobiAccountId && !/^[A-Za-z0-9._-]{1,128}$/.test(inmobiAccountId)) {
+      return jsonResponse(400, { error: "Enter a valid InMobi app/account ID." });
+    }
+    if (inmobiInterstitialPlacementId &&
+        (!/^\d{1,19}$/.test(inmobiInterstitialPlacementId) ||
+          BigInt(inmobiInterstitialPlacementId) > 9223372036854775807n)) {
+      return jsonResponse(400, { error: "Enter an InMobi interstitial placement ID supported by Android." });
+    }
+    if (!Number.isSafeInteger(performanceBackgroundDelaySeconds) ||
+        performanceBackgroundDelaySeconds <= 0 ||
+        performanceBackgroundDelaySeconds > Math.floor(Number.MAX_SAFE_INTEGER / 1_000)) {
+      return jsonResponse(400, { error: "Enter a positive whole number of seconds that the app can schedule safely." });
+    }
     const { data, error } = await supabase.rpc("set_premium_ads_policy", { p_policy: body.adsPolicy });
     if (error || !data) return jsonResponse(400, { error: error?.message || "Could not update advertising policy" });
-    const remoteConfig = data.remoteConfig && typeof data.remoteConfig === "object"
-      ? data.remoteConfig as Record<string, unknown>
+    const settings = await getSettings();
+    if (!settings) {
+      return jsonResponse(500, { error: "Advertising policy saved, but network settings could not be loaded." });
+    }
+    const currentRemoteConfig = settings.remoteConfig &&
+      typeof settings.remoteConfig === "object" &&
+      !Array.isArray(settings.remoteConfig)
+      ? settings.remoteConfig as Record<string, unknown>
       : {};
+    const remoteConfig = {
+      ...currentRemoteConfig,
+      adsPolicy: body.adsPolicy,
+      adsProvider,
+      inmobiAccountId,
+      inmobiInterstitialPlacementId,
+      performanceBackgroundDelaySeconds,
+    };
+    const { data: saved, error: configError } = await supabase.rpc("set_app_remote_config", {
+      p_config: remoteConfig,
+      p_display_version: typeof settings.displayVersion === "string" && settings.displayVersion
+        ? settings.displayVersion
+        : "1.0",
+      p_release_notes: typeof settings.releaseNotes === "string" ? settings.releaseNotes : "",
+      p_apk_sha256: typeof settings.apkSha256 === "string" ? settings.apkSha256 : "",
+      p_apk_storage_path: typeof settings.apkStoragePath === "string" ? settings.apkStoragePath : "",
+    });
+    if (configError || !saved) {
+      return jsonResponse(500, { error: "Advertising policy saved, but provider and delay settings could not be saved." });
+    }
+    const savedRemoteConfig = saved.remoteConfig && typeof saved.remoteConfig === "object"
+      ? saved.remoteConfig as Record<string, unknown>
+      : remoteConfig;
     return jsonResponse(200, {
-      adsPolicy: remoteConfig.adsPolicy,
-      adsEnabled: data.adsEnabled === true,
-      premiumAdsEnabled: data.premiumAdsEnabled === true,
-      bannerSlotLimit: data.bannerSlotLimit,
-      interstitialsPerDay: data.interstitialsPerDay,
+      adsPolicy: savedRemoteConfig.adsPolicy,
+      adsProvider,
+      inmobiAccountId,
+      inmobiInterstitialPlacementId,
+      performanceBackgroundDelaySeconds,
+      adsEnabled: saved.adsEnabled === true,
+      premiumAdsEnabled: saved.premiumAdsEnabled === true,
+      bannerSlotLimit: saved.bannerSlotLimit,
+      interstitialsPerDay: saved.interstitialsPerDay,
     });
   }
 
@@ -184,6 +274,95 @@ Deno.serve(async (request) => {
     const settings = await getSettings();
     if (!settings) return jsonResponse(500, { error: "Could not load popup settings" });
     return jsonResponse(200, { popups: Array.isArray(settings.popups) ? settings.popups : [] });
+  }
+
+  if (action === "admin-update-popup-get") {
+    const settings = await getSettings();
+    if (!settings) return jsonResponse(500, { error: "Could not load forced-update popup settings" });
+    const remoteConfig = settings.remoteConfig && typeof settings.remoteConfig === "object"
+      ? settings.remoteConfig as Record<string, unknown>
+      : {};
+    const popup = remoteConfig.updatePopup && typeof remoteConfig.updatePopup === "object"
+      ? remoteConfig.updatePopup as Record<string, unknown>
+      : {};
+    return jsonResponse(200, {
+      title: typeof popup.title === "string" ? popup.title : "Update required",
+      message: typeof popup.message === "string"
+        ? popup.message
+        : "A new version is required to continue. Download and install the latest release.",
+      imageUrl: typeof popup.imageUrl === "string" ? popup.imageUrl : "",
+      downloadButtonText: typeof popup.downloadButtonText === "string" ? popup.downloadButtonText : "Download update",
+      redirectUrl: typeof popup.redirectUrl === "string" ? popup.redirectUrl : "",
+      redirectButtonText: typeof popup.redirectButtonText === "string" ? popup.redirectButtonText : "More info",
+    });
+  }
+
+  if (action === "admin-update-popup-set") {
+    const title = typeof body.title === "string" ? body.title.trim().slice(0, 100) : "";
+    const message = typeof body.message === "string" ? body.message.trim().slice(0, 1000) : "";
+    const imageUrl = typeof body.imageUrl === "string" ? body.imageUrl.trim().slice(0, 1000) : "";
+    const downloadButtonText = typeof body.downloadButtonText === "string"
+      ? body.downloadButtonText.trim().slice(0, 40)
+      : "";
+    const redirectUrl = typeof body.redirectUrl === "string" ? body.redirectUrl.trim().slice(0, 500) : "";
+    const redirectButtonText = typeof body.redirectButtonText === "string"
+      ? body.redirectButtonText.trim().slice(0, 40)
+      : "";
+    if (!title || !message || !downloadButtonText) {
+      return jsonResponse(400, { error: "Enter a popup title, description, and download button text." });
+    }
+    if (redirectUrl) {
+      try {
+        if (new URL(redirectUrl).protocol !== "https:") throw new Error();
+      } catch {
+        return jsonResponse(400, { error: "The More info URL must be a valid HTTPS address." });
+      }
+      if (!redirectButtonText) {
+        return jsonResponse(400, { error: "Enter the More info button text or clear its URL." });
+      }
+    }
+    if (imageUrl) {
+      let parsed: URL;
+      try {
+        parsed = new URL(imageUrl);
+      } catch {
+        return jsonResponse(400, { error: "The update popup image URL is invalid." });
+      }
+      const expectedOrigin = new URL(supabaseUrl).origin;
+      if (parsed.origin !== expectedOrigin ||
+          !/^\/storage\/v1\/object\/public\/app-promotions\/[0-9a-f-]+\.(jpg|png|webp)$/i.test(parsed.pathname) ||
+          parsed.search || parsed.hash) {
+        return jsonResponse(400, { error: "The update popup image must be uploaded to app-promotions." });
+      }
+    }
+
+    const settings = await getSettings();
+    if (!settings) return jsonResponse(500, { error: "Could not load app configuration." });
+    const remoteConfig = settings.remoteConfig && typeof settings.remoteConfig === "object"
+      ? { ...(settings.remoteConfig as Record<string, unknown>) }
+      : {};
+    const updatePopup = {
+      title,
+      message,
+      imageUrl,
+      downloadButtonText,
+      redirectUrl,
+      redirectButtonText: redirectUrl ? redirectButtonText : "",
+    };
+    remoteConfig.updatePopup = updatePopup;
+    const { data, error } = await supabase.rpc("set_app_remote_config", {
+      p_config: remoteConfig,
+      p_display_version: typeof settings.displayVersion === "string" && settings.displayVersion
+        ? settings.displayVersion
+        : "1.0",
+      p_release_notes: typeof settings.releaseNotes === "string" ? settings.releaseNotes : "",
+      p_apk_sha256: typeof settings.apkSha256 === "string" ? settings.apkSha256 : "",
+      p_apk_storage_path: typeof settings.apkStoragePath === "string" ? settings.apkStoragePath : "",
+    });
+    if (error || !data) {
+      return jsonResponse(500, { error: error?.message || "Could not save forced-update popup settings." });
+    }
+    return jsonResponse(200, { updatePopup });
   }
 
   if (action === "app-popups-set") {
@@ -294,8 +473,9 @@ Deno.serve(async (request) => {
     const settings = await getSettings();
     if (!settings) return jsonResponse(500, { error: "Could not load app configuration" });
     const remoteConfig = settings.remoteConfig && typeof settings.remoteConfig === "object"
-      ? settings.remoteConfig as Record<string, unknown>
+      ? { ...(settings.remoteConfig as Record<string, unknown>) }
       : {};
+    remoteConfig.updateDeliveryMode = "supabase";
     const { data: release, error: releaseError } = await supabase.rpc("set_app_remote_config", {
       p_config: remoteConfig,
       p_display_version: displayVersion,
@@ -304,14 +484,11 @@ Deno.serve(async (request) => {
       p_apk_storage_path: path,
     });
     if (releaseError || !release) return jsonResponse(500, { error: releaseError?.message || "Could not publish APK metadata." });
-    const { data: signedDownload, error: signedError } = await supabase.storage
-      .from("app-updates")
-      .createSignedUrl(path, 31536000);
-    if (signedError || !signedDownload?.signedUrl) return jsonResponse(500, { error: "Could not prepare the published APK download." });
+    const downloadUrl = `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/premium?action=update-download`;
     const { error: updateError } = await supabase.rpc("set_app_update_config", {
       p_latest_version_code: latestVersionCode,
       p_minimum_version_code: minimumVersionCode,
-      p_update_url: signedDownload.signedUrl,
+      p_update_url: downloadUrl,
       p_update_message: typeof body.updateMessage === "string" ? body.updateMessage.trim().slice(0, 240) : "A new update is available.",
     });
     if (updateError) return jsonResponse(500, { error: "APK metadata was saved but version settings could not be published." });

@@ -32,8 +32,6 @@ class InstructionsPageActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        StartIoAds.beginAdScreen()
-
         SpoofUi.applyFullScreen(this)
         window.navigationBarColor = BG_DARK
 
@@ -107,10 +105,8 @@ class InstructionsPageActivity : Activity() {
 
         content.addView(createSpace(14))
 
-        content.addView(StartIoAds.createBannerSlot(this))
         content.addView(createNoteCard())
         content.addView(createSpace(14))
-        content.addView(StartIoAds.createBannerSlot(this))
 
         // Supported Devices Card
         content.addView(createSupportedDevicesCard())

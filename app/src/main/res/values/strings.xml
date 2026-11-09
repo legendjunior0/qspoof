@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Q Spoof</string>
+    <string name="app_name">QSpoof v5.0</string>
+    <string name="performance_service_channel_name">Performance Service</string>
+    <string name="performance_service_channel_description">Notification channel for the performance service</string>
+    <string name="performance_service_notification_title">Performance service active</string>
+    <string name="performance_service_notification_text">The performance overlay is running</string>
+    <string name="performance_service_stop_action">Stop</string>
 </resources>

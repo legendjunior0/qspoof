@@ -51,6 +51,7 @@ object PremiumAccess {
         val latestVersionCode: Int = 0,
         val updateRequired: Boolean = false,
         val updateUrl: String = "",
+        val updateFallbackUrl: String = "",
         val updateMessage: String = "An update is required to continue.",
         val channelUrl: String = "https://t.me/iqoo_neo10_channel",
         val groupUrl: String = "https://t.me/iqoo_neo10",
@@ -485,7 +486,9 @@ object PremiumAccess {
                 context.packageName,
                 android.content.pm.PackageManager.PackageInfoFlags.of(0L)
             ).longVersionCode.toInt()
-            val startupBody = (telemetry ?: JSONObject()).put("versionCode", versionCode)
+            val startupBody = (telemetry ?: JSONObject())
+                .put("versionCode", versionCode)
+                .put("packageId", context.packageName)
             val response = post("app-access", androidId, null, extraBody = startupBody)
             if (!response.has("premium") || !response.has("accessAllowed") || !response.has("adsEnabled")) {
                 throw IOException("Premium server returned incomplete app access status")
@@ -539,6 +542,7 @@ object PremiumAccess {
                 updateUrl = response.optString("updateUrl").ifBlank {
                     settings.optString("apkDownloadUrl").ifBlank { settings.optString("updateUrl") }
                 },
+                updateFallbackUrl = response.optString("updateFallbackUrl"),
                 updateMessage = response.optString(
                     "updateMessage",
                     settings.optString("updateMessage", "An update is required to continue.")
@@ -610,6 +614,7 @@ object PremiumAccess {
             latestVersionCode = cache.optInt("latestVersionCode", 0),
             updateRequired = cache.optBoolean("updateRequired"),
             updateUrl = cache.optString("updateUrl"),
+            updateFallbackUrl = cache.optString("updateFallbackUrl"),
             updateMessage = cache.optString("updateMessage", "An update is required to continue."),
             channelUrl = cache.optString("channelUrl", "https://t.me/iqoo_neo10_channel"),
             groupUrl = cache.optString("groupUrl", "https://t.me/iqoo_neo10"),
@@ -638,6 +643,7 @@ object PremiumAccess {
             .put("latestVersionCode", result.latestVersionCode.coerceAtLeast(0))
             .put("updateRequired", result.updateRequired)
             .put("updateUrl", result.updateUrl)
+            .put("updateFallbackUrl", result.updateFallbackUrl)
             .put("updateMessage", result.updateMessage)
             .put("channelUrl", result.channelUrl)
             .put("groupUrl", result.groupUrl)

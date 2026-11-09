@@ -50,13 +50,14 @@ input,select{background:#0b1420;border-color:#304257;color:#edf4fd;border-radius
 a{color:#8dc3ff}
 @media(max-width:900px){.workspace{grid-template-columns:1fr}.sidebar{min-height:0}.admin-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:620px){main{padding:25px 13px 58px}.topbar{padding:0 13px}.page-intro{margin-bottom:20px}.page-intro h1{font-size:30px}.sidebar{padding:10px}.admin-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-tabs button{min-height:41px;font-size:11px}.subpanel{padding:17px}.login-panel{padding:23px;margin:35px auto}}
+@media(max-width:1050px){.release-publish-grid{grid-template-columns:1fr}}
 </style>
 <script id="qspoof-navigation-refresh">
 document.addEventListener("DOMContentLoaded",()=>{
  const workspace=document.querySelector('#review-card');
  const tabs=[...document.querySelectorAll('.admin-tabs button')];
- const headings={pending:'Pending requests',active:'Active premium',premium:'Premium & advertising',analytics:'Usage analytics',devices:'Device inventory',supportedDevices:'Supported devices',updates:'App updates',links:'App links'};
- const ids={pending:'pending-tab',active:'active-tab',premium:'premium-tab',analytics:'analytics-tab',devices:'devices-tab',supportedDevices:'supported-devices-tab',updates:'updates-tab',links:'links-tab'};
+ const headings={pending:'Pending requests',active:'Active premium',premium:'Premium & advertising',analytics:'Usage analytics',devices:'Device inventory',supportedDevices:'Supported devices',updates:'App updates',popups:'Promotional popups',links:'App links'};
+ const ids={pending:'pending-tab',active:'active-tab',premium:'premium-tab',analytics:'analytics-tab',devices:'devices-tab',supportedDevices:'supported-devices-tab',updates:'updates-tab',popups:'popups-tab',links:'links-tab'};
  const observer=new MutationObserver(()=>{
    const visible=workspace&&!workspace.hidden;
    document.body.classList.toggle('qspoof-authenticated',!!visible);
@@ -165,6 +166,10 @@ input[type=checkbox]{width:16px;min-height:16px;padding:0}
 .metric{padding:12px 14px;border-radius:10px;box-shadow:none}
 .metric strong{font-size:21px}
 .analytics-summary{gap:8px;margin:12px 0}
+.version-cluster-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.version-cluster{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);text-align:left}
+.version-cluster strong{color:#e49a51}
+.version-cluster span{font-size:12px;color:var(--muted)}
 .analytics-topline{margin:12px 0;gap:12px}
 .usage-chart{height:250px;min-height:250px;border-radius:11px}
 .filter-panel{margin:12px 0;border-radius:10px}
@@ -609,6 +614,30 @@ input:focus,select:focus,textarea:focus{
   outline:none!important;
   box-shadow:0 0 0 2px rgba(217,119,36,.14)!important;
 }
+#update-popup-message{min-height:190px;resize:vertical}
+.release-publish-grid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:14px;align-items:start;margin:12px 0}
+.release-publish-grid>.subpanel{min-width:0;margin:0;height:100%;align-content:start}
+@media(max-width:1050px){.release-publish-grid{grid-template-columns:1fr}}
+.release-delivery-card,.release-popup-card{display:grid;gap:12px}
+.delivery-choice{display:grid;gap:9px;margin:0;padding:12px;border:1px solid var(--line);border-radius:11px}
+.delivery-choice legend{padding:0 6px;color:var(--muted);font-size:11px;font-weight:650}
+.delivery-choice label{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-size:12px;font-weight:650}
+.delivery-choice label span{display:grid;gap:3px}
+.delivery-choice small{color:var(--muted);font-size:10px;font-weight:450}
+.delivery-choice input{width:16px;min-height:16px;margin:2px 0 0;flex:0 0 16px}
+.release-publish-grid .form-grid{width:100%}
+.update-popup-description{display:grid;grid-column:1/-1;gap:6px;min-width:0;font-size:12px;font-weight:600}
+#update-popup-message{display:block;width:100%;min-height:190px;resize:vertical;font:inherit;line-height:1.55}
+.release-popup-card .popup-image-preview{min-height:0}
+.release-publish-grid .actions{display:flex;gap:9px;flex-wrap:wrap}
+.release-publish-grid .meta{margin:0}
+.release-source-status{min-height:18px}
+.update-popup-preview-dialog{width:min(440px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 36px);padding:0;overflow:auto;border:1px solid #493521;border-radius:18px;background:#17120d;color:var(--text);box-shadow:0 24px 80px #000b}
+.update-popup-preview-dialog::backdrop{background:#000b;backdrop-filter:blur(4px)}
+.update-popup-preview-content{display:grid;gap:12px;padding:20px}
+.update-popup-preview-content img{width:100%;max-height:190px;object-fit:cover;border-radius:12px}
+.update-popup-preview-content h2,.update-popup-preview-content p{margin:0}
+.update-popup-preview-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
 .warning{background:#090704!important;border-color:#4b391f!important;box-shadow:none!important}
 .ad-policy-preview,.admin-default-permission-note{background:#000!important;border-color:#29231d!important}
 .device-table th{color:#b8b8b8!important}
@@ -924,6 +953,7 @@ button:hover:not(:disabled){box-shadow:none!important}
         <div class="side-label side-gap">APP CONFIGURATION</div>
         <button id="supported-devices-tab" type="button"><span>▧</span> Supported devices</button>
         <button id="updates-tab" type="button"><span>↑</span> Updates</button>
+        <button id="popups-tab" type="button"><span>▣</span> Promotional popups</button>
         <button id="links-tab" type="button"><span>↗</span> App links</button>
       </nav><div class="sidebar-foot"><span class="secure-dot"></span> Private admin area</div></aside>
       <div class="content-area">
@@ -945,6 +975,27 @@ button:hover:not(:disabled){box-shadow:none!important}
                   <div><strong>Global advertising switch</strong><p class="meta">Emergency off switch. Turn this off to hide every ad for everyone.</p></div>
                   <label class="ad-switch"><input id="ads-global-enabled" type="checkbox"><span>Advertising enabled</span></label>
                 </div>
+                <section class="ad-audience-card">
+                  <div class="setting-head"><div><h4>Ad network and app behavior</h4><p class="meta">Choose the interstitial provider and configure the remote delay before the performance screen moves to the background.</p></div></div>
+                  <div class="ad-limit-grid">
+                    <label>Interstitial provider
+                      <select id="ads-provider">
+                        <option value="startio">Start.io</option>
+                        <option value="inmobi">InMobi (falls back to Start.io if unconfigured)</option>
+                      </select>
+                    </label>
+                    <label>InMobi account / app ID
+                      <input id="inmobi-account-id" type="text" maxlength="128" autocomplete="off" placeholder="Publisher app ID">
+                    </label>
+                    <label>InMobi interstitial placement ID
+                      <input id="inmobi-placement-id" type="text" inputmode="numeric" maxlength="19" autocomplete="off" placeholder="Numeric placement ID">
+                    </label>
+                    <label>Delay before app backgrounds (seconds)
+                      <input id="performance-background-delay-seconds" type="number" min="1" step="1" value="5" inputmode="numeric">
+                    </label>
+                  </div>
+                  <p class="meta">The delay changes only when the app UI moves to the background after starting the performance service; it does not stop that service. InMobi identifiers are SDK configuration values, not secret tokens. Live InMobi ads require valid publisher placements and consent configuration.</p>
+                </section>
                 <div class="ad-audience-grid">
                   <section class="ad-audience-card" aria-labelledby="ads-free-heading">
                     <div class="ad-audience-heading"><div><p class="eyebrow">AUDIENCE 01</p><h4 id="ads-free-heading">Free users</h4><p class="meta">Standard users without active premium.</p></div><label class="ad-switch"><input id="ads-free-enabled" type="checkbox"><span>Enabled</span></label></div>
@@ -1003,6 +1054,11 @@ button:hover:not(:disabled){box-shadow:none!important}
           <details id="analytics-filter-panel" class="filter-panel"><summary>Filters <span id="analytics-filter-count">All devices</span></summary><div class="device-filter-toolbar"><input id="device-search" type="search" placeholder="Search model, name, reference, email or version" aria-label="Search devices"><button id="clear-device-filters" class="secondary" type="button">Clear filters</button></div>
             <div class="analytics-filter-grid"><details class="filter-group"><summary>App version</summary><div id="analytics-version-options" class="checkbox-options"></div></details><details class="filter-group"><summary>Premium status</summary><div id="analytics-premium-options" class="checkbox-options"></div></details><details class="filter-group"><summary>RAM</summary><div id="analytics-ram-options" class="checkbox-options"></div></details><details class="filter-group"><summary>Storage</summary><div id="analytics-storage-options" class="checkbox-options"></div></details><details class="filter-group"><summary>Processor</summary><div id="analytics-cpu-options" class="checkbox-options"></div></details><details class="filter-group"><summary>Device model</summary><input id="analytics-model-search" class="filter-search" type="search" placeholder="Find a model"><div id="analytics-model-options" class="checkbox-options"></div></details></div>
           </details><div id="analytics-summary" class="analytics-summary" aria-live="polite"></div>
+          <section class="subpanel">
+            <h3>Registered devices by version</h3>
+            <p class="meta">Counts are grouped by Android build code using the existing device inventory. Select a version filter to inspect that group.</p>
+            <div id="version-cluster-list" class="version-cluster-list" aria-live="polite"></div>
+          </section>
           <section id="analytics-period-devices" class="subpanel"><h3 id="analytics-period-title">Select a chart bar</h3><p id="analytics-period-status" class="meta">Choose a period to inspect its devices.</p><div class="device-table-wrap"><table class="device-table"><thead><tr><th>Version</th><th>Device</th><th>RAM</th><th>Storage</th><th>Name</th><th>Reference ID</th><th>Gmail</th><th>Latest IP</th><th>Access</th></tr></thead><tbody id="analytics-period-list"></tbody></table></div></section>
         </section>
 
@@ -1012,7 +1068,93 @@ button:hover:not(:disabled){box-shadow:none!important}
         </section>
 
         <section id="supported-devices-management" hidden><div class="section-heading"><div><p class="eyebrow">COMPATIBILITY</p><h2>Supported hardware</h2><p class="card-copy">Maintain the device categories and hardware profiles used by the app setup guide.</p></div></div><div id="supported-device-categories"></div><div class="actions"><button id="add-supported-category" type="button">Add category</button><button id="save-supported-catalog" type="button">Save catalog</button></div><p id="supported-devices-status" class="meta settings-status" role="status" aria-live="polite"></p></section>
-        <section id="updates-management" hidden><div class="section-heading"><div><p class="eyebrow">RELEASE MANAGEMENT</p><h2>App updates</h2><p class="card-copy">Configure releases, upload one APK, and control in-app popups.</p></div></div><form id="updates-form" class="subpanel form-grid"><label>Latest version code<input id="latest-version-code" type="number" min="0" step="1" required></label><label>Minimum version code (0 = no forced update)<input id="minimum-version-code" type="number" min="0" step="1" required></label><label>Display version<input id="display-version" maxlength="32" placeholder="1.2"></label><label>Update destination (HTTPS)<input id="update-url" type="url" placeholder="Filled after APK upload" autocomplete="url"></label><label>Update message<input id="update-message" maxlength="240" placeholder="An update is available."></label><label>Release notes<textarea id="release-notes" maxlength="2000"></textarea></label><p class="meta">Current destination: <a id="current-update-link" target="_blank" rel="noopener noreferrer">Not configured</a></p><button type="submit">Save update settings</button></form><div class="subpanel form-grid"><h3>Upload APK release</h3><input id="apk-file" type="file" accept=".apk,application/vnd.android.package-archive"><button id="upload-apk-button" type="button">Upload and publish APK</button><p id="apk-upload-status" class="meta settings-status" role="status" aria-live="polite"></p></div><div class="subpanel form-grid"><h3>In-app popups</h3><p class="meta">Each enabled popup is shown at most its configured count per device.</p><div id="popup-list"></div><button id="add-popup-button" type="button" class="secondary">Add popup</button><button id="save-popups-button" type="button">Save popups</button><p id="popups-status" class="meta settings-status" role="status" aria-live="polite"></p></div><p id="updates-status" class="meta settings-status" role="status" aria-live="polite"></p></section>
+        <section id="updates-management" hidden>
+          <div class="section-heading"><div><p class="eyebrow">RELEASE MANAGEMENT</p><h2>App updates</h2><p class="card-copy">Publish APK releases, configure the latest-release popup, and set a separate minimum-version redirect.</p></div></div>
+          <form id="updates-form" class="subpanel form-grid">
+            <h3>Version policy</h3>
+            <p class="meta">The minimum-version switch can require v5.0 for both package variants or be turned off for testing older builds. Devices below an active minimum go straight to the required update flow.</p>
+            <label>Latest version code<input id="latest-version-code" type="number" min="0" step="1" required></label>
+            <label>Minimum version code (0 = no forced update)<input id="minimum-version-code" type="number" min="0" step="1" required></label>
+            <label class="toggle-row check-label"><input id="enforce-minimum-version" type="checkbox"> Enforce the latest version for both package variants</label>
+            <p class="meta">When enabled, older builds are blocked after their next successful access check. Turn it off to test older builds; the configured minimum version still applies.</p>
+            <label>Display version<input id="display-version" maxlength="32" placeholder="5.0"></label>
+            <label>Update message<input id="update-message" maxlength="240" placeholder="An update is available."></label>
+            <label>Release notes<textarea id="release-notes" maxlength="2000"></textarea></label>
+            <div class="actions"><button type="submit">Save release settings</button><span id="updates-status" class="meta settings-status" role="status" aria-live="polite"></span></div>
+          </form>
+          <div class="release-publish-grid">
+            <section class="subpanel release-delivery-card">
+              <div><h3>Release download</h3><p class="meta">The app downloads the APK from Supabase and retries from the external APK fallback if the download fails. After a download starts, the app opens the Telegram channel configured under Links.</p></div>
+              <div id="supabase-update-panel" class="form-grid">
+                <section class="subpanel">
+                  <h4>Antutu release · com.antutu.ABenchMark</h4>
+                  <label class="update-popup-description">Signed Antutu APK<input id="antutu-apk-file" type="file" accept=".apk,application/vnd.android.package-archive"></label>
+                  <label class="update-popup-description">Antutu external APK fallback (optional)<input id="antutu-fallback-url" type="url" placeholder="https://example.com/antutu.apk"></label>
+                  <button type="button" data-package-upload="com.antutu.ABenchMark">Upload and publish Antutu</button>
+                  <p class="meta" data-release-status="com.antutu.ABenchMark" role="status" aria-live="polite">No package-specific release shown.</p>
+                </section>
+                <section class="subpanel">
+                  <h4>Ludashi release · com.ludashi.benchmark</h4>
+                  <label class="update-popup-description">Signed Ludashi APK<input id="ludashi-apk-file" type="file" accept=".apk,application/vnd.android.package-archive"></label>
+                  <label class="update-popup-description">Ludashi external APK fallback (optional)<input id="ludashi-fallback-url" type="url" placeholder="https://example.com/ludashi.apk"></label>
+                  <button type="button" data-package-upload="com.ludashi.benchmark">Upload and publish Ludashi</button>
+                  <p class="meta" data-release-status="com.ludashi.benchmark" role="status" aria-live="polite">No package-specific release shown.</p>
+                </section>
+                <p class="meta">Each upload is published to its matching Android package only. The shared version-policy fields above apply when publishing either package.</p>
+              </div>
+              <label class="update-popup-description">Legacy external APK fallback (optional)<input id="update-fallback-url" type="url" placeholder="https://example.com/qspoof.apk" autocomplete="url"></label>
+              <p class="meta">Per-package fallbacks above are preferred. This legacy fallback is used by older app versions and by package releases without a package-specific fallback. It must be a direct HTTPS APK URL.</p>
+              <p class="meta">Current external fallback: <a id="current-update-fallback-link" target="_blank" rel="noopener noreferrer">Not configured</a></p>
+              <label class="update-popup-description">After-download redirect (Telegram or promotion link)<input id="update-redirect-url" type="url" placeholder="https://t.me/your_channel" autocomplete="url" required></label>
+              <p class="meta">This is separate from the APK fallback. The app opens this destination after an update download starts. It is also the Telegram channel link shown under App links.</p>
+              <p class="meta">Current redirect: <a id="current-update-redirect-link" target="_blank" rel="noopener noreferrer">Not configured</a></p>
+              <label class="update-popup-description">Total project monthly bandwidth (GB)<input id="update-bandwidth-budget-gb" type="number" min="1" max="10000" step="0.1" value="10"></label>
+              <p class="meta">The app reserves 40% of this configured budget for APK downloads. Update this value if your Supabase plan quota changes; other project traffic is not included in this download counter.</p>
+              <p id="update-bandwidth-usage" class="meta" role="status" aria-live="polite">APK bandwidth usage is loading.</p>
+              <p class="meta">Primary Supabase APK: <a id="current-update-link" target="_blank" rel="noopener noreferrer">Not configured</a></p>
+              <p id="apk-upload-status" class="meta settings-status release-source-status" role="status" aria-live="polite"></p>
+            </section>
+            <section class="subpanel release-popup-card">
+              <div><h3>Latest-release popup</h3><p class="meta">This dismissible popup appears once when a newer release is available and the installed version meets the minimum. Older blocked versions skip it and go directly to the selected destination.</p></div>
+              <label class="update-popup-description">Popup image (compressed before upload)<input id="update-popup-image" type="file" accept="image/jpeg,image/png,image/webp"><span id="update-popup-image-status" class="meta settings-status" role="status" aria-live="polite"></span></label>
+              <div id="update-popup-image-preview" class="popup-image-preview"></div>
+              <label class="update-popup-description">Title<input id="update-popup-title" maxlength="100" value="Update available"></label>
+              <label class="update-popup-description">Description<textarea id="update-popup-message" rows="7" maxlength="1000">A newer version is available. Open the update link to get the latest release.</textarea></label>
+              <label class="update-popup-description">Update button text<input id="update-popup-download-text" maxlength="40" value="Download update"></label>
+              <div class="actions">
+                <button id="preview-update-popup-button" type="button" class="secondary">Preview popup</button>
+                <button id="save-update-popup-button" type="button">Save release popup</button>
+              </div>
+              <p id="update-popup-status" class="meta settings-status" role="status" aria-live="polite"></p>
+            </section>
+          </div>
+        </section>
+        <section id="popups-management" hidden>
+          <div class="section-heading"><div><p class="eyebrow">APP PROMOTIONS</p><h2>Promotional popups</h2><p class="card-copy">Configure optional, dismissible in-app cards separately from release updates.</p></div></div>
+          <div class="subpanel form-grid">
+            <p class="meta">Download starts an Android download notification; Open link takes the user to the HTTPS destination. Set display count and cooldown to control frequency.</p>
+            <div id="popup-list"></div>
+            <div class="actions">
+              <button id="add-popup-button" type="button" class="secondary">Add popup</button>
+              <button id="add-promo-preset-button" type="button" class="secondary">Add default promo preset</button>
+              <button id="save-popups-button" type="button">Save popups</button>
+            </div>
+            <p id="popups-status" class="meta settings-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+        <dialog id="update-popup-preview-dialog" class="update-popup-preview-dialog" aria-labelledby="update-popup-preview-title">
+          <div class="update-popup-preview-content">
+            <p class="eyebrow">LATEST RELEASE · PREVIEW</p>
+            <img id="update-popup-preview-image" alt="Latest release popup image preview" hidden>
+            <h2 id="update-popup-preview-title">Update available</h2>
+            <p id="update-popup-preview-message"></p>
+            <p class="meta">Shown for a newer release if the installed version meets the minimum. Preview only; the update button will not open a link.</p>
+            <div class="update-popup-preview-actions">
+              <button id="update-popup-preview-close" class="secondary" type="button">Later</button>
+              <button id="update-popup-preview-action" type="button">Download update</button>
+            </div>
+          </div>
+        </dialog>
         <section id="links-management" hidden><div class="section-heading"><div><p class="eyebrow">APP DESTINATIONS</p><h2>App links</h2><p class="card-copy">Manage the Telegram channel, discussion group and fallback links.</p></div></div><form id="links-form" class="subpanel form-grid"><label>Channel link<input id="channel-url" type="url" required></label><label>Discussion group link<input id="group-url" type="url" required></label><p class="meta">Current channel: <a id="current-channel-link" target="_blank" rel="noopener noreferrer">Not configured</a></p><p class="meta">Current group: <a id="current-group-link" target="_blank" rel="noopener noreferrer">Not configured</a></p><button type="submit">Save app links</button></form><p id="links-status" class="meta settings-status" role="status" aria-live="polite"></p></section>
 
         <section id="profile-management" class="profile-management-page" hidden>
@@ -1270,6 +1412,7 @@ button:hover:not(:disabled){box-shadow:none!important}
     const supportedDevicesTab = document.querySelector("#supported-devices-tab");
     const supportedDevicesManagement = document.querySelector("#supported-devices-management");
     const updatesTab = document.querySelector("#updates-tab");
+    const popupsTab = document.querySelector("#popups-tab");
     const linksTab = document.querySelector("#links-tab");
     const quickApproveForm = document.querySelector("#quick-approve-form");
     const quickApproveButton = document.querySelector("#quick-approve-button");
@@ -1302,6 +1445,10 @@ button:hover:not(:disabled){box-shadow:none!important}
     const clearDataButton = document.querySelector("#clear-data-button");
     const adsSettingsStatus = document.querySelector("#ads-settings-status");
     const saveAdsSettingsButton = document.querySelector("#save-ads-settings");
+    const adsProviderInput = document.querySelector("#ads-provider");
+    const inmobiAccountIdInput = document.querySelector("#inmobi-account-id");
+    const inmobiPlacementIdInput = document.querySelector("#inmobi-placement-id");
+    const performanceBackgroundDelayInput = document.querySelector("#performance-background-delay-seconds");
     const adsPolicyPreview = document.querySelector("#ads-policy-preview");
     const adPolicyInputs = {
       globalEnabled: document.querySelector("#ads-global-enabled"),
@@ -1342,6 +1489,7 @@ button:hover:not(:disabled){box-shadow:none!important}
     const analyticsManagement = document.querySelector("#analytics-management");
     const devicesManagement = document.querySelector("#devices-management");
     const updatesManagement = document.querySelector("#updates-management");
+    const popupsManagement = document.querySelector("#popups-management");
     const linksManagement = document.querySelector("#links-management");
     const analyticsAudienceOptions = document.querySelector("#analytics-audience-options");
     const analyticsVersionOptions = document.querySelector("#analytics-version-options");
@@ -1364,6 +1512,7 @@ button:hover:not(:disabled){box-shadow:none!important}
     const deviceFilterCount = document.querySelector("#device-filter-count");
     const deviceFilterResultCount = document.querySelector("#device-filter-result-count");
     const analyticsSummary = document.querySelector("#analytics-summary");
+    const versionClusterList = document.querySelector("#version-cluster-list");
     const usageChart = document.querySelector("#usage-chart");
     const dailyChartButton = document.querySelector("#daily-chart-button");
     const weeklyChartButton = document.querySelector("#weekly-chart-button");
@@ -1381,17 +1530,30 @@ button:hover:not(:disabled){box-shadow:none!important}
     const supportedDeviceCategories = document.querySelector("#supported-device-categories");
     const supportedDevicesStatus = document.querySelector("#supported-devices-status");
     const updatesForm = document.querySelector("#updates-form");
-    const uploadApkButton = document.querySelector("#upload-apk-button");
     const apkUploadStatus = document.querySelector("#apk-upload-status");
     const popupList = document.querySelector("#popup-list");
     const addPopupButton = document.querySelector("#add-popup-button");
+    const addPromoPresetButton = document.querySelector("#add-promo-preset-button");
     const savePopupsButton = document.querySelector("#save-popups-button");
     const popupsStatus = document.querySelector("#popups-status");
+    const updatePopupImageInput = document.querySelector("#update-popup-image");
+    const updatePopupImageStatus = document.querySelector("#update-popup-image-status");
+    const updatePopupImagePreview = document.querySelector("#update-popup-image-preview");
+    const updatePopupStatus = document.querySelector("#update-popup-status");
+    const saveUpdatePopupButton = document.querySelector("#save-update-popup-button");
+    const previewUpdatePopupButton = document.querySelector("#preview-update-popup-button");
+    const updatePopupPreviewDialog = document.querySelector("#update-popup-preview-dialog");
+    const updatePopupPreviewImage = document.querySelector("#update-popup-preview-image");
+    const supabaseUpdatePanel = document.querySelector("#supabase-update-panel");
     const linksForm = document.querySelector("#links-form");
     const updatesStatus = document.querySelector("#updates-status");
     const linksStatus = document.querySelector("#links-status");
     let adminCredentials = null;
     let adminProfile = null;
+    let updateDeliveryMode = "supabase";
+    let storedUpdateUrl = "";
+    let hostedApkAvailable = false;
+    let publishedPackageReleases = {};
     const defaultAdsPolicy = () => ({
       version: 1,
       globalEnabled: true,
@@ -1413,10 +1575,51 @@ button:hover:not(:disabled){box-shadow:none!important}
     let analyticsData = null;
     let devicePage = 0;
     let popupEntries = [];
+    let updatePopupImageUrl = "";
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, (character) => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
       }[character]));
+    }
+    async function compressPopupImage(file) {
+      if (!file.type.startsWith("image/")) throw new Error("Choose a valid image file.");
+      if (file.size > 32 * 1024 * 1024) throw new Error("Choose an image smaller than 32 MB.");
+      const bitmap = await createImageBitmap(file);
+      try {
+        const maxDimension = 1100;
+        let scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement("canvas");
+        let output;
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+          canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+          canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+          const context = canvas.getContext("2d", { alpha: false });
+          if (!context) throw new Error("This browser cannot process the image.");
+          context.fillStyle = "#fff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+          const quality = Math.max(0.42, 0.68 - attempt * 0.05);
+          output = await new Promise((resolve) =>
+            canvas.toBlob(resolve, "image/webp", quality));
+          if (!output) output = await new Promise((resolve) =>
+            canvas.toBlob(resolve, "image/jpeg", quality));
+          if (!output) throw new Error("The browser could not compress this image.");
+          if (output.size <= 700 * 1024) break;
+          scale *= 0.82;
+        }
+        if (output.size > 8 * 1024 * 1024) {
+          throw new Error("The compressed image is still too large. Try a smaller image.");
+        }
+        const extension = ({ "image/webp": "webp", "image/png": "png" }[output.type]) || "jpg";
+        const baseName = file.name.replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 80);
+        return {
+          blob: output,
+          contentType: output.type,
+          fileName: `${baseName || "popup-image"}.${extension}`,
+        };
+      } finally {
+        bitmap.close();
+      }
     }
     let selectedModels = new Set();
     let selectedInventoryModels = new Set();
@@ -1443,7 +1646,7 @@ button:hover:not(:disabled){box-shadow:none!important}
       saveAdsSettingsButton.disabled = busy;
       togglePremiumAccessButton.disabled = busy;
       saveAccessPolicyButton.disabled = busy;
-      [analyticsManagement, devicesManagement, updatesManagement, linksManagement, supportedDevicesManagement].forEach((section) => section.querySelectorAll("input, button").forEach((control) => {
+      [analyticsManagement, devicesManagement, updatesManagement, popupsManagement, linksManagement, supportedDevicesManagement].forEach((section) => section.querySelectorAll("input, button").forEach((control) => {
         control.disabled = busy;
       }));
       requests.querySelectorAll("button").forEach((button) => {
@@ -1464,6 +1667,8 @@ button:hover:not(:disabled){box-shadow:none!important}
         "app-popups-get",
         "app-popups-set",
         "admin-popup-image-upload-url",
+        "admin-update-popup-get",
+        "admin-update-popup-set",
         "admin-apk-upload-url",
         "admin-apk-publish",
       ]);
@@ -1530,6 +1735,12 @@ button:hover:not(:disabled){box-shadow:none!important}
       try {
         const data = await callPremium("admin-ads-get");
         adsPolicy = normalizeAdsPolicy(data.adsPolicy, data);
+        adsProviderInput.value = data.adsProvider === "inmobi" ? "inmobi" : "startio";
+        inmobiAccountIdInput.value = data.inmobiAccountId || "";
+        inmobiPlacementIdInput.value = data.inmobiInterstitialPlacementId || "";
+        performanceBackgroundDelayInput.value = String(
+          data.performanceBackgroundDelaySeconds || 5
+        );
         renderAdsSetting();
       } catch (error) {
         adsSettingsStatus.textContent = error.message;
@@ -1756,6 +1967,43 @@ button:hover:not(:disabled){box-shadow:none!important}
       }, selectedInventoryModels, inventorySearch);
     }
 
+    function renderVersionClusters() {
+      versionClusterList.replaceChildren();
+      const counts = new Map();
+      for (const device of analyticsData?.devices || []) {
+        const versionCode = Number(device.appVersionCode);
+        if (Number.isSafeInteger(versionCode) && versionCode > 0) {
+          counts.set(versionCode, (counts.get(versionCode) || 0) + 1);
+        }
+      }
+      if (!counts.size) {
+        const empty = document.createElement("p");
+        empty.className = "meta";
+        empty.textContent = "No versioned device records are available.";
+        versionClusterList.append(empty);
+        return;
+      }
+      for (const [versionCode, count] of [...counts].sort((a, b) => b[0] - a[0])) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "version-cluster";
+        button.setAttribute("aria-label", `Filter registered devices to build ${versionCode}`);
+        const version = document.createElement("strong");
+        version.textContent = versionCode === 13 ? "v5.0 · build 13" : `Build ${versionCode}`;
+        const devices = document.createElement("span");
+        devices.textContent = `${count} device${count === 1 ? "" : "s"}`;
+        button.append(version, devices);
+        button.addEventListener("click", () => {
+          const inputs = [...analyticsVersionOptions.querySelectorAll('input[type="checkbox"]')];
+          const alreadySelected = inputs.filter((input) => input.checked).map((input) => input.value);
+          const clearSelection = alreadySelected.length === 1 && alreadySelected[0] === String(versionCode);
+          inputs.forEach((input) => { input.checked = !clearSelection && input.value === String(versionCode); });
+          renderAnalytics();
+        });
+        versionClusterList.append(button);
+      }
+    }
+
     function renderPeriodDeviceRows(devices) {
       analyticsPeriodList.replaceChildren();
       const rows = selectedDevices(devices);
@@ -1875,6 +2123,7 @@ button:hover:not(:disabled){box-shadow:none!important}
         metricCard.append(number, copy);
         analyticsSummary.append(metricCard);
       });
+      renderVersionClusters();
 
       usageChart.replaceChildren();
       if (points.length === 0) {
@@ -1993,7 +2242,7 @@ button:hover:not(:disabled){box-shadow:none!important}
     }
 
     function prepareAdminView(tab) {
-      [pendingTab, activeTab, premiumTab, analyticsTab, devicesTab, supportedDevicesTab, updatesTab, linksTab].forEach((button) => {
+      [pendingTab, activeTab, premiumTab, analyticsTab, devicesTab, supportedDevicesTab, updatesTab, popupsTab, linksTab].forEach((button) => {
         button.setAttribute("aria-current", button === tab ? "page" : "false");
       });
       requests.hidden = true;
@@ -2005,6 +2254,7 @@ button:hover:not(:disabled){box-shadow:none!important}
       analyticsManagement.hidden = true;
       devicesManagement.hidden = true;
       updatesManagement.hidden = true;
+      popupsManagement.hidden = true;
       linksManagement.hidden = true;
       supportedDevicesManagement.hidden = true;
       profileManagement.hidden = true;
@@ -2618,6 +2868,25 @@ button:hover:not(:disabled){box-shadow:none!important}
 
     async function saveAdsConfig() {
       const requested = readAdsPolicyFromForm();
+      const delaySeconds = Number(performanceBackgroundDelayInput.value);
+      if (!Number.isSafeInteger(delaySeconds) || delaySeconds <= 0 ||
+          delaySeconds > Math.floor(Number.MAX_SAFE_INTEGER / 1000)) {
+        adsSettingsStatus.textContent = "Enter a positive whole number of seconds for the background delay.";
+        return;
+      }
+      if (inmobiAccountIdInput.value.trim() &&
+          !/^[A-Za-z0-9._-]{1,128}$/.test(inmobiAccountIdInput.value.trim())) {
+        adsSettingsStatus.textContent = "Enter a valid InMobi app/account ID.";
+        return;
+      }
+      const placementId = inmobiPlacementIdInput.value.trim();
+      if (placementId && (
+        !/^\d{1,19}$/.test(placementId) ||
+        BigInt(placementId) > 9223372036854775807n
+      )) {
+        adsSettingsStatus.textContent = "Enter a numeric InMobi placement ID supported by Android.";
+        return;
+      }
       for (const audience of ["free", "premium"]) {
         const limits = requested[audience].limits;
         if (!Number.isInteger(limits.bannerSlotsPerScreen) || limits.bannerSlotsPerScreen < 0 || limits.bannerSlotsPerScreen > 6 ||
@@ -2631,8 +2900,15 @@ button:hover:not(:disabled){box-shadow:none!important}
       setBusy(true);
       adsSettingsStatus.textContent = "Saving advertising policy…";
       try {
-        const saved = await callPremium("admin-ads-config-set", { adsPolicy: requested });
+        const saved = await callPremium("admin-ads-config-set", {
+          adsPolicy: requested,
+          adsProvider: adsProviderInput.value,
+          inmobiAccountId: inmobiAccountIdInput.value.trim(),
+          inmobiInterstitialPlacementId: inmobiPlacementIdInput.value.trim(),
+          performanceBackgroundDelaySeconds: delaySeconds,
+        });
         adsPolicy = normalizeAdsPolicy(saved.adsPolicy, saved);
+        performanceBackgroundDelayInput.value = String(saved.performanceBackgroundDelaySeconds || 5);
         renderAdsSetting();
         adsSettingsStatus.textContent += " Saved. Existing app sessions refresh these rules on their next policy check.";
       } catch (error) {
@@ -2697,26 +2973,68 @@ button:hover:not(:disabled){box-shadow:none!important}
     }
 
     async function loadReleaseSettings(section) {
-      const status = section === "updates" ? updatesStatus : linksStatus;
+      const status = section === "updates" ? updatesStatus : section === "popups" ? popupsStatus : linksStatus;
       status.textContent = "Loading settings…";
       try {
-        const data = await callPremium(`${section}-get`);
+        const action = section === "popups" ? "app-popups-get" : `${section}-get`;
+        const data = await callPremium(action);
         if (section === "updates") {
           document.querySelector("#latest-version-code").value = data.latestVersionCode ?? 0;
           document.querySelector("#minimum-version-code").value = data.minimumVersionCode ?? 0;
-          document.querySelector("#update-url").value = data.updateUrl || "";
+          document.querySelector("#enforce-minimum-version").checked =
+            data.enforceMinimumVersion === true;
+          publishedPackageReleases = data.packageReleases || {};
+          storedUpdateUrl = data.updateUrl || "";
+          hostedApkAvailable = Boolean(data.apkStoragePath);
+          updateDeliveryMode = "supabase";
+          document.querySelector("#update-fallback-url").value = data.updateFallbackUrl ||
+            data.remoteConfig?.updateFallbackUrl || "";
+          setLinkPreview("#current-update-fallback-link", data.updateFallbackUrl ||
+            data.remoteConfig?.updateFallbackUrl || "");
+          document.querySelector("#update-redirect-url").value = data.channelUrl || "";
+          setLinkPreview("#current-update-redirect-link", data.channelUrl || "");
+          document.querySelector("#update-bandwidth-budget-gb").value =
+            data.monthlyBandwidthLimitGb ?? data.remoteConfig?.monthlyBandwidthLimitGb ?? 10;
+          const monthlyBandwidthLimitGb = Number(
+            data.monthlyBandwidthLimitGb ?? data.remoteConfig?.monthlyBandwidthLimitGb ?? 10
+          );
+          const updateBudgetGb = monthlyBandwidthLimitGb * 0.4;
+          const usedGb = (Number(data.updateBandwidthReservedBytes) || 0) / 1_000_000_000;
+          document.querySelector("#update-bandwidth-usage").textContent =
+            `This month: ${usedGb.toFixed(2)} GB reserved of ${updateBudgetGb.toFixed(2)} GB for APK downloads (40% of ${monthlyBandwidthLimitGb} GB).`;
+          applyUpdateDeliveryMode(updateDeliveryMode);
           document.querySelector("#update-message").value = data.updateMessage || "";
           document.querySelector("#display-version").value = data.displayVersion || "";
           document.querySelector("#release-notes").value = data.releaseNotes || "";
           setLinkPreview("#current-update-link", data.updateUrl || "");
+          for (const [packageId, packageName] of [
+            ["com.antutu.ABenchMark", "Antutu"],
+            ["com.ludashi.benchmark", "Ludashi"],
+          ]) {
+            const release = data.packageReleases?.[packageId];
+            const packageStatus = document.querySelector(`[data-release-status="${packageId}"]`);
+            if (release?.apkStoragePath) {
+              packageStatus.textContent =
+                `${packageName} published: version ${release.latestVersionCode ?? "unknown"}.`;
+            } else {
+              packageStatus.textContent = `${packageName}: no package-specific APK published.`;
+            }
+            document.querySelector(
+              packageId === "com.antutu.ABenchMark" ? "#antutu-fallback-url" : "#ludashi-fallback-url"
+            ).value = release?.updateFallbackUrl || "";
+          }
           status.textContent = `Latest ${data.latestVersionCode || 0}; minimum ${data.minimumVersionCode || 0}.`;
-          await loadPopups();
-        } else {
+          await loadUpdatePopup();
+        } else if (section === "links") {
           document.querySelector("#channel-url").value = data.channelUrl || "";
           document.querySelector("#group-url").value = data.groupUrl || "";
           setLinkPreview("#current-channel-link", data.channelUrl || "");
           setLinkPreview("#current-group-link", data.groupUrl || "");
           status.textContent = "App links loaded.";
+        } else {
+          popupEntries = Array.isArray(data.popups) ? data.popups : [];
+          renderPopups();
+          status.textContent = "Promotional popups loaded.";
         }
 
         function renderPopups() {
@@ -2730,11 +3048,12 @@ button:hover:not(:disabled){box-shadow:none!important}
               <label>Button text<input data-popup-field="buttonText" maxlength="40" value="${escapeHtml(popup.buttonText || "")}" placeholder="Learn More"></label>
               <label>Button action<select data-popup-field="buttonMode"><option value="link" ${popup.buttonMode !== "download" ? "selected" : ""}>Open link</option><option value="download" ${popup.buttonMode === "download" ? "selected" : ""}>Download file</option></select></label>
               <label>HTTPS destination (optional)<input data-popup-field="link" maxlength="500" value="${escapeHtml(popup.link || "")}"></label>
-              <label>Popup image (JPG, PNG or WebP; up to 8 MB)<input data-popup-image-upload type="file" accept="image/jpeg,image/png,image/webp"><span data-popup-upload-status class="meta settings-status" role="status" aria-live="polite"></span></label>
+              <label>Popup image (automatically compressed)<input data-popup-image-upload type="file" accept="image/jpeg,image/png,image/webp"><span data-popup-upload-status class="meta settings-status" role="status" aria-live="polite"></span></label>
               <div data-popup-preview class="popup-image-preview"></div>
               <label><input data-popup-field="dismissible" type="checkbox" ${popup.dismissible !== false ? "checked" : ""}> Allow “Remind later”</label>
               <label>Maximum displays per device<input data-popup-field="maxDisplays" type="number" min="1" max="100" value="${popup.maxDisplays || 1}"></label>
               <label>Cooldown hours<input data-popup-field="cooldownHours" type="number" min="0" max="720" value="${popup.cooldownHours || 0}"></label>
+              <p class="meta">Open link opens the HTTPS destination. Download file starts an Android download and notification; the user taps the notification and confirms installation. Promotional downloads do not install automatically.</p>
               <button type="button" class="danger" data-remove-popup="${index}">Remove popup</button>`;
             const preview = row.querySelector("[data-popup-preview]");
             if (typeof popup.imageUrl === "string" && popup.imageUrl.startsWith("https://")) {
@@ -2753,17 +3072,19 @@ button:hover:not(:disabled){box-shadow:none!important}
               const file = event.target.files[0];
               if (!file) return;
               const status = row.querySelector("[data-popup-upload-status]");
-              status.textContent = "Uploading image…";
+              status.textContent = "Compressing image…";
               try {
+                const compressed = await compressPopupImage(file);
+                status.textContent = `Uploading compressed image (${Math.ceil(compressed.blob.size / 1024)} KB)…`;
                 const upload = await callPremium("admin-popup-image-upload-url", {
-                  fileName: file.name,
-                  fileSize: file.size,
-                  contentType: file.type,
+                  fileName: compressed.fileName,
+                  fileSize: compressed.blob.size,
+                  contentType: compressed.contentType,
                 });
                 const uploaded = await fetch(upload.signedUrl, {
                   method: "PUT",
-                  headers: { "content-type": file.type },
-                  body: file,
+                  headers: { "content-type": compressed.contentType },
+                  body: compressed.blob,
                 });
                 if (!uploaded.ok) throw new Error("Image upload failed.");
                 popup.imageUrl = upload.publicUrl;
@@ -2780,46 +3101,115 @@ button:hover:not(:disabled){box-shadow:none!important}
           });
         }
 
-        async function loadPopups() {
-          try {
-            const data = await callPremium("app-popups-get");
-            popupEntries = Array.isArray(data.popups) ? data.popups : [];
-            renderPopups();
-          } catch (error) { popupsStatus.textContent = error.message; }
-        }
-
-        addPopupButton.addEventListener("click", () => {
-          popupEntries.push({ id: crypto.randomUUID(), enabled: false, title: "", message: "", buttonText: "", buttonMode: "link", link: "", imageUrl: "", dismissible: true, maxDisplays: 1, cooldownHours: 0 });
-          renderPopups();
-        });
-        savePopupsButton.addEventListener("click", async () => {
-          popupsStatus.textContent = "Saving popups…";
-          try {
-            await callPremium("app-popups-set", { popups: popupEntries });
-            popupsStatus.textContent = "Popup configuration saved.";
-          } catch (error) { popupsStatus.textContent = error.message; }
-        });
-        uploadApkButton.addEventListener("click", async () => {
-          const file = document.querySelector("#apk-file").files[0];
-          if (!file) { apkUploadStatus.textContent = "Choose an APK first."; return; }
-          apkUploadStatus.textContent = "Preparing upload…";
-          try {
-            const upload = await callPremium("admin-apk-upload-url", { fileName: file.name, fileSize: file.size });
-            const uploaded = await fetch(upload.signedUrl, { method: "PUT", headers: { "content-type": "application/vnd.android.package-archive" }, body: file });
-            if (!uploaded.ok) throw new Error("Storage upload failed.");
-            const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
-            const sha256 = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-            const result = await callPremium("admin-apk-publish", {
-              path: upload.path,
-              sha256,
-              latestVersionCode: Number(document.querySelector("#latest-version-code").value),
-              minimumVersionCode: Number(document.querySelector("#minimum-version-code").value),
-              displayVersion: document.querySelector("#display-version").value.trim(),
-              releaseNotes: document.querySelector("#release-notes").value.trim(),
-              updateMessage: document.querySelector("#update-message").value.trim(),
+        if (!addPopupButton.dataset.bound) {
+          addPopupButton.dataset.bound = "true";
+          addPopupButton.addEventListener("click", () => {
+            popupEntries.push({
+              id: crypto.randomUUID(),
+              enabled: false,
+              title: "",
+              message: "",
+              buttonText: "Learn more",
+              buttonMode: "link",
+              link: "",
+              imageUrl: "",
+              dismissible: true,
+              maxDisplays: 1,
+              cooldownHours: 0,
             });
-            apkUploadStatus.textContent = result.published ? "APK uploaded and published." : "APK upload completed.";
-          } catch (error) { apkUploadStatus.textContent = error.message; }
+            renderPopups();
+          });
+        }
+        if (!addPromoPresetButton.dataset.bound) {
+          addPromoPresetButton.dataset.bound = "true";
+          addPromoPresetButton.addEventListener("click", () => {
+            popupEntries.push({
+              id: crypto.randomUUID(),
+              enabled: false,
+              title: "Special announcement",
+              message: "Add a short, clear message about your promotion or news.",
+              buttonText: "Learn more",
+              buttonMode: "link",
+              link: "",
+              imageUrl: "",
+              dismissible: true,
+              maxDisplays: 1,
+              cooldownHours: 24,
+            });
+            renderPopups();
+            popupsStatus.textContent =
+              "Preset added but disabled. Add an HTTPS destination, optionally upload an image, then enable and save it.";
+          });
+        }
+        if (!savePopupsButton.dataset.bound) {
+          savePopupsButton.dataset.bound = "true";
+          savePopupsButton.addEventListener("click", async () => {
+            popupsStatus.textContent = "Saving popups…";
+            try {
+              await callPremium("app-popups-set", { popups: popupEntries });
+              popupsStatus.textContent = "Popup configuration saved.";
+            } catch (error) { popupsStatus.textContent = error.message; }
+          });
+        }
+        document.querySelectorAll("[data-package-upload]").forEach((button) => {
+          if (button.dataset.bound) return;
+          button.dataset.bound = "true";
+          button.addEventListener("click", async () => {
+            const packageId = button.dataset.packageUpload;
+            const fileInput = document.querySelector(
+              packageId === "com.antutu.ABenchMark" ? "#antutu-apk-file" : "#ludashi-apk-file"
+            );
+            const packageStatus = document.querySelector(
+              `[data-release-status="${packageId}"]`
+            );
+            const file = fileInput.files[0];
+            if (!file) { packageStatus.textContent = "Choose an APK first."; return; }
+            packageStatus.textContent = "Preparing upload…";
+            try {
+              const upload = await callPremium("admin-apk-upload-url", {
+                packageId,
+                fileName: file.name,
+                fileSize: file.size,
+              });
+              const uploaded = await fetch(upload.signedUrl, {
+                method: "PUT",
+                headers: { "content-type": "application/vnd.android.package-archive" },
+                body: file,
+              });
+              if (!uploaded.ok) throw new Error("Storage upload failed.");
+              const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+              const sha256 = [...new Uint8Array(digest)]
+                .map((byte) => byte.toString(16).padStart(2, "0"))
+                .join("");
+              const result = await callPremium("admin-apk-publish", {
+                packageId,
+                path: upload.path,
+                sha256,
+                latestVersionCode: Number(document.querySelector("#latest-version-code").value),
+                minimumVersionCode: Number(document.querySelector("#minimum-version-code").value),
+                displayVersion: document.querySelector("#display-version").value.trim(),
+                releaseNotes: document.querySelector("#release-notes").value.trim(),
+                updateMessage: document.querySelector("#update-message").value.trim(),
+                updateFallbackUrl: document.querySelector(
+                  packageId === "com.antutu.ABenchMark" ? "#antutu-fallback-url" : "#ludashi-fallback-url"
+                ).value.trim(),
+              });
+              if (!result.published) throw new Error("APK upload completed but release was not published.");
+              const settings = await callPremium("updates-get");
+              const release = settings.packageReleases?.[packageId];
+              publishedPackageReleases = settings.packageReleases || {};
+              const appName = packageId === "com.antutu.ABenchMark" ? "Antutu" : "Ludashi";
+              packageStatus.textContent = `${appName} published: version ${release?.latestVersionCode ?? "unknown"}.`;
+              storedUpdateUrl = settings.updateUrl || "";
+              hostedApkAvailable = Boolean(settings.apkStoragePath);
+              setLinkPreview("#current-update-link", storedUpdateUrl);
+              applyUpdateDeliveryMode("supabase");
+              apkUploadStatus.textContent = `${appName} APK uploaded and published to Supabase.`;
+            } catch (error) {
+              packageStatus.textContent = error.message;
+              apkUploadStatus.textContent = error.message;
+            }
+          });
         });
       } catch (error) { status.textContent = error.message; }
     }
@@ -2831,13 +3221,67 @@ button:hover:not(:disabled){box-shadow:none!important}
       link.hidden = !url;
     }
 
+    function applyUpdateDeliveryMode(mode) {
+      updateDeliveryMode = "supabase";
+      supabaseUpdatePanel.hidden = false;
+    }
+
+    function renderUpdatePopupImage(url) {
+      updatePopupImagePreview.replaceChildren();
+      if (!url) return;
+      const image = document.createElement("img");
+      image.src = url;
+      image.alt = "Forced update popup image preview";
+      updatePopupImagePreview.append(image);
+    }
+
+    async function loadUpdatePopup() {
+      updatePopupStatus.textContent = "Loading latest-release popup…";
+      try {
+        const popup = await callPremium("admin-update-popup-get");
+        document.querySelector("#update-popup-title").value = popup.title || "Update available";
+        document.querySelector("#update-popup-message").value = popup.message ||
+          "A newer version is available. Open the update link to get the latest release.";
+        const savedButtonText = popup.downloadButtonText || "Download update";
+        document.querySelector("#update-popup-download-text").value = savedButtonText;
+        updatePopupImageUrl = popup.imageUrl || "";
+        renderUpdatePopupImage(updatePopupImageUrl);
+        updatePopupStatus.textContent = "Latest-release popup settings loaded.";
+      } catch (error) {
+        updatePopupStatus.textContent = error.message;
+      }
+    }
+
     function openSettingsTab(tab, section) {
       prepareAdminView(tab);
-      const view = section === "updates" ? updatesManagement : linksManagement;
+      const view = section === "updates" ? updatesManagement :
+        section === "popups" ? popupsManagement : linksManagement;
       view.hidden = false;
       void loadReleaseSettings(section);
     }
 
+    previewUpdatePopupButton.addEventListener("click", () => {
+      document.querySelector("#update-popup-preview-title").textContent =
+        document.querySelector("#update-popup-title").value.trim() || "Update available";
+      document.querySelector("#update-popup-preview-message").textContent =
+        document.querySelector("#update-popup-message").value.trim() ||
+        "A newer version is available.";
+      if (updatePopupImageUrl.startsWith("https://")) {
+        updatePopupPreviewImage.src = updatePopupImageUrl;
+        updatePopupPreviewImage.hidden = false;
+      } else {
+        updatePopupPreviewImage.removeAttribute("src");
+        updatePopupPreviewImage.hidden = true;
+      }
+      const previewAction = document.querySelector("#update-popup-preview-action");
+      previewAction.textContent =
+        document.querySelector("#update-popup-download-text").value.trim() || "Download update";
+      previewAction.disabled = !storedUpdateUrl.startsWith("https://");
+      updatePopupPreviewDialog.showModal();
+    });
+    document.querySelector("#update-popup-preview-close").addEventListener("click", () => {
+      updatePopupPreviewDialog.close();
+    });
     saveAdsSettingsButton.addEventListener("click", () => void saveAdsConfig());
     togglePremiumAccessButton.addEventListener(
       "click",
@@ -2846,17 +3290,111 @@ button:hover:not(:disabled){box-shadow:none!important}
     saveAccessPolicyButton.addEventListener("click", () => void saveAccessPolicy());
     updatesForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      updatesStatus.textContent = "Saving update policy…";
+      const minimumVersionCode = Number(document.querySelector("#minimum-version-code").value);
+      const latestVersionCode = Number(document.querySelector("#latest-version-code").value);
+      const enforceMinimumVersion =
+        document.querySelector("#enforce-minimum-version").checked;
+      const updateUrl = storedUpdateUrl;
+      const updateFallbackUrl = document.querySelector("#update-fallback-url").value.trim();
+      const redirectUrl = document.querySelector("#update-redirect-url").value.trim();
+      const monthlyBandwidthLimitGb = Number(
+        document.querySelector("#update-bandwidth-budget-gb").value
+      );
+      if (enforceMinimumVersion && ![
+        "com.antutu.ABenchMark",
+        "com.ludashi.benchmark",
+      ].every((packageId) => {
+        const release = publishedPackageReleases[packageId];
+        return release?.apkStoragePath &&
+          Number(release.latestVersionCode) === latestVersionCode;
+      })) {
+        updatesStatus.textContent =
+          "Publish both package APKs for the selected latest build before enforcing it.";
+        return;
+      }
+      if (!hostedApkAvailable && minimumVersionCode > 0) {
+        updatesStatus.textContent = "Upload a release APK to Supabase before selecting it as the download source.";
+        return;
+      }
+      if (minimumVersionCode > 0 && !updateUrl.startsWith("https://")) {
+        updatesStatus.textContent = "Upload a Supabase APK before enabling a minimum-version update.";
+        return;
+      }
+      if (updateFallbackUrl && !updateFallbackUrl.startsWith("https://")) {
+        updatesStatus.textContent = "The external fallback must be a valid HTTPS direct APK URL.";
+        return;
+      }
+      if (!redirectUrl.startsWith("https://")) {
+        updatesStatus.textContent = "Enter a valid HTTPS after-download redirect URL.";
+        return;
+      }
+      if (!Number.isFinite(monthlyBandwidthLimitGb) ||
+          monthlyBandwidthLimitGb < 1 || monthlyBandwidthLimitGb > 10000) {
+        updatesStatus.textContent = "Enter a project bandwidth quota from 1 to 10,000 GB.";
+        return;
+      }
+      updatesStatus.textContent = "Saving release settings…";
       try {
         const result = await callPremium("updates-set", {
-          latestVersionCode: Number(document.querySelector("#latest-version-code").value),
-          minimumVersionCode: Number(document.querySelector("#minimum-version-code").value),
-          updateUrl: document.querySelector("#update-url").value.trim(),
+          latestVersionCode,
+          minimumVersionCode,
+          enforceMinimumVersion,
+          updateUrl,
+          deliveryMode: "supabase",
+          updateFallbackUrl,
+          redirectUrl,
+          monthlyBandwidthLimitGb,
           updateMessage: document.querySelector("#update-message").value.trim(),
         });
-        setLinkPreview("#current-update-link", document.querySelector("#update-url").value.trim());
-        updatesStatus.textContent = `Saved. Latest ${result.latestVersionCode}; minimum ${result.minimumVersionCode}.`;
+        updateDeliveryMode = "supabase";
+        storedUpdateUrl = updateUrl;
+        setLinkPreview("#current-update-link", updateUrl);
+        setLinkPreview("#current-update-fallback-link", result.updateFallbackUrl || updateFallbackUrl);
+        document.querySelector("#update-redirect-url").value = result.redirectUrl || redirectUrl;
+        setLinkPreview("#current-update-redirect-link", result.redirectUrl || redirectUrl);
+        updatesStatus.textContent = `Saved. Latest ${result.latestVersionCode}; minimum ${result.minimumVersionCode}; strict update lock ${result.enforceMinimumVersion ? "enabled" : "disabled"}.`;
       } catch (error) { updatesStatus.textContent = error.message; }
+    });
+    updatePopupImageInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      updatePopupImageStatus.textContent = "Compressing image…";
+      try {
+        const compressed = await compressPopupImage(file);
+        updatePopupImageStatus.textContent =
+          `Uploading compressed image (${Math.ceil(compressed.blob.size / 1024)} KB)…`;
+        const upload = await callPremium("admin-popup-image-upload-url", {
+          fileName: compressed.fileName,
+          fileSize: compressed.blob.size,
+          contentType: compressed.contentType,
+        });
+        const uploaded = await fetch(upload.signedUrl, {
+          method: "PUT",
+          headers: { "content-type": compressed.contentType },
+          body: compressed.blob,
+        });
+        if (!uploaded.ok) throw new Error("Image upload failed.");
+        updatePopupImageUrl = upload.publicUrl;
+        renderUpdatePopupImage(updatePopupImageUrl);
+        updatePopupImageStatus.textContent = "Image uploaded. Save the popup to publish the change.";
+      } catch (error) {
+        updatePopupImageStatus.textContent = error.message;
+      }
+    });
+    saveUpdatePopupButton.addEventListener("click", async () => {
+      updatePopupStatus.textContent = "Saving latest-release popup…";
+      try {
+        const result = await callPremium("admin-update-popup-set", {
+          title: document.querySelector("#update-popup-title").value.trim(),
+          message: document.querySelector("#update-popup-message").value.trim(),
+          imageUrl: updatePopupImageUrl,
+          downloadButtonText: document.querySelector("#update-popup-download-text").value.trim(),
+        });
+        updatePopupImageUrl = result.updatePopup.imageUrl || "";
+        updatePopupStatus.textContent = "Latest-release popup saved. It appears for a newer release only when the installed version meets the minimum.";
+      } catch (error) {
+        updatePopupStatus.textContent = error.message;
+      }
     });
     linksForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -2872,6 +3410,7 @@ button:hover:not(:disabled){box-shadow:none!important}
       } catch (error) { linksStatus.textContent = error.message; }
     });
     updatesTab.addEventListener("click", () => openSettingsTab(updatesTab, "updates"));
+    popupsTab.addEventListener("click", () => openSettingsTab(popupsTab, "popups"));
     supportedDevicesTab.addEventListener("click", () => void loadSupportedCatalog());
     linksTab.addEventListener("click", () => openSettingsTab(linksTab, "links"));
     refreshPremiumButton.addEventListener("click", () => void loadManualPremium());

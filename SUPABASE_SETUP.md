@@ -55,7 +55,17 @@ Donors may optionally submit a display name with a payment reference and choose 
 
 The tiered access settings migration starts normal and premium access checks at six hours each; administrators can set each interval independently from 1 to 168 hours. The app checks with the server at launch, retries a failed check once, and can use a valid offline grant until its configured expiry. The offline grant is encrypted with an Android Keystore key; this raises the bar for editing app data but cannot make a rooted or patched device tamper-proof.
 
-The Updates page supports image popups with editable title/message/button text, link or download actions, per-device display caps, and cooldowns. Popup images are uploaded through short-lived signed URLs to the public `app-promotions` bucket, limited to JPEG, PNG, or WebP images up to 8 MB. APK releases continue to use the private `app-updates` bucket.
+The separate **Promotional popups** page supports optional popups with a default preset, editable title/message/button text, link or download actions, per-device display caps, and cooldowns. Popup images are resized and compressed in the browser before upload through a short-lived signed URL to the public `app-promotions` bucket, limited to JPEG, PNG, or WebP images up to 8 MB. APK releases continue to use the private `app-updates` bucket.
+
+The **Updates** page publishes the primary signed APK to the private Supabase `app-updates` bucket and can store a separate external direct-APK fallback URL. The Android app downloads with the system Download Manager, shows its download notification, verifies the APK SHA-256, and offers an **Install update** action. Android still requires the user to allow installs from QSpoof (once) and confirm installation. After starting a download, the app opens the Telegram channel configured under **Links**; that promotion destination is separate from the external APK fallback.
+
+App downloads stream through the `premium` Edge Function rather than exposing a signed Storage URL. The function reserves each requested byte range against a monthly APK-download budget before streaming and redirects to the external fallback when the budget is exhausted or the Supabase transfer fails. The reservation is atomic across concurrent downloads; interrupted transfers conservatively retain their reservation for that month.
+
+The Updates page's **Total project monthly bandwidth (GB)** defaults to 10 GB, matching the current Free plan's documented total allowance (5 GB cached plus 5 GB uncached). The APK route reserves 40% of that configured total (4 GB by default). Change the value if the project plan changes. This meter limits APK-download traffic, not other database, Storage, or Functions traffic, so it cannot guarantee the entire project stays below its plan quota. See [Supabase bandwidth and Storage egress](https://supabase.com/docs/guides/storage/serving/bandwidth).
+
+When a newer release is available, users at or above the minimum see the dismissible popup once for that release. Users below the minimum cannot continue until the update is installed. The minimum-version field of `0` disables the forced update.
+
+App access is still checked with Supabase at every launch. The encrypted, expiring premium cache is used only when online checks fail, preserving configured offline access; clearing it on every launch would disable that behavior and increase the chance of lockouts.
 
 Deploy the companion function with the project's Supabase CLI v3 syntax:
 

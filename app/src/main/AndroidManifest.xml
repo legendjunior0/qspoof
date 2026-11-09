@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <application
@@ -20,13 +21,6 @@
         android:roundIcon="@drawable/original_app_icon"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
-
-        <meta-data
-            android:name="com.startapp.sdk.APPLICATION_ID"
-            android:value="208529843" />
-        <meta-data
-            android:name="com.startapp.sdk.RETURN_ADS_ENABLED"
-            android:value="false" />
 
         <activity
             android:name=".MainActivity"
@@ -57,6 +51,20 @@
             android:name=".RefreshRateActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".QSpoofActivationActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_qspoof_engine"
+            android:label="QSpoof Engine v5.0"
+            android:taskAffinity="${engineTaskAffinity}"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".PerformanceService"
             android:exported="false"
@@ -72,12 +80,16 @@
             android:name=".MaxRefreshRateTileService"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
-            android:label="Max Hz"
+            android:label="QHz"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+
+        <service
+            android:name=".QSpoofOverlayService"
+            android:exported="false" />
 
     </application>
 

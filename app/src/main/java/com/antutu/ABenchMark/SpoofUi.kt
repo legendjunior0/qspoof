@@ -81,13 +81,9 @@ object SpoofUi {
     private const val TELEGRAM_GROUP = "https://t.me/iqoo_neo10"
     private const val MAX_POPUP_IMAGE_BYTES = 8L * 1024L * 1024L
 
-    private class ScaleToFitFrameLayout(
-        context: Context,
-        private val reserveSideAds: Boolean
-    ) : FrameLayout(context) {
+    private class ScaleToFitFrameLayout(context: Context) : FrameLayout(context) {
         private fun scaleFor(availableWidth: Float, contentWidth: Float, availableHeight: Float, contentHeight: Float): Float {
-            val sideAdsWidth = if (reserveSideAds) dp(context, 100).toFloat() else 0f
-            val widthScale = availableWidth / (contentWidth + sideAdsWidth).coerceAtLeast(1f)
+            val widthScale = availableWidth / contentWidth.coerceAtLeast(1f)
             val heightScale = availableHeight / contentHeight.coerceAtLeast(1f)
             return minOf(1f, widthScale, heightScale)
         }
@@ -162,7 +158,6 @@ object SpoofUi {
         onLaunchAnimationComplete: () -> Unit = {}
     ): View {
         applyFullScreen(activity)
-        StartIoAds.beginAdScreen()
         val rootContainer = FrameLayout(activity).apply {
             setBackgroundColor(BG_DARK)
         }
@@ -187,8 +182,6 @@ object SpoofUi {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         )
-        addPopupSideAds(activity, rootContainer, mainDashboard)
-
         val splashOverlay = createSplashOverlay(activity) {
             mainDashboard.animate()
                 .alpha(1.0f)
@@ -533,7 +526,7 @@ object SpoofUi {
             isFocusable = true
         }
 
-    private fun loadPopupImage(imageView: ImageView, url: String) {
+    fun loadPopupImage(imageView: ImageView, url: String) {
         popupImageExecutor.execute {
             var connection: HttpURLConnection? = null
             try {
@@ -578,7 +571,7 @@ object SpoofUi {
         }
     }
 
-    private fun downloadPopupFile(activity: Activity, url: String, title: String) {
+    fun downloadPopupFile(activity: Activity, url: String, title: String): Boolean {
         try {
             val uri = Uri.parse(url)
             if (uri.scheme != "https") throw IllegalArgumentException("Only HTTPS downloads are allowed")
@@ -594,15 +587,20 @@ object SpoofUi {
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(false)
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+            if (fileName.endsWith(".apk", ignoreCase = true)) {
+                request.setMimeType("application/vnd.android.package-archive")
+            }
             val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             manager.enqueue(request)
             Toast.makeText(activity, "Download started", Toast.LENGTH_SHORT).show()
+            return true
         } catch (error: Exception) {
             Toast.makeText(
                 activity,
                 error.message ?: "Could not start the download",
                 Toast.LENGTH_LONG
             ).show()
+            return false
         }
     }
 
@@ -893,16 +891,12 @@ object SpoofUi {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         ).apply { topMargin = dp(activity, 10) })
-        root.addView(StartIoAds.createBannerSlot(activity, forceDisplay = true))
         root.addView(createVerticalSpace(activity, 14))
         root.addView(createCommunityCard(activity, channelUrl, groupUrl))
-        root.addView(StartIoAds.createBannerSlot(activity, forceDisplay = true))
         root.addView(createVerticalSpace(activity, 16))
         root.addView(createActionButtonsRow(activity))
 
-        val reserveSideAds = activity.isInMultiWindowMode ||
-            activity.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-        val dashboardFrame = ScaleToFitFrameLayout(activity, reserveSideAds).apply {
+        val dashboardFrame = ScaleToFitFrameLayout(activity).apply {
             clipChildren = true
             clipToPadding = true
             setBackgroundColor(BG_DARK)
@@ -917,76 +911,6 @@ object SpoofUi {
         }
 
         return dashboardFrame
-    }
-
-    private fun addPopupSideAds(
-        activity: Activity,
-        rootContainer: FrameLayout,
-        mainDashboard: View
-    ) {
-        val scaledContent = (mainDashboard as? ViewGroup)?.getChildAt(0) ?: return
-        val dashboardRoot = scaledContent as? ViewGroup ?: return
-        // The popup leaves gutters on both sides of the scaled portrait dashboard.
-        // Use one landscape native ad in each gutter beside the donation and community cards.
-        val anchors = listOfNotNull(dashboardRoot.getChildAt(2), dashboardRoot.getChildAt(6))
-        if (anchors.size != 2) return
-        rootContainer.clipChildren = false
-        rootContainer.clipToPadding = false
-        val sideSlots = anchors.flatMap { anchor ->
-            listOf(Gravity.START, Gravity.END).map { horizontalGravity ->
-                // Use the same StartApp banner manager as the two inline menu ads.
-                val slot = StartIoAds.createBannerSlot(activity, forceDisplay = true)
-                rootContainer.addView(
-                    slot,
-                    FrameLayout.LayoutParams(dp(activity, 320), dp(activity, 50)).apply {
-                        gravity = Gravity.TOP or horizontalGravity
-                        if (horizontalGravity == Gravity.START) leftMargin = dp(activity, 4)
-                        else rightMargin = dp(activity, 4)
-                    }
-                )
-                Triple(slot, anchor, horizontalGravity)
-            }
-        }
-
-        fun updateRails() {
-            val scaleX = scaledContent.scaleX
-            val scaleY = scaledContent.scaleY
-            val dashboardWidth = scaledContent.width * scaleX
-            val dashboardLeft = (rootContainer.width - dashboardWidth) / 2f
-            val renderedAdWidth = dp(activity, 50) * scaleX
-            val gap = dp(activity, 4) * scaleX
-            sideSlots.forEach { (slot, anchor, horizontalGravity) ->
-                val params = slot.layoutParams as FrameLayout.LayoutParams
-                if (params.width != dp(activity, 320) || params.height != dp(activity, 50)) {
-                    params.width = dp(activity, 320)
-                    params.height = dp(activity, 50)
-                    slot.layoutParams = params
-                }
-                slot.pivotX = dp(activity, 160).toFloat()
-                slot.pivotY = dp(activity, 25).toFloat()
-                slot.scaleX = scaleX
-                slot.scaleY = scaleY
-                slot.rotation = 90f
-                params.gravity = Gravity.TOP or Gravity.LEFT
-                val bannerCenterX = if (horizontalGravity == Gravity.START) {
-                    dashboardLeft - renderedAdWidth / 2f - gap
-                } else {
-                    dashboardLeft + dashboardWidth + renderedAdWidth / 2f + gap
-                }
-                params.leftMargin = bannerCenterX.toInt() - dp(activity, 160)
-                params.rightMargin = 0
-                val anchorY = mainDashboard.top + scaledContent.top +
-                    ((anchor.top + anchor.height / 2f) * scaleY).toInt()
-                params.topMargin = anchorY - dp(activity, 25)
-                slot.layoutParams = params
-                slot.visibility = View.VISIBLE
-            }
-        }
-
-        rootContainer.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateRails() }
-        mainDashboard.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateRails() }
-        scaledContent.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateRails() }
-        updateRails()
     }
 
     private fun createSplashOverlay(
@@ -1136,7 +1060,13 @@ object SpoofUi {
             card.addView(brandMark, LinearLayout.LayoutParams(dp(activity, sizeDp), dp(activity, sizeDp)))
         }
 
-        fun addTitle(card: LinearLayout, title: String, subtitle: String, hint: String) {
+        fun addTitle(
+            card: LinearLayout,
+            title: String,
+            subtitle: String,
+            hint: String,
+            version: String? = null
+        ) {
             val titleStack = LinearLayout(activity).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER_VERTICAL
@@ -1158,13 +1088,28 @@ object SpoofUi {
                 textSize = 9f
                 setTextColor(TEXT_MUTED)
             })
+            if (version != null) {
+                titleStack.addView(TextView(activity).apply {
+                    text = version
+                    textSize = 10f
+                    setTextColor(ACCENT_INDIGO)
+                    typeface = Typeface.DEFAULT_BOLD
+                })
+            }
             card.addView(titleStack, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         }
 
         val cardHeight = dp(activity, 112)
         val front = createCard()
         addBrandMark(front, 55)
-        addTitle(front, "QSpoof Engine", "Performance Spoofer & Optimizer", "Tap controls • Swipe to switch")
+        addTitle(
+            front,
+            "QSpoof Engine",
+            "Performance Spoofer & Optimizer",
+            "Tap controls • Swipe to switch",
+            "v5.0"
+        )
+        front.addView(createActiveStatus(activity))
 
         val back = createCard().apply {
             orientation = LinearLayout.VERTICAL
@@ -1510,20 +1455,26 @@ object SpoofUi {
             gravity = Gravity.CENTER_VERTICAL
         }
         header.addView(TextView(activity).apply {
-            text = "Refresh"
+            text = "Force Refresh Rate"
             textSize = 13f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(TEXT_PRIMARY)
         }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
 
         val rateStatus = TextView(activity).apply {
-            text = "ACTIVE • -- Hz"
+            text = "--Hz"
             textSize = 10f
             typeface = Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
-            setPadding(dp(activity, 10), dp(activity, 6), dp(activity, 10), dp(activity, 6))
-            setTextColor(Color.WHITE)
-            background = AppTheme.gradient(activity, 12f)
+            setPadding(dp(activity, 8), dp(activity, 3), dp(activity, 8), dp(activity, 3))
+            setTextColor(Color.rgb(52, 211, 153))
+            background = roundedDrawable(
+                Color.argb(30, 52, 211, 153),
+                5f,
+                Color.argb(70, 52, 211, 153),
+                1f,
+                activity
+            )
             contentDescription = "Current display refresh rate"
         }
         header.addView(rateStatus)
@@ -1625,18 +1576,13 @@ object SpoofUi {
                 if (!card.isAttachedToWindow || activity.isFinishing) return
                 val rate = currentDisplayRefreshRate(activity)
                 if (rate > 0f) {
-                    rateStatus.text = String.format(Locale.US, "ACTIVE • %.0f Hz", rate)
-                    rateStatus.background = AppTheme.gradient(activity, 12f)
+                    rateStatus.text = String.format(Locale.US, "%.0fHz", rate)
+                    rateStatus.setTextColor(Color.rgb(52, 211, 153))
                 } else {
-                    rateStatus.text = "-- Hz"
-                    rateStatus.background = roundedDrawable(
-                        AppTheme.elevated,
-                        12f,
-                        CARD_BORDER_GLOW,
-                        1f,
-                        activity
-                    )
+                    rateStatus.text = "--Hz"
+                    rateStatus.setTextColor(TEXT_SECONDARY)
                 }
+                updateButtons()
                 card.postDelayed(this, 1_000L)
             }
         }
@@ -1651,6 +1597,63 @@ object SpoofUi {
             }
         })
         return card
+    }
+
+    private fun createActiveStatus(context: Context): LinearLayout {
+        val green = Color.rgb(52, 211, 153)
+        val density = context.resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+
+        val status = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(8), dp(5), dp(10), dp(5))
+            background = roundedDrawable(
+                Color.argb(30, 52, 211, 153),
+                14f,
+                Color.argb(70, 52, 211, 153),
+                1f,
+                context
+            )
+            contentDescription = "Status: Active"
+        }
+
+        val dot = View(context).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(green)
+            }
+        }
+
+        val pulse = ValueAnimator.ofFloat(0.4f, 1f).apply {
+            duration = 650L
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            addUpdateListener { animator ->
+                val value = animator.animatedValue as Float
+                dot.alpha = value
+                dot.scaleX = 0.85f + value * 0.15f
+                dot.scaleY = 0.85f + value * 0.15f
+            }
+        }
+
+        dot.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(view: View) = pulse.start()
+            override fun onViewDetachedFromWindow(view: View) = pulse.cancel()
+        })
+
+        status.addView(dot, LinearLayout.LayoutParams(dp(7), dp(7)).apply {
+            marginEnd = dp(6)
+        })
+        status.addView(TextView(context).apply {
+            text = "Active"
+            textSize = 11f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(green)
+            letterSpacing = 0.08f
+        }, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        return status
     }
 
     private fun createCommunityCard(activity: Activity, channelUrl: String, groupUrl: String): View {

@@ -1,6 +1,12 @@
 package com.antutu.ABenchMark
 
 import android.hardware.display.DisplayManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.graphics.drawable.Icon
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.view.Display
@@ -51,8 +57,42 @@ class MaxRefreshRateTileService : TileService() {
             tile.state = if (isMaxActive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
             tile.subtitle = if (isMaxActive) "$maxRate Hz active" else "Tap for $maxRate Hz"
         }
-        tile.label = "Max Hz"
+        val isMaxActive = maxRate > 0 && Rms.selectedRate(this) == maxRate
+        tile.label = if (isMaxActive) "$maxRate Hz" else "QHz"
+        tile.icon = createQHzIcon(maxRate, isMaxActive)
         tile.updateTile()
+    }
+
+    private fun createQHzIcon(maxRate: Int, isMaxActive: Boolean): Icon {
+        val bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            typeface = Typeface.create("sans-serif", Typeface.BOLD)
+        }
+        if (!isMaxActive || maxRate <= 0) {
+            paint.textAlign = Paint.Align.CENTER
+            paint.textSize = 34f
+            val baseline = 48f - (paint.ascent() + paint.descent()) / 2f
+            canvas.drawText("QHz", 48f, baseline, paint)
+        } else {
+            val rateText = maxRate.toString()
+            paint.textSize = 43f
+            paint.textAlign = Paint.Align.LEFT
+            val rateWidth = paint.measureText(rateText)
+            val suffixPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.WHITE
+                textAlign = Paint.Align.LEFT
+                textSize = 9f
+                typeface = Typeface.create("sans-serif", Typeface.BOLD)
+            }
+            val totalWidth = rateWidth + suffixPaint.measureText("Hz") + 2f
+            val startX = (96f - totalWidth) / 2f
+            val baseline = 48f - (paint.ascent() + paint.descent()) / 2f
+            canvas.drawText(rateText, startX, baseline, paint)
+            canvas.drawText("Hz", startX + rateWidth + 2f, baseline - 12f, suffixPaint)
+        }
+        return Icon.createWithBitmap(bitmap)
     }
 
     private fun maxSupportedRefreshRate(): Int {

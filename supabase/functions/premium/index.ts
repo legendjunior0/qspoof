@@ -2,8 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, apikey, content-type, range, if-range",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
 const jsonResponse = (status: number, body: Record<string, unknown>) =>
@@ -13,6 +13,9 @@ const jsonResponse = (status: number, body: Record<string, unknown>) =>
   });
 
 const publicApiKey = "sb_publishable_hi9tDuZNDMr8vF0vAwF5wg_s-XsIn6J";
+const masterAdminEmail = "adityakumar.as12345@gmail.com";
+const defaultMonthlyBandwidthGb = 10;
+const updateDownloadBandwidthShare = 0.4;
 const motherLoginEmail = "adityakumar.as12345@email.com";
 const motherAccountEmail = "adityakumar.as12345@gmail.com";
 const motherLoginAliases = new Set([motherLoginEmail, motherAccountEmail]);
@@ -35,6 +38,206 @@ function getClientIp(request: Request): string | null {
   } catch {
     return null;
   }
+}
+
+const supportedUpdatePackages = new Set(["com.antutu.ABenchMark", "com.ludashi.benchmark"]);
+
+function updateDownloadEndpoint(
+  supabaseUrl: string,
+  browserLink = false,
+  packageId?: string,
+): string {
+  const endpoint = `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/premium?action=update-download`;
+  const query = new URLSearchParams();
+  if (packageId) query.set("packageId", packageId);
+  if (browserLink) query.set("apikey", publicApiKey);
+  const suffix = query.toString();
+  return suffix ? `${endpoint}&${suffix}` : endpoint;
+}
+
+function getPackageRelease(
+  remoteConfig: Record<string, unknown>,
+  packageId: string,
+): Record<string, unknown> | null {
+  const releases = remoteConfig.packageReleases;
+  if (!releases || typeof releases !== "object" || Array.isArray(releases)) return null;
+  const release = (releases as Record<string, unknown>)[packageId];
+  return release && typeof release === "object" && !Array.isArray(release)
+    ? release as Record<string, unknown>
+    : null;
+}
+
+function updateFallbackResponse(fallbackUrl: unknown, status: number, message: string): Response {
+  if (typeof fallbackUrl === "string" && fallbackUrl.startsWith("https://")) {
+    return Response.redirect(fallbackUrl, 302);
+  }
+  return new Response(message, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      "Content-Type": "text/plain; charset=utf-8",
+    },
+  });
+}
+
+async function serveMeteredUpdateDownload(
+  request: Request,
+  supabase: ReturnType<typeof createClient>,
+  supabaseUrl: string,
+): Promise<Response> {
+  const { data: settings, error: settingsError } = await supabase.rpc("get_premium_public_settings");
+  if (settingsError || !settings || typeof settings !== "object") {
+    console.error("Could not load metered update settings", settingsError?.message);
+    return new Response("Update download is temporarily unavailable.", {
+      status: 503,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+  const config = settings as Record<string, unknown>;
+  const remoteConfig = config.remoteConfig && typeof config.remoteConfig === "object"
+    ? config.remoteConfig as Record<string, unknown>
+    : {};
+  const requestUrl = new URL(request.url);
+  const requestedPackageId = requestUrl.searchParams.get("packageId");
+  if (requestedPackageId && !supportedUpdatePackages.has(requestedPackageId)) {
+    return new Response("Unsupported app package.", {
+      status: 400,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+  const packageId = requestedPackageId ?? "com.antutu.ABenchMark";
+  const packageRelease = getPackageRelease(remoteConfig, packageId);
+  const usesLegacyRelease = requestedPackageId === null ||
+    (packageId === "com.antutu.ABenchMark" && packageRelease === null);
+  const selectedRelease = packageRelease ?? (usesLegacyRelease ? config : null);
+  if (!selectedRelease) {
+    return new Response("No release is published for this app package.", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+  const packageFallbackUrl = packageRelease?.updateFallbackUrl;
+  const fallbackUrl = typeof packageFallbackUrl === "string" && packageFallbackUrl
+    ? packageFallbackUrl
+    : remoteConfig.updateFallbackUrl;
+  const storagePath = typeof selectedRelease.apkStoragePath === "string"
+    ? selectedRelease.apkStoragePath
+    : "";
+  if (!storagePath) {
+    return updateFallbackResponse(fallbackUrl, 404, "No Supabase APK is published.");
+  }
+
+  const configuredBudgetGb = remoteConfig.monthlyBandwidthLimitGb;
+  const monthlyBandwidthGb = typeof configuredBudgetGb === "number" &&
+      Number.isFinite(configuredBudgetGb) &&
+      configuredBudgetGb >= 1 &&
+      configuredBudgetGb <= 10000
+    ? configuredBudgetGb
+    : defaultMonthlyBandwidthGb;
+  const monthlyLimitBytes = Math.floor(monthlyBandwidthGb * 1_000_000_000);
+  const downloadLimitBytes = Math.floor(monthlyLimitBytes * updateDownloadBandwidthShare);
+  const { data: signed, error: signedError } = await supabase.storage
+    .from("app-updates")
+    .createSignedUrl(storagePath, 120);
+  if (signedError || !signed?.signedUrl) {
+    console.error("Could not create metered update URL", signedError?.message);
+    return updateFallbackResponse(fallbackUrl, 502, "Could not prepare the Supabase APK download.");
+  }
+
+  let metadata: Response;
+  try {
+    metadata = await fetch(signed.signedUrl, { method: "HEAD" });
+  } catch (error) {
+    console.error("Could not read Supabase APK metadata", error);
+    return updateFallbackResponse(fallbackUrl, 502, "Could not read Supabase APK metadata.");
+  }
+  const fileSize = Number(metadata.headers.get("content-length"));
+  if (!metadata.ok || !Number.isSafeInteger(fileSize) || fileSize <= 0) {
+    return updateFallbackResponse(fallbackUrl, 502, "Could not determine Supabase APK size.");
+  }
+
+  let reservedBytes = fileSize;
+  const range = request.headers.get("range");
+  if (range) {
+    const match = /^bytes=(\d*)-(\d*)$/i.exec(range.trim());
+    if (match) {
+      const start = match[1] ? Number(match[1]) : null;
+      const end = match[2] ? Number(match[2]) : null;
+      if (start === null && end !== null) {
+        reservedBytes = Math.min(end, fileSize);
+      } else if (start !== null && start < fileSize) {
+        reservedBytes = Math.max(0, Math.min(end ?? (fileSize - 1), fileSize - 1) - start + 1);
+      }
+    }
+  }
+  if (reservedBytes <= 0) {
+    return new Response("Invalid byte range.", {
+      status: 416,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
+  const { data: reserved, error: reservationError } = await supabase.rpc(
+    "reserve_app_update_bandwidth",
+    {
+      p_requested_bytes: reservedBytes,
+      p_monthly_limit_bytes: downloadLimitBytes,
+    },
+  );
+  if (reservationError) {
+    console.error("Could not reserve APK bandwidth", reservationError.message);
+    return updateFallbackResponse(fallbackUrl, 503, "Could not check the APK bandwidth allowance.");
+  }
+  if (reserved !== true) {
+    return updateFallbackResponse(fallbackUrl, 429, "Supabase APK bandwidth allowance reached.");
+  }
+
+  const downloadHeaders = new Headers();
+  if (range) downloadHeaders.set("Range", range);
+  const ifRange = request.headers.get("if-range");
+  if (ifRange) downloadHeaders.set("If-Range", ifRange);
+  let download: Response;
+  try {
+    download = await fetch(signed.signedUrl, {
+      headers: downloadHeaders,
+      signal: request.signal,
+    });
+  } catch (error) {
+    console.error("Supabase APK transfer failed", error);
+    return updateFallbackResponse(fallbackUrl, 502, "Supabase APK transfer failed.");
+  }
+  if (!download.ok || !download.body) {
+    return updateFallbackResponse(fallbackUrl, 502, "Supabase APK transfer failed.");
+  }
+  if (range && download.status === 200 && reservedBytes < fileSize) {
+    const { data: fullFileReserved, error: fullFileReservationError } = await supabase.rpc(
+      "reserve_app_update_bandwidth",
+      {
+        p_requested_bytes: fileSize - reservedBytes,
+        p_monthly_limit_bytes: downloadLimitBytes,
+      },
+    );
+    if (fullFileReservationError || fullFileReserved !== true) {
+      await download.body.cancel();
+      return updateFallbackResponse(fallbackUrl, 429, "Supabase APK bandwidth allowance reached.");
+    }
+  }
+
+  const headers = new Headers({
+    "Cache-Control": "no-store",
+    "Content-Type": "application/vnd.android.package-archive",
+    "Content-Disposition": 'attachment; filename="qspoof-update.apk"',
+    "Accept-Ranges": "bytes",
+    "X-Content-Type-Options": "nosniff",
+  });
+  for (const headerName of ["content-length", "content-range", "etag", "last-modified"]) {
+    const value = download.headers.get(headerName);
+    if (value) headers.set(headerName, value);
+  }
+  return new Response(download.body, {
+    status: download.status,
+    headers,
+  });
 }
 
 async function authorizeAdmin(
@@ -65,7 +268,9 @@ async function authorizeAdmin(
     manage_links: ["manage_settings"], manage_supported_devices: ["manage_settings"],
     view_devices: ["view_analytics"],
   };
-  if (permission && profile.role !== "owner" && !permissions.includes(permission) &&
+  const isOwner = profile.role === "owner" ||
+    (typeof profile.email === "string" && profile.email.toLowerCase() === masterAdminEmail);
+  if (permission && !isOwner && !permissions.includes(permission) &&
       !(legacyPermissionAliases[permission] || []).some((alias) => permissions.includes(alias))) return null;
   const { error: auditError } = await supabase.rpc("record_premium_admin_audit", {
     p_actor: profile.email,
@@ -193,10 +398,15 @@ Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-  if (request.method !== "POST") {
+  const isUpdateDownload = request.method === "GET" &&
+    new URL(request.url).searchParams.get("action") === "update-download";
+  if (request.method !== "POST" && !isUpdateDownload) {
     return jsonResponse(405, { error: "Method not allowed" });
   }
-  if (request.headers.get("apikey") !== publicApiKey) {
+  const requestUrl = new URL(request.url);
+  const suppliedApiKey = request.headers.get("apikey") ||
+    (isUpdateDownload ? requestUrl.searchParams.get("apikey") : null);
+  if (suppliedApiKey !== publicApiKey) {
     return jsonResponse(401, { error: "Invalid API key" });
   }
 
@@ -204,6 +414,13 @@ Deno.serve(async (request) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceRoleKey) {
     return jsonResponse(500, { error: "Premium service is not configured" });
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  if (isUpdateDownload) {
+    return serveMeteredUpdateDownload(request, supabase, supabaseUrl);
   }
 
   let body: {
@@ -230,6 +447,10 @@ Deno.serve(async (request) => {
     normalAccessCheckIntervalHours?: unknown;
     premiumAccessCheckIntervalHours?: unknown;
     adsPolicy?: unknown;
+    adsProvider?: unknown;
+    inmobiAccountId?: unknown;
+    inmobiInterstitialPlacementId?: unknown;
+    performanceBackgroundDelaySeconds?: unknown;
     deviceModel?: unknown;
     ramMb?: unknown;
     storageMb?: unknown;
@@ -241,7 +462,13 @@ Deno.serve(async (request) => {
     versionCode?: unknown;
     latestVersionCode?: unknown;
     minimumVersionCode?: unknown;
+    packageId?: unknown;
     updateUrl?: unknown;
+    updateFallbackUrl?: unknown;
+    deliveryMode?: unknown;
+    enforceMinimumVersion?: unknown;
+    redirectUrl?: unknown;
+    monthlyBandwidthLimitGb?: unknown;
     updateMessage?: unknown;
     channelUrl?: unknown;
     groupUrl?: unknown;
@@ -267,10 +494,6 @@ Deno.serve(async (request) => {
   } catch {
     return jsonResponse(400, { error: "Invalid JSON body" });
   }
-
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   // Accept the password-login action name used by older browser admin panels.
   // Admin authentication is independent of Android app device identifiers.
@@ -336,6 +559,11 @@ Deno.serve(async (request) => {
     "supported-devices-get",
   ]);
   const minimumSupportedVersion = 9;
+  const requestedPackageId = typeof body.packageId === "string" ? body.packageId : null;
+  if (requestedPackageId && !supportedUpdatePackages.has(requestedPackageId)) {
+    return jsonResponse(400, { error: "Unsupported app package." });
+  }
+  const appPackageId = requestedPackageId ?? "com.antutu.ABenchMark";
   if (mobileActions.has(String(body.action))) {
     const versionValid = typeof body.versionCode === "number" &&
       Number.isSafeInteger(body.versionCode) &&
@@ -350,10 +578,30 @@ Deno.serve(async (request) => {
         : minimumSupportedVersion;
       const minimumVersionCode = Math.max(minimumSupportedVersion, configuredMinimum);
       const latestVersionCode = Math.max(minimumVersionCode, configuredLatest);
-      const updateUrl = typeof settings?.updateUrl === "string" ? settings.updateUrl : "";
+      const remoteConfig = settings?.remoteConfig && typeof settings.remoteConfig === "object"
+        ? settings.remoteConfig as Record<string, unknown>
+        : {};
+      const packageRelease = getPackageRelease(remoteConfig, appPackageId);
+      const legacyRelease = appPackageId === "com.antutu.ABenchMark" && packageRelease === null;
+      const selectedRelease = packageRelease ?? (legacyRelease ? settings : null);
+      const releaseMinimum = Number.isSafeInteger(selectedRelease?.minimumVersionCode)
+        ? Number(selectedRelease.minimumVersionCode)
+        : minimumVersionCode;
+      const releaseLatest = Number.isSafeInteger(selectedRelease?.latestVersionCode)
+        ? Number(selectedRelease.latestVersionCode)
+        : Math.max(releaseMinimum, latestVersionCode);
+      const minimumVersionRequired = remoteConfig.enforceMinimumVersion === true
+        ? releaseLatest
+        : releaseMinimum;
+      const storagePath = typeof selectedRelease?.apkStoragePath === "string"
+        ? selectedRelease.apkStoragePath
+        : "";
+      const downloadUrl = storagePath
+        ? updateDownloadEndpoint(supabaseUrl, false, appPackageId)
+        : "";
       const updateMessage = typeof settings?.updateMessage === "string"
         ? settings.updateMessage
-        : "Version 9.0 or newer is required to continue.";
+        : "A newer version is required to continue.";
       const channelUrl = typeof settings?.channelUrl === "string"
         ? settings.channelUrl
         : "https://t.me/iqoo_neo10_channel";
@@ -365,20 +613,31 @@ Deno.serve(async (request) => {
           premium: false,
           accessAllowed: false,
           adsEnabled: settings?.adsEnabled === true,
-          minimumVersionCode,
-          latestVersionCode,
-          updateUrl,
-          updateMessage,
+          minimumVersionCode: minimumVersionRequired,
+          latestVersionCode: releaseLatest,
+          updateUrl: downloadUrl,
+          updateFallbackUrl: typeof selectedRelease?.updateFallbackUrl === "string" &&
+              selectedRelease.updateFallbackUrl
+            ? selectedRelease.updateFallbackUrl
+            : typeof remoteConfig.updateFallbackUrl === "string"
+              ? remoteConfig.updateFallbackUrl
+            : "",
+          apkSha256: typeof selectedRelease?.apkSha256 === "string"
+            ? selectedRelease.apkSha256
+            : "",
+          updateMessage: typeof selectedRelease?.updateMessage === "string"
+            ? selectedRelease.updateMessage
+            : updateMessage,
           channelUrl,
           groupUrl,
           versionRequired: true,
         });
       }
       return jsonResponse(426, {
-        error: "Version 9.0 or newer is required. Update the app to continue.",
-        minimumVersionCode,
-        latestVersionCode,
-        updateUrl,
+        error: "A newer version is required. Update the app to continue.",
+        minimumVersionCode: minimumVersionRequired,
+        latestVersionCode: releaseLatest,
+        updateUrl: downloadUrl,
         channelUrl,
       });
     }
@@ -394,11 +653,14 @@ Deno.serve(async (request) => {
       return jsonResponse(500, { error: "App access settings are not configured" });
     }
     const publicSettings = { ...(data as Record<string, unknown>) };
-    if (typeof publicSettings.apkStoragePath === "string" && publicSettings.apkStoragePath) {
-      const { data: signed } = await supabase.storage
-        .from("app-updates")
-        .createSignedUrl(publicSettings.apkStoragePath, 3600);
-      if (signed?.signedUrl) publicSettings.apkDownloadUrl = signed.signedUrl;
+    const hasPublishedApk =
+      typeof publicSettings.apkStoragePath === "string" && publicSettings.apkStoragePath.length > 0;
+    publicSettings.updateUrl = "";
+    publicSettings.apkDownloadUrl = "";
+    if (hasPublishedApk) {
+      const downloadUrl = updateDownloadEndpoint(supabaseUrl);
+      publicSettings.updateUrl = downloadUrl;
+      publicSettings.apkDownloadUrl = downloadUrl;
     }
     return jsonResponse(200, publicSettings);
   }
@@ -411,6 +673,48 @@ Deno.serve(async (request) => {
     if (String(body.action).endsWith("-get")) {
       const { data, error } = await supabase.rpc("get_premium_public_settings");
       if (error || !data) return jsonResponse(500, { error: "Could not load app settings" });
+      if (body.action === "updates-get" && typeof data === "object") {
+        const settings = data as Record<string, unknown>;
+        const remoteConfig = settings.remoteConfig && typeof settings.remoteConfig === "object"
+          ? settings.remoteConfig as Record<string, unknown>
+          : {};
+        settings.enforceMinimumVersion = remoteConfig.enforceMinimumVersion === true;
+        const packageReleases = remoteConfig.packageReleases &&
+          typeof remoteConfig.packageReleases === "object" &&
+          !Array.isArray(remoteConfig.packageReleases)
+          ? remoteConfig.packageReleases as Record<string, unknown>
+          : {};
+        settings.packageReleases = packageReleases;
+        settings.packageDownloadUrls = Object.fromEntries(
+          [...supportedUpdatePackages].map((packageId) => [
+            packageId,
+            getPackageRelease(remoteConfig, packageId)?.apkStoragePath
+              ? updateDownloadEndpoint(supabaseUrl, true, packageId)
+              : "",
+          ]),
+        );
+        const storagePath = typeof settings.apkStoragePath === "string" ? settings.apkStoragePath : "";
+        settings.updateUrl = storagePath
+          ? updateDownloadEndpoint(supabaseUrl, true, "com.antutu.ABenchMark")
+          : "";
+        settings.updateFallbackUrl = typeof remoteConfig.updateFallbackUrl === "string"
+          ? remoteConfig.updateFallbackUrl
+          : "";
+        const monthlyBandwidthLimitGb = typeof remoteConfig.monthlyBandwidthLimitGb === "number" &&
+            Number.isFinite(remoteConfig.monthlyBandwidthLimitGb) &&
+            remoteConfig.monthlyBandwidthLimitGb >= 1 &&
+            remoteConfig.monthlyBandwidthLimitGb <= 10000
+          ? remoteConfig.monthlyBandwidthLimitGb
+          : defaultMonthlyBandwidthGb;
+        const { data: reservedBytes, error: bandwidthError } = await supabase.rpc(
+          "get_app_update_bandwidth_usage",
+        );
+        if (bandwidthError) {
+          return jsonResponse(500, { error: "Could not load APK bandwidth usage." });
+        }
+        settings.monthlyBandwidthLimitGb = monthlyBandwidthLimitGb;
+        settings.updateBandwidthReservedBytes = Number(reservedBytes) || 0;
+      }
       return jsonResponse(200, data);
     }
     if (body.action === "app-popups-get") {
@@ -489,6 +793,85 @@ Deno.serve(async (request) => {
           typeof body.updateUrl !== "string" || typeof body.updateMessage !== "string") {
         return jsonResponse(400, { error: "Enter valid version codes, update link, and message" });
       }
+      if (body.enforceMinimumVersion !== undefined &&
+          typeof body.enforceMinimumVersion !== "boolean") {
+        return jsonResponse(400, { error: "Choose whether to enforce the latest app version." });
+      }
+      if (body.enforceMinimumVersion === true) {
+        const { data: releaseSettings, error: releaseSettingsError } =
+          await supabase.rpc("get_premium_public_settings");
+        if (releaseSettingsError || !releaseSettings || typeof releaseSettings !== "object") {
+          return jsonResponse(500, { error: "Could not verify both package releases before enforcing the update." });
+        }
+        const savedRemoteConfig = releaseSettings.remoteConfig &&
+          typeof releaseSettings.remoteConfig === "object" &&
+          !Array.isArray(releaseSettings.remoteConfig)
+          ? releaseSettings.remoteConfig as Record<string, unknown>
+          : {};
+        const packageReleases = savedRemoteConfig.packageReleases &&
+          typeof savedRemoteConfig.packageReleases === "object" &&
+          !Array.isArray(savedRemoteConfig.packageReleases)
+          ? savedRemoteConfig.packageReleases as Record<string, unknown>
+          : {};
+        const bothPackagesPublished = [...supportedUpdatePackages].every((packageId) => {
+          const release = packageReleases[packageId];
+          if (!release || typeof release !== "object" || Array.isArray(release)) return false;
+          const releaseRecord = release as Record<string, unknown>;
+          return typeof releaseRecord.apkStoragePath === "string" &&
+            releaseRecord.apkStoragePath.length > 0 &&
+            releaseRecord.latestVersionCode === body.latestVersionCode;
+        });
+        if (!bothPackagesPublished) {
+          return jsonResponse(400, {
+            error: "Publish the same latest build for both Antutu and Ludashi before enforcing it.",
+          });
+        }
+      }
+      if (body.deliveryMode !== undefined &&
+          body.deliveryMode !== "external" && body.deliveryMode !== "supabase") {
+        return jsonResponse(400, { error: "Choose Supabase APK upload or an external HTTPS link." });
+      }
+      if (body.updateUrl && (() => {
+        try {
+          return new URL(body.updateUrl).protocol !== "https:";
+        } catch {
+          return true;
+        }
+      })()) {
+        return jsonResponse(400, { error: "The update destination must be a valid HTTPS URL." });
+      }
+      if (body.deliveryMode === "external" && !body.updateUrl) {
+        return jsonResponse(400, { error: "Enter the external HTTPS update destination." });
+      }
+      const updateFallbackUrl = typeof body.updateFallbackUrl === "string"
+        ? body.updateFallbackUrl.trim()
+        : "";
+      if (updateFallbackUrl && (() => {
+        try {
+          return new URL(updateFallbackUrl).protocol !== "https:";
+        } catch {
+          return true;
+        }
+      })()) {
+        return jsonResponse(400, { error: "The external fallback must be a valid HTTPS direct APK URL." });
+      }
+      const redirectUrl = typeof body.redirectUrl === "string" ? body.redirectUrl.trim() : "";
+      if (body.redirectUrl !== undefined && (!redirectUrl || (() => {
+        try {
+          return new URL(redirectUrl).protocol !== "https:";
+        } catch {
+          return true;
+        }
+      })())) {
+        return jsonResponse(400, { error: "The after-download redirect must be a valid HTTPS URL." });
+      }
+      if (body.monthlyBandwidthLimitGb !== undefined &&
+          (typeof body.monthlyBandwidthLimitGb !== "number" ||
+            !Number.isFinite(body.monthlyBandwidthLimitGb) ||
+            body.monthlyBandwidthLimitGb < 1 ||
+            body.monthlyBandwidthLimitGb > 10000)) {
+        return jsonResponse(400, { error: "Project bandwidth must be between 1 and 10,000 GB." });
+      }
       rpc = "set_app_update_config";
       args = { p_latest_version_code: body.latestVersionCode, p_minimum_version_code: body.minimumVersionCode,
         p_update_url: body.updateUrl, p_update_message: body.updateMessage };
@@ -501,6 +884,69 @@ Deno.serve(async (request) => {
     }
     const { data, error } = await supabase.rpc(rpc, args);
     if (error || !data) return jsonResponse(400, { error: error?.message || "Could not save settings" });
+    if (body.action === "updates-set" && body.redirectUrl !== undefined) {
+      const settings = data as Record<string, unknown>;
+      const groupUrl = typeof settings.groupUrl === "string" ? settings.groupUrl : "";
+      if (!groupUrl) {
+        return jsonResponse(500, { error: "Version policy saved, but the existing discussion link could not be loaded." });
+      }
+      const { data: links, error: linksError } = await supabase.rpc("set_app_telegram_links", {
+        p_channel_url: typeof body.redirectUrl === "string" ? body.redirectUrl.trim() : "",
+        p_group_url: groupUrl,
+      });
+      if (linksError || !links) {
+        return jsonResponse(500, { error: "Version policy saved, but the after-download redirect could not be saved." });
+      }
+      const savedLinks = links as Record<string, unknown>;
+      data.channelUrl = savedLinks.channelUrl;
+    }
+    if (body.action === "updates-set" &&
+        (body.deliveryMode || body.enforceMinimumVersion !== undefined)) {
+      const { data: current, error: settingsError } = await supabase.rpc("get_premium_public_settings");
+      if (settingsError || !current || typeof current !== "object") {
+        return jsonResponse(500, { error: "Version policy saved, but delivery mode could not be loaded." });
+      }
+      const settings = current as Record<string, unknown>;
+      const remoteConfig = settings.remoteConfig && typeof settings.remoteConfig === "object"
+        ? { ...(settings.remoteConfig as Record<string, unknown>) }
+        : {};
+      if (body.deliveryMode) remoteConfig.updateDeliveryMode = body.deliveryMode;
+      const enforceMinimumVersion = typeof body.enforceMinimumVersion === "boolean"
+        ? body.enforceMinimumVersion
+        : remoteConfig.enforceMinimumVersion === true;
+      remoteConfig.enforceMinimumVersion = enforceMinimumVersion;
+      remoteConfig.updateFallbackUrl = typeof body.updateFallbackUrl === "string"
+        ? body.updateFallbackUrl.trim()
+        : typeof remoteConfig.updateFallbackUrl === "string"
+          ? remoteConfig.updateFallbackUrl
+          : "";
+      remoteConfig.monthlyBandwidthLimitGb = typeof body.monthlyBandwidthLimitGb === "number"
+        ? body.monthlyBandwidthLimitGb
+        : typeof remoteConfig.monthlyBandwidthLimitGb === "number"
+          ? remoteConfig.monthlyBandwidthLimitGb
+          : defaultMonthlyBandwidthGb;
+      const { error: configError } = await supabase.rpc("set_app_remote_config", {
+        p_config: remoteConfig,
+        p_display_version: typeof settings.displayVersion === "string" && settings.displayVersion
+          ? settings.displayVersion
+          : "1.0",
+        p_release_notes: typeof settings.releaseNotes === "string" ? settings.releaseNotes : "",
+        p_apk_sha256: typeof settings.apkSha256 === "string" ? settings.apkSha256 : "",
+        p_apk_storage_path: typeof settings.apkStoragePath === "string" ? settings.apkStoragePath : "",
+      });
+      if (configError) {
+        return jsonResponse(500, { error: "Version policy saved, but download source could not be saved." });
+      }
+      const saved = data && typeof data === "object" ? data as Record<string, unknown> : {};
+      return jsonResponse(200, {
+        ...saved,
+        deliveryMode: remoteConfig.updateDeliveryMode,
+        enforceMinimumVersion,
+        updateFallbackUrl: remoteConfig.updateFallbackUrl,
+        monthlyBandwidthLimitGb: remoteConfig.monthlyBandwidthLimitGb,
+        redirectUrl: data.channelUrl,
+      });
+    }
     return jsonResponse(200, data);
   }
 
@@ -536,6 +982,10 @@ Deno.serve(async (request) => {
       });
     }
     if (body.action === "admin-apk-upload-url") {
+      const packageId = typeof body.packageId === "string" ? body.packageId : "";
+      if (!supportedUpdatePackages.has(packageId)) {
+        return jsonResponse(400, { error: "Select a supported app package." });
+      }
       const fileName = typeof body.fileName === "string" ? body.fileName.trim() : "";
       const fileSize = Number(body.fileSize);
       if (!/^[A-Za-z0-9._-]{1,120}\.apk$/i.test(fileName) || !Number.isSafeInteger(fileSize) || fileSize < 1 || fileSize > 200 * 1024 * 1024) {
@@ -547,34 +997,81 @@ Deno.serve(async (request) => {
       return jsonResponse(200, { path, signedUrl: data.signedUrl, token: data.token });
     }
     const path = typeof body.path === "string" ? body.path.trim() : "";
+    const packageId = typeof body.packageId === "string" ? body.packageId : "";
     const sha256 = typeof body.sha256 === "string" ? body.sha256.trim().toLowerCase() : "";
     const latestVersionCode = Number(body.latestVersionCode);
     const minimumVersionCode = Number(body.minimumVersionCode);
     const displayVersion = typeof body.displayVersion === "string" ? body.displayVersion.trim() : "";
-    if (!/^[0-9a-f]{64}$/.test(sha256) || !/^[0-9a-f-]{37,180}$/.test(path) ||
+    const updateFallbackUrl = typeof body.updateFallbackUrl === "string"
+      ? body.updateFallbackUrl.trim()
+      : "";
+    if (!supportedUpdatePackages.has(packageId) ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[A-Za-z0-9._-]{1,120}\.apk$/i.test(path) ||
+        !/^[0-9a-f]{64}$/.test(sha256) ||
         !Number.isSafeInteger(latestVersionCode) || !Number.isSafeInteger(minimumVersionCode) ||
         latestVersionCode < 1 || minimumVersionCode < 0 || minimumVersionCode > latestVersionCode ||
         !/^[^<>]{1,32}$/.test(displayVersion)) {
       return jsonResponse(400, { error: "Enter valid APK release metadata." });
     }
+    if (updateFallbackUrl) {
+      try {
+        if (new URL(updateFallbackUrl).protocol !== "https:" || updateFallbackUrl.length > 500) {
+          throw new Error("Invalid fallback URL");
+        }
+      } catch {
+        return jsonResponse(400, { error: "The package fallback must be a valid HTTPS APK URL." });
+      }
+    }
+    const { data: currentSettings, error: settingsError } = await supabase.rpc("get_premium_public_settings");
+    if (settingsError || !currentSettings) {
+      return jsonResponse(500, { error: "Could not load existing release settings." });
+    }
+    const currentRemoteConfig = currentSettings.remoteConfig &&
+      typeof currentSettings.remoteConfig === "object" &&
+      !Array.isArray(currentSettings.remoteConfig)
+      ? currentSettings.remoteConfig as Record<string, unknown>
+      : {};
+    const packageReleases = currentRemoteConfig.packageReleases &&
+      typeof currentRemoteConfig.packageReleases === "object" &&
+      !Array.isArray(currentRemoteConfig.packageReleases)
+      ? currentRemoteConfig.packageReleases as Record<string, unknown>
+      : {};
+    packageReleases[packageId] = {
+      latestVersionCode,
+      minimumVersionCode,
+      displayVersion,
+      releaseNotes: typeof body.releaseNotes === "string" ? body.releaseNotes.slice(0, 2000) : "",
+      updateMessage: typeof body.updateMessage === "string"
+        ? body.updateMessage.slice(0, 240)
+        : "A new update is available.",
+      updateFallbackUrl,
+      apkSha256: sha256,
+      apkStoragePath: path,
+    };
+    const isAntutuRelease = packageId === "com.antutu.ABenchMark";
     const { data, error } = await supabase.rpc("set_app_remote_config", {
-      p_config: (await supabase.rpc("get_premium_public_settings")).data?.remoteConfig ?? {},
-      p_display_version: displayVersion,
-      p_release_notes: typeof body.releaseNotes === "string" ? body.releaseNotes.slice(0, 2000) : "",
-      p_apk_sha256: sha256,
-      p_apk_storage_path: path,
+      p_config: { ...currentRemoteConfig, packageReleases },
+      p_display_version: isAntutuRelease
+        ? displayVersion
+        : String(currentSettings.displayVersion || displayVersion),
+      p_release_notes: isAntutuRelease
+        ? typeof body.releaseNotes === "string" ? body.releaseNotes.slice(0, 2000) : ""
+        : String(currentSettings.releaseNotes ?? ""),
+      p_apk_sha256: isAntutuRelease ? sha256 : String(currentSettings.apkSha256 ?? ""),
+      p_apk_storage_path: isAntutuRelease ? path : String(currentSettings.apkStoragePath ?? ""),
     });
     if (error || !data) return jsonResponse(500, { error: error?.message || "Could not publish APK release." });
-    const { data: signedDownload } = await supabase.storage
-      .from("app-updates")
-      .createSignedUrl(path, 31536000);
-    const { data: updated, error: updateError } = await supabase.rpc("set_app_update_config", {
-      p_latest_version_code: latestVersionCode,
-      p_minimum_version_code: minimumVersionCode,
-      p_update_url: signedDownload?.signedUrl || (typeof body.updateUrl === "string" ? body.updateUrl : ""),
-      p_update_message: typeof body.updateMessage === "string" ? body.updateMessage.slice(0, 240) : "A new update is available.",
-    });
-    if (updateError || !updated) return jsonResponse(500, { error: "APK uploaded but release settings could not be published." });
+    if (isAntutuRelease) {
+      const { data: updated, error: updateError } = await supabase.rpc("set_app_update_config", {
+        p_latest_version_code: latestVersionCode,
+        p_minimum_version_code: minimumVersionCode,
+        p_update_url: updateDownloadEndpoint(supabaseUrl),
+        p_update_message: typeof body.updateMessage === "string"
+          ? body.updateMessage.slice(0, 240)
+          : "A new update is available.",
+      });
+      if (updateError || !updated) return jsonResponse(500, { error: "APK uploaded but release settings could not be published." });
+    }
     return jsonResponse(200, { published: true, settings: data });
   }
 
@@ -603,6 +1100,18 @@ Deno.serve(async (request) => {
         : {};
       return jsonResponse(200, {
         adsPolicy: remoteConfig.adsPolicy,
+        adsProvider: remoteConfig.adsProvider === "inmobi" ? "inmobi" : "startio",
+        inmobiAccountId: typeof remoteConfig.inmobiAccountId === "string"
+          ? remoteConfig.inmobiAccountId
+          : "",
+        inmobiInterstitialPlacementId: typeof remoteConfig.inmobiInterstitialPlacementId === "string"
+          ? remoteConfig.inmobiInterstitialPlacementId
+          : "",
+        performanceBackgroundDelaySeconds: Number.isSafeInteger(
+          remoteConfig.performanceBackgroundDelaySeconds,
+        ) && Number(remoteConfig.performanceBackgroundDelaySeconds) > 0
+          ? Number(remoteConfig.performanceBackgroundDelaySeconds)
+          : 5,
         adsEnabled: data?.adsEnabled === true,
         premiumAdsEnabled: data?.premiumAdsEnabled === true,
         bannerSlotLimit: data?.bannerSlotLimit,
@@ -626,21 +1135,88 @@ Deno.serve(async (request) => {
       if (!body.adsPolicy || typeof body.adsPolicy !== "object" || Array.isArray(body.adsPolicy)) {
         return jsonResponse(400, { error: "Enter a valid advertising policy" });
       }
+      const adsProvider = body.adsProvider === "inmobi" ? "inmobi" : body.adsProvider === "startio"
+        ? "startio"
+        : null;
+      const inmobiAccountId = typeof body.inmobiAccountId === "string"
+        ? body.inmobiAccountId.trim()
+        : "";
+      const inmobiInterstitialPlacementId = typeof body.inmobiInterstitialPlacementId === "string"
+        ? body.inmobiInterstitialPlacementId.trim()
+        : "";
+      const performanceBackgroundDelaySeconds = Number(body.performanceBackgroundDelaySeconds);
+      if (!adsProvider) {
+        return jsonResponse(400, { error: "Choose Start.io or InMobi as the ad provider." });
+      }
+      if (inmobiAccountId && !/^[A-Za-z0-9._-]{1,128}$/.test(inmobiAccountId)) {
+        return jsonResponse(400, { error: "Enter a valid InMobi app/account ID." });
+      }
+      if (inmobiInterstitialPlacementId &&
+          (!/^\d{1,19}$/.test(inmobiInterstitialPlacementId) ||
+            BigInt(inmobiInterstitialPlacementId) > 9223372036854775807n)) {
+        return jsonResponse(400, { error: "Enter an InMobi interstitial placement ID supported by Android." });
+      }
+      if (!Number.isSafeInteger(performanceBackgroundDelaySeconds) ||
+          performanceBackgroundDelaySeconds <= 0 ||
+          performanceBackgroundDelaySeconds > Math.floor(Number.MAX_SAFE_INTEGER / 1_000)) {
+        return jsonResponse(400, { error: "Enter a positive whole number of seconds that the app can schedule safely." });
+      }
       const { data, error } = await supabase.rpc("set_premium_ads_policy", {
         p_policy: body.adsPolicy,
       });
       if (error || !data) {
         return jsonResponse(400, { error: error?.message || "Could not update advertising policy" });
       }
-      const remoteConfig = data.remoteConfig && typeof data.remoteConfig === "object"
-        ? data.remoteConfig as Record<string, unknown>
+      const { data: current, error: settingsError } = await supabase.rpc(
+        "get_premium_public_settings",
+      );
+      if (settingsError || !current) {
+        return jsonResponse(500, { error: "Advertising policy saved, but network settings could not be loaded." });
+      }
+      const currentRemoteConfig = current.remoteConfig &&
+        typeof current.remoteConfig === "object" &&
+        !Array.isArray(current.remoteConfig)
+        ? current.remoteConfig as Record<string, unknown>
         : {};
+      const remoteConfig = {
+        ...currentRemoteConfig,
+        adsPolicy: data.adsPolicy ?? body.adsPolicy,
+        adsProvider,
+        inmobiAccountId,
+        inmobiInterstitialPlacementId,
+        performanceBackgroundDelaySeconds,
+      };
+      const { data: savedSettings, error: configError } = await supabase.rpc(
+        "set_app_remote_config",
+        {
+          p_config: remoteConfig,
+          p_display_version: typeof current.displayVersion === "string" && current.displayVersion
+            ? current.displayVersion
+            : "1.0",
+          p_release_notes: typeof current.releaseNotes === "string" ? current.releaseNotes : "",
+          p_apk_sha256: typeof current.apkSha256 === "string" ? current.apkSha256 : "",
+          p_apk_storage_path: typeof current.apkStoragePath === "string"
+            ? current.apkStoragePath
+            : "",
+        },
+      );
+      if (configError || !savedSettings) {
+        return jsonResponse(500, { error: "Advertising policy saved, but provider and delay settings could not be saved." });
+      }
+      const savedRemoteConfig = savedSettings.remoteConfig &&
+        typeof savedSettings.remoteConfig === "object"
+        ? savedSettings.remoteConfig as Record<string, unknown>
+        : remoteConfig;
       return jsonResponse(200, {
-        adsPolicy: remoteConfig.adsPolicy,
-        adsEnabled: data.adsEnabled === true,
-        premiumAdsEnabled: data.premiumAdsEnabled === true,
-        bannerSlotLimit: data.bannerSlotLimit,
-        interstitialsPerDay: data.interstitialsPerDay,
+        adsPolicy: savedRemoteConfig.adsPolicy,
+        adsProvider,
+        inmobiAccountId,
+        inmobiInterstitialPlacementId,
+        performanceBackgroundDelaySeconds,
+        adsEnabled: savedSettings.adsEnabled === true,
+        premiumAdsEnabled: savedSettings.premiumAdsEnabled === true,
+        bannerSlotLimit: savedSettings.bannerSlotLimit,
+        interstitialsPerDay: savedSettings.interstitialsPerDay,
       });
     }
 
@@ -1379,25 +1955,48 @@ Deno.serve(async (request) => {
     }
     const { data: settings } = await supabase.rpc("get_premium_public_settings");
     const appSettings = settings && typeof settings === "object" ? settings as Record<string, unknown> : {};
+    const appRemoteConfig = appSettings.remoteConfig && typeof appSettings.remoteConfig === "object"
+      ? appSettings.remoteConfig as Record<string, unknown>
+      : {};
+    const packageRelease = getPackageRelease(appRemoteConfig, appPackageId);
+    const legacyRelease = appPackageId === "com.antutu.ABenchMark" && packageRelease === null;
+    const selectedRelease = packageRelease ?? (legacyRelease ? appSettings : null);
+    const selectedPath = typeof selectedRelease?.apkStoragePath === "string"
+      ? selectedRelease.apkStoragePath
+      : "";
+    const releaseMinimum = Number.isSafeInteger(selectedRelease?.minimumVersionCode)
+      ? Number(selectedRelease.minimumVersionCode)
+      : data.minimumVersionCode;
+    const releaseLatest = Number.isSafeInteger(selectedRelease?.latestVersionCode)
+      ? Number(selectedRelease.latestVersionCode)
+      : data.latestVersionCode;
+    const minimumVersionRequired = appRemoteConfig.enforceMinimumVersion === true
+      ? releaseLatest
+      : releaseMinimum;
     const result = {
       ...data,
+      minimumVersionCode: minimumVersionRequired,
+      latestVersionCode: releaseLatest,
       accessCheckIntervalHours: data.premium === true
         ? appSettings.premiumAccessCheckIntervalHours ?? 6
         : appSettings.normalAccessCheckIntervalHours ?? 6,
-      displayVersion: appSettings.displayVersion ?? "",
-      releaseNotes: appSettings.releaseNotes ?? "",
-      apkSha256: appSettings.apkSha256 ?? "",
-      apkStoragePath: appSettings.apkStoragePath ?? "",
-      updateUrl: appSettings.updateUrl ?? "",
-      updateMessage: appSettings.updateMessage ?? "A new update is available.",
-      remoteConfig: appSettings.remoteConfig ?? {},
+      displayVersion: selectedRelease?.displayVersion ?? "",
+      releaseNotes: selectedRelease?.releaseNotes ?? "",
+      apkSha256: selectedRelease?.apkSha256 ?? "",
+      apkStoragePath: selectedPath,
+      updateUrl: "",
+      updateFallbackUrl: typeof selectedRelease?.updateFallbackUrl === "string" &&
+          selectedRelease.updateFallbackUrl
+        ? selectedRelease.updateFallbackUrl
+        : typeof appRemoteConfig.updateFallbackUrl === "string"
+          ? appRemoteConfig.updateFallbackUrl
+          : "",
+      updateMessage: selectedRelease?.updateMessage ?? appSettings.updateMessage ?? "A new update is available.",
+      remoteConfig: appRemoteConfig,
       popups: Array.isArray(appSettings.popups) ? appSettings.popups : [],
     };
     if (typeof result.apkStoragePath === "string" && result.apkStoragePath) {
-      const { data: signed } = await supabase.storage
-        .from("app-updates")
-        .createSignedUrl(result.apkStoragePath, 3600);
-      if (signed?.signedUrl) result.updateUrl = signed.signedUrl;
+      result.updateUrl = updateDownloadEndpoint(supabaseUrl, false, appPackageId);
     }
     return jsonResponse(200, result);
   }

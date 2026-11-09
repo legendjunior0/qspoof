@@ -25,8 +25,8 @@ android {
         applicationId = "com.antutu.ABenchMark"
         minSdk = 30
         targetSdk = 36
-        versionCode = 11
-        versionName = "11.0"
+        versionCode = 13
+        versionName = "5.0"
         buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl.escapeBuildConfig()}\"")
         buildConfigField(
             "String",
@@ -45,12 +45,14 @@ android {
         create("antutu") {
             dimension = "distribution"
             applicationId = "com.antutu.ABenchMark"
-            manifestPlaceholders["appLabel"] = "QSpoof"
+            manifestPlaceholders["appLabel"] = "QSpoof v5.0"
+            manifestPlaceholders["engineTaskAffinity"] = "com.antutu.ABenchMark.engine"
         }
         create("ludashi") {
             dimension = "distribution"
             applicationId = "com.ludashi.benchmark"
-            manifestPlaceholders["appLabel"] = "Qspoof"
+            manifestPlaceholders["appLabel"] = "QSpoof v5.0"
+            manifestPlaceholders["engineTaskAffinity"] = "com.ludashi.benchmark.engine"
         }
     }
 
@@ -96,6 +98,6 @@ android {
 
 dependencies {
     implementation("com.google.zxing:core:3.5.3")
-    implementation("com.startapp:inapp-sdk:5.3.1")
+    implementation("com.inmobi.monetization:inmobi-ads-kotlin:10.8.3")
     testImplementation(libs.junit)
 }
