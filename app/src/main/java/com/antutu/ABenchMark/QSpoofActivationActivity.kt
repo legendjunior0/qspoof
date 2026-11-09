@@ -17,6 +17,10 @@ class QSpoofActivationActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!OfficialRelease.hasValidSignature(this)) {
+            finishAndRemoveTask()
+            return
+        }
         if (!Settings.canDrawOverlays(this)) {
             Toast.makeText(
                 this,

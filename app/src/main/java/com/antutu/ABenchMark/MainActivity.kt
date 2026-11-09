@@ -82,7 +82,7 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!hasOfficialReleaseSignature()) {
+        if (!OfficialRelease.hasValidSignature(this)) {
             finishAndRemoveTask()
             return
         }
@@ -129,22 +129,6 @@ class MainActivity : Activity() {
         if (previouslyOpenedVersion == versionCode) return false
         preferences.edit().putLong("last_opened_version_code", versionCode).commit()
         return true
-    }
-
-    private fun hasOfficialReleaseSignature(): Boolean {
-        if (BuildConfig.DEBUG) return true
-
-        val packageInfo = packageManager.getPackageInfo(
-            packageName,
-            PackageManager.PackageInfoFlags.of(PackageManager.GET_SIGNING_CERTIFICATES.toLong())
-        )
-        val signers = packageInfo.signingInfo?.apkContentsSigners ?: return false
-        return signers.any { signature ->
-            val fingerprint = MessageDigest.getInstance("SHA-256")
-                .digest(signature.toByteArray())
-                .joinToString("") { byte -> "%02X".format(byte) }
-            fingerprint == BuildConfig.RELEASE_CERT_SHA256
-        }
     }
 
     override fun onDestroy() {
