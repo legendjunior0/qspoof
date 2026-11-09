@@ -935,6 +935,7 @@ object PremiumAccess {
                 // Send the installed build on every app API call. The server
                 // rejects device and app requests from older or unidentified builds.
                 .put("versionCode", BuildConfig.VERSION_CODE)
+                .put("packageId", BuildConfig.APPLICATION_ID)
             if (androidId != null) body.put("androidId", androidId)
             if (transactionId != null) body.put("transactionId", transactionId)
             if (displayName != null) {

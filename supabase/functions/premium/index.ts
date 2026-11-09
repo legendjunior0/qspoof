@@ -568,6 +568,44 @@ Deno.serve(async (request) => {
     const versionValid = typeof body.versionCode === "number" &&
       Number.isSafeInteger(body.versionCode) &&
       body.versionCode >= minimumSupportedVersion;
+    if (versionValid && body.action !== "app-access") {
+      const { data: settings, error: settingsError } =
+        await supabase.rpc("get_premium_public_settings");
+      if (settingsError || !settings || typeof settings !== "object") {
+        console.error("Could not load mobile version policy", settingsError?.message);
+        return jsonResponse(503, { error: "Could not verify the app version policy." });
+      }
+      const remoteConfig = settings.remoteConfig && typeof settings.remoteConfig === "object"
+        ? settings.remoteConfig as Record<string, unknown>
+        : {};
+      const packageRelease = getPackageRelease(remoteConfig, appPackageId);
+      const legacyRelease = appPackageId === "com.antutu.ABenchMark" && packageRelease === null;
+      const selectedRelease = packageRelease ?? (legacyRelease ? settings : null);
+      const releaseMinimum = Number.isSafeInteger(selectedRelease?.minimumVersionCode)
+        ? Number(selectedRelease.minimumVersionCode)
+        : Number.isSafeInteger(settings.minimumVersionCode)
+          ? Number(settings.minimumVersionCode)
+          : minimumSupportedVersion;
+      const releaseLatest = Number.isSafeInteger(selectedRelease?.latestVersionCode)
+        ? Number(selectedRelease.latestVersionCode)
+        : Number.isSafeInteger(settings.latestVersionCode)
+          ? Number(settings.latestVersionCode)
+          : Math.max(releaseMinimum, minimumSupportedVersion);
+      const minimumVersionRequired = remoteConfig.enforceMinimumVersion === true
+        ? releaseLatest
+        : releaseMinimum;
+      if (Number(body.versionCode) < Math.max(minimumSupportedVersion, minimumVersionRequired)) {
+        return jsonResponse(426, {
+          error: "A newer version is required. Update the app to continue.",
+          minimumVersionCode: Math.max(minimumSupportedVersion, minimumVersionRequired),
+          latestVersionCode: releaseLatest,
+          updateUrl: selectedRelease?.apkStoragePath
+            ? updateDownloadEndpoint(supabaseUrl, false, appPackageId)
+            : "",
+          updateFallbackUrl: selectedRelease?.updateFallbackUrl ?? remoteConfig.updateFallbackUrl ?? "",
+        });
+      }
+    }
     if (!versionValid) {
       const { data: settings } = await supabase.rpc("get_premium_public_settings");
       const configuredMinimum = Number.isSafeInteger(settings?.minimumVersionCode)
