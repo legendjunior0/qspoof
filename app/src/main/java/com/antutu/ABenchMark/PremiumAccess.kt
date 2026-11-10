@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.os.StatFs
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Base64
 import android.util.Log
 import android.security.keystore.KeyGenParameterSpec
@@ -61,6 +62,8 @@ object PremiumAccess {
         val releaseNotes: String = "",
         val apkSha256: String = "",
         val apkStoragePath: String = "",
+        val serverVerified: Boolean = false,
+        val qengineAuthorizationMinutes: Int = 30,
         val isFinalCheck: Boolean = true,
         val error: String? = null
     )
@@ -459,7 +462,7 @@ object PremiumAccess {
                 )
             } else {
                 val finalResult = if (result.error != null && cached != null) {
-                    cached.copy(isFinalCheck = true)
+                    cached.copy(isFinalCheck = true, serverVerified = false)
                 } else {
                     result.copy(isFinalCheck = true)
                 }
@@ -488,8 +491,28 @@ object PremiumAccess {
             ).longVersionCode.toInt()
             val startupBody = (telemetry ?: JSONObject())
                 .put("versionCode", versionCode)
+                .put("appVersion", BuildConfig.VERSION_NAME)
                 .put("packageId", context.packageName)
             val response = post("app-access", androidId, null, extraBody = startupBody)
+            if (response.optBoolean("versionRequired")) {
+                return AppAccessResult(
+                    allowed = true,
+                    premium = false,
+                    adsEnabled = false,
+                    latestVersionCode = response.optInt("latestVersionCode", 0),
+                    updateRequired = true,
+                    updateUrl = response.optString("updateUrl"),
+                    updateFallbackUrl = response.optString("updateFallbackUrl"),
+                    updateMessage = response.optString(
+                        "updateMessage",
+                        "A newer version is required to continue."
+                    ),
+                    displayVersion = response.optString("displayVersion", BuildConfig.VERSION_NAME),
+                    apkSha256 = response.optString("apkSha256"),
+                    serverVerified = true,
+                    isFinalCheck = true
+                )
+            }
             if (!response.has("premium") || !response.has("accessAllowed") || !response.has("adsEnabled")) {
                 throw IOException("Premium server returned incomplete app access status")
             }
@@ -564,7 +587,10 @@ object PremiumAccess {
                 displayVersion = response.optString("displayVersion", settings.optString("displayVersion")),
                 releaseNotes = response.optString("releaseNotes", settings.optString("releaseNotes")),
                 apkSha256 = response.optString("apkSha256", settings.optString("apkSha256")),
-                apkStoragePath = response.optString("apkStoragePath", settings.optString("apkStoragePath"))
+                apkStoragePath = response.optString("apkStoragePath", settings.optString("apkStoragePath")),
+                serverVerified = true,
+                qengineAuthorizationMinutes = response.optInt("qengineAuthorizationMinutes", 30)
+                    .coerceIn(1, 10_080)
             )
             if (allowed) {
                 applyAccessState(result)
@@ -624,16 +650,26 @@ object PremiumAccess {
             apkStoragePath = cache.optString("apkStoragePath"),
             remoteConfig = cache.optJSONObject("remoteConfig") ?: JSONObject(),
             accessCheckIntervalHours = cache.optInt("accessCheckIntervalHours", 12)
-                .coerceIn(1, 168)
+                .coerceIn(1, 168),
+            serverVerified = false
         )
         return result.also(::applyAccessState)
     }
 
     private fun saveAppAccessCache(context: Context, result: AppAccessResult) {
-        val now = System.currentTimeMillis()
+        val now = SystemClock.elapsedRealtime()
         val intervalHours = result.accessCheckIntervalHours.coerceIn(1, 168)
+        val bootCount = Settings.Global.getInt(context.contentResolver, "boot_count", -1)
+        if (bootCount < 0) {
+            Log.w(ACCESS_CACHE_TAG, "Could not read the boot count; offline access cache will be unavailable")
+            clearAppAccessCache(context)
+            return
+        }
         val cache = JSONObject()
-            .put("expiresAt", now + intervalHours * 60L * 60L * 1000L)
+            .put("expiresAtElapsedMs", now + intervalHours * 60L * 60L * 1000L)
+            .put("bootCount", bootCount)
+            .put("packageId", BuildConfig.APPLICATION_ID)
+            .put("versionCode", BuildConfig.VERSION_CODE)
             .put("allowed", result.allowed)
             .put("premium", result.premium)
             .put("adsEnabled", result.adsEnabled)
@@ -683,7 +719,12 @@ object PremiumAccess {
             cipher.init(Cipher.DECRYPT_MODE, accessCacheKey(context), GCMParameterSpec(128, iv))
             cipher.updateAAD(context.packageName.toByteArray(Charsets.UTF_8))
             val cache = JSONObject(String(cipher.doFinal(ciphertext), Charsets.UTF_8))
-            if (cache.optLong("expiresAt", 0L) <= System.currentTimeMillis() ||
+            val bootCount = Settings.Global.getInt(context.contentResolver, "boot_count", -1)
+            if (bootCount < 0 ||
+                cache.optInt("bootCount", -1) != bootCount ||
+                cache.optString("packageId") != BuildConfig.APPLICATION_ID ||
+                cache.optInt("versionCode", -1) != BuildConfig.VERSION_CODE ||
+                cache.optLong("expiresAtElapsedMs", 0L) <= SystemClock.elapsedRealtime() ||
                 !cache.optBoolean("allowed", false)
             ) {
                 clearAppAccessCache(context)
@@ -935,6 +976,7 @@ object PremiumAccess {
                 // Send the installed build on every app API call. The server
                 // rejects device and app requests from older or unidentified builds.
                 .put("versionCode", BuildConfig.VERSION_CODE)
+                .put("appVersion", BuildConfig.VERSION_NAME)
                 .put("packageId", BuildConfig.APPLICATION_ID)
             if (androidId != null) body.put("androidId", androidId)
             if (transactionId != null) body.put("transactionId", transactionId)
@@ -962,6 +1004,7 @@ object PremiumAccess {
             } catch (error: JSONException) {
                 throw IOException("Premium server returned HTTP $statusCode")
             }
+            if (statusCode == 426 && action == "app-access") return response
             if (statusCode !in 200..299) {
                 throw IOException(
                     response.optString("error").ifBlank {
@@ -980,6 +1023,8 @@ object PremiumAccess {
             context.contentResolver,
             Settings.Secure.ANDROID_ID
         )?.trim()?.takeIf { it.length in 8..128 }
+
+    internal fun installationId(context: Context): String? = getAndroidId(context)
 
     private fun deviceModel(): String = listOf(Build.MANUFACTURER, Build.MODEL)
         .filter { it.isNotBlank() }

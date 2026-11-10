@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 const publicApiKey = "sb_publishable_hi9tDuZNDMr8vF0vAwF5wg_s-XsIn6J";
 const masterAdminEmail = "adityakumar.as12345@gmail.com";
+const FUNCTION_SOURCE_BUILD = "qspoof-v5.0-build15";
 
 const jsonResponse = (status: number, body: Record<string, unknown>) =>
   new Response(JSON.stringify(body), {
@@ -80,7 +81,17 @@ Deno.serve(async (request) => {
   }
 
   if (action === "health") {
-    return jsonResponse(200, { ok: true, service: "premium-config" });
+    return jsonResponse(200, {
+      ok: true,
+      service: "premium-config",
+      serverTime: new Date().toISOString(),
+      functionBuildId: Deno.env.get("QSPOOF_FUNCTION_BUILD_ID") || FUNCTION_SOURCE_BUILD,
+      functionCapabilities: [
+        "public-config-v1",
+        "release-settings-v1",
+        "interstitial-provider-config-v1",
+      ],
+    });
   }
 
   if (action === "public-config") {
@@ -175,6 +186,9 @@ Deno.serve(async (request) => {
     return jsonResponse(200, {
       adsPolicy: remoteConfig.adsPolicy,
       adsProvider: remoteConfig.adsProvider === "inmobi" ? "inmobi" : "startio",
+      startioAppId: typeof remoteConfig.startioAppId === "string"
+        ? remoteConfig.startioAppId
+        : "",
       inmobiAccountId: typeof remoteConfig.inmobiAccountId === "string"
         ? remoteConfig.inmobiAccountId
         : "",
@@ -203,12 +217,18 @@ Deno.serve(async (request) => {
     const inmobiAccountId = typeof body.inmobiAccountId === "string"
       ? body.inmobiAccountId.trim()
       : "";
+    const startioAppId = typeof body.startioAppId === "string"
+      ? body.startioAppId.trim()
+      : "";
     const inmobiInterstitialPlacementId = typeof body.inmobiInterstitialPlacementId === "string"
       ? body.inmobiInterstitialPlacementId.trim()
       : "";
     const performanceBackgroundDelaySeconds = Number(body.performanceBackgroundDelaySeconds);
     if (!adsProvider) {
       return jsonResponse(400, { error: "Choose Start.io or InMobi as the ad provider." });
+    }
+    if (startioAppId && !/^[A-Za-z0-9._-]{1,128}$/.test(startioAppId)) {
+      return jsonResponse(400, { error: "Enter a valid Start.io publisher App ID." });
     }
     if (inmobiAccountId && !/^[A-Za-z0-9._-]{1,128}$/.test(inmobiAccountId)) {
       return jsonResponse(400, { error: "Enter a valid InMobi app/account ID." });
@@ -238,6 +258,7 @@ Deno.serve(async (request) => {
       ...currentRemoteConfig,
       adsPolicy: body.adsPolicy,
       adsProvider,
+      startioAppId,
       inmobiAccountId,
       inmobiInterstitialPlacementId,
       performanceBackgroundDelaySeconds,
@@ -260,6 +281,7 @@ Deno.serve(async (request) => {
     return jsonResponse(200, {
       adsPolicy: savedRemoteConfig.adsPolicy,
       adsProvider,
+      startioAppId,
       inmobiAccountId,
       inmobiInterstitialPlacementId,
       performanceBackgroundDelaySeconds,

@@ -16,6 +16,15 @@ const publicApiKey = "sb_publishable_hi9tDuZNDMr8vF0vAwF5wg_s-XsIn6J";
 const masterAdminEmail = "adityakumar.as12345@gmail.com";
 const defaultMonthlyBandwidthGb = 10;
 const updateDownloadBandwidthShare = 0.4;
+const DEFAULT_QENGINE_AUTHORIZATION_MINUTES = 30;
+const MAX_QENGINE_AUTHORIZATION_MINUTES = 10_080;
+const APP_RELEASE_IDENTITY = "5.0";
+const FUNCTION_SOURCE_BUILD = "qspoof-v5.0-build14";
+const FUNCTION_CAPABILITIES = [
+  "release-identity-v1",
+  "qengine-grant-v1",
+  "deployment-health-v1",
+];
 const motherLoginEmail = "adityakumar.as12345@email.com";
 const motherAccountEmail = "adityakumar.as12345@gmail.com";
 const motherLoginAliases = new Set([motherLoginEmail, motherAccountEmail]);
@@ -40,7 +49,11 @@ function getClientIp(request: Request): string | null {
   }
 }
 
-const supportedUpdatePackages = new Set(["com.antutu.ABenchMark", "com.ludashi.benchmark"]);
+const supportedUpdatePackages = new Set([
+  "com.antutu.ABenchMark",
+  "com.antutu.benchmark.full",
+  "com.ludashi.benchmark",
+]);
 
 function updateDownloadEndpoint(
   supabaseUrl: string,
@@ -307,6 +320,51 @@ async function sha256Hex(value: string): Promise<string> {
   return Array.from(digest, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function base64Url(value: Uint8Array): string {
+  let binary = "";
+  for (const byte of value) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+
+async function createQEngineGrant(
+  privateKeyPem: string,
+  androidId: string,
+  packageId: string,
+  appVersion: string,
+  versionCode: number,
+  durationMinutes: number,
+): Promise<{ payload: string; signature: string }> {
+  const keyBody = privateKeyPem
+    .replaceAll("\\n", "\n")
+    .replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+  const keyBytes = Uint8Array.from(atob(keyBody), (character) => character.charCodeAt(0));
+  const privateKey = await crypto.subtle.importKey(
+    "pkcs8",
+    keyBytes,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const issuedAt = Math.floor(Date.now() / 1_000);
+  const durationSeconds = durationMinutes * 60;
+  const payloadBytes = new TextEncoder().encode(JSON.stringify({
+    issuedAt,
+    expiresAt: issuedAt + durationSeconds,
+    durationSeconds,
+    packageId,
+    appVersion,
+    versionCode,
+    deviceIdHash: await sha256Hex(androidId),
+  }));
+  const signature = new Uint8Array(
+    await crypto.subtle.sign("RSASSA-PKCS1-v1_5", privateKey, payloadBytes),
+  );
+  return {
+    payload: base64Url(payloadBytes),
+    signature: base64Url(signature),
+  };
+}
+
 function newAdminToken(): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(32)), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
@@ -448,6 +506,7 @@ Deno.serve(async (request) => {
     premiumAccessCheckIntervalHours?: unknown;
     adsPolicy?: unknown;
     adsProvider?: unknown;
+    startioAppId?: unknown;
     inmobiAccountId?: unknown;
     inmobiInterstitialPlacementId?: unknown;
     performanceBackgroundDelaySeconds?: unknown;
@@ -460,6 +519,10 @@ Deno.serve(async (request) => {
     targetEmail?: unknown;
     permissions?: unknown;
     versionCode?: unknown;
+    appVersion?: unknown;
+    requireReleaseIdentity?: unknown;
+    qengineAuthorizationMinutes?: unknown;
+    requireSignedQEngineGrant?: unknown;
     latestVersionCode?: unknown;
     minimumVersionCode?: unknown;
     packageId?: unknown;
@@ -539,7 +602,14 @@ Deno.serve(async (request) => {
   }
 
   if (body.action === "health") {
-    return jsonResponse(200, { ok: true, service: "premium", serverTime: new Date().toISOString() });
+    return jsonResponse(200, {
+      ok: true,
+      service: "premium",
+      serverTime: new Date().toISOString(),
+      releaseIdentity: APP_RELEASE_IDENTITY,
+      functionBuildId: Deno.env.get("QSPOOF_FUNCTION_BUILD_ID") || FUNCTION_SOURCE_BUILD,
+      functionCapabilities: FUNCTION_CAPABILITIES,
+    });
   }
 
   // All Android client actions carry the installed version. Keep this check
@@ -568,7 +638,7 @@ Deno.serve(async (request) => {
     const versionValid = typeof body.versionCode === "number" &&
       Number.isSafeInteger(body.versionCode) &&
       body.versionCode >= minimumSupportedVersion;
-    if (versionValid && body.action !== "app-access") {
+    if (versionValid) {
       const { data: settings, error: settingsError } =
         await supabase.rpc("get_premium_public_settings");
       if (settingsError || !settings || typeof settings !== "object") {
@@ -594,15 +664,30 @@ Deno.serve(async (request) => {
       const minimumVersionRequired = remoteConfig.enforceMinimumVersion === true
         ? releaseLatest
         : releaseMinimum;
-      if (Number(body.versionCode) < Math.max(minimumSupportedVersion, minimumVersionRequired)) {
+      const updateDetails = {
+        minimumVersionCode: Math.max(minimumSupportedVersion, minimumVersionRequired),
+        latestVersionCode: releaseLatest,
+        updateUrl: selectedRelease?.apkStoragePath
+          ? updateDownloadEndpoint(supabaseUrl, false, appPackageId)
+          : "",
+        updateFallbackUrl: selectedRelease?.updateFallbackUrl ?? remoteConfig.updateFallbackUrl ?? "",
+        updateMessage: selectedRelease?.updateMessage ?? settings.updateMessage ??
+          "A newer version is required to continue.",
+        displayVersion: selectedRelease?.displayVersion ?? APP_RELEASE_IDENTITY,
+        apkSha256: selectedRelease?.apkSha256 ?? "",
+      };
+      if (remoteConfig.requireReleaseIdentity === true && body.appVersion !== APP_RELEASE_IDENTITY) {
+        return jsonResponse(426, {
+          error: "This app release is no longer accepted. Update the app to continue.",
+          versionRequired: true,
+          ...updateDetails,
+        });
+      }
+      if (body.action !== "app-access" &&
+          Number(body.versionCode) < Math.max(minimumSupportedVersion, minimumVersionRequired)) {
         return jsonResponse(426, {
           error: "A newer version is required. Update the app to continue.",
-          minimumVersionCode: Math.max(minimumSupportedVersion, minimumVersionRequired),
-          latestVersionCode: releaseLatest,
-          updateUrl: selectedRelease?.apkStoragePath
-            ? updateDownloadEndpoint(supabaseUrl, false, appPackageId)
-            : "",
-          updateFallbackUrl: selectedRelease?.updateFallbackUrl ?? remoteConfig.updateFallbackUrl ?? "",
+          ...updateDetails,
         });
       }
     }
@@ -717,6 +802,14 @@ Deno.serve(async (request) => {
           ? settings.remoteConfig as Record<string, unknown>
           : {};
         settings.enforceMinimumVersion = remoteConfig.enforceMinimumVersion === true;
+        settings.requireReleaseIdentity = remoteConfig.requireReleaseIdentity === true;
+        settings.qengineAuthorizationMinutes = Number.isSafeInteger(
+          remoteConfig.qengineAuthorizationMinutes,
+        ) && Number(remoteConfig.qengineAuthorizationMinutes) >= 1 &&
+            Number(remoteConfig.qengineAuthorizationMinutes) <= MAX_QENGINE_AUTHORIZATION_MINUTES
+          ? Number(remoteConfig.qengineAuthorizationMinutes)
+          : DEFAULT_QENGINE_AUTHORIZATION_MINUTES;
+        settings.requireSignedQEngineGrant = remoteConfig.requireSignedQEngineGrant === true;
         const packageReleases = remoteConfig.packageReleases &&
           typeof remoteConfig.packageReleases === "object" &&
           !Array.isArray(remoteConfig.packageReleases)
@@ -835,6 +928,24 @@ Deno.serve(async (request) => {
           typeof body.enforceMinimumVersion !== "boolean") {
         return jsonResponse(400, { error: "Choose whether to enforce the latest app version." });
       }
+      if (body.requireReleaseIdentity !== undefined &&
+          typeof body.requireReleaseIdentity !== "boolean") {
+        return jsonResponse(400, { error: "Choose whether to require release identity 5.0." });
+      }
+      if (body.requireSignedQEngineGrant !== undefined &&
+          typeof body.requireSignedQEngineGrant !== "boolean") {
+        return jsonResponse(400, { error: "Choose whether to require signed QEngine grants." });
+      }
+      if (body.qengineAuthorizationMinutes !== undefined &&
+          (!Number.isSafeInteger(body.qengineAuthorizationMinutes) ||
+            Number(body.qengineAuthorizationMinutes) < 1 ||
+            Number(body.qengineAuthorizationMinutes) > MAX_QENGINE_AUTHORIZATION_MINUTES)) {
+        return jsonResponse(400, { error: "Set QEngine authorization from 1 to 10,080 whole minutes." });
+      }
+      if (body.requireSignedQEngineGrant === true &&
+          !Deno.env.get("QSPOOF_QENGINE_GRANT_PRIVATE_KEY")) {
+        return jsonResponse(400, { error: "Configure the private grant signing key as an Edge Function secret before requiring signed grants." });
+      }
       if (body.enforceMinimumVersion === true) {
         const { data: releaseSettings, error: releaseSettingsError } =
           await supabase.rpc("get_premium_public_settings");
@@ -851,7 +962,7 @@ Deno.serve(async (request) => {
           !Array.isArray(savedRemoteConfig.packageReleases)
           ? savedRemoteConfig.packageReleases as Record<string, unknown>
           : {};
-        const bothPackagesPublished = [...supportedUpdatePackages].every((packageId) => {
+        const allPackagesPublished = [...supportedUpdatePackages].every((packageId) => {
           const release = packageReleases[packageId];
           if (!release || typeof release !== "object" || Array.isArray(release)) return false;
           const releaseRecord = release as Record<string, unknown>;
@@ -859,9 +970,9 @@ Deno.serve(async (request) => {
             releaseRecord.apkStoragePath.length > 0 &&
             releaseRecord.latestVersionCode === body.latestVersionCode;
         });
-        if (!bothPackagesPublished) {
+        if (!allPackagesPublished) {
           return jsonResponse(400, {
-            error: "Publish the same latest build for both Antutu and Ludashi before enforcing it.",
+            error: "Publish the same latest build for Antutu, Antutu Full, and Ludashi before enforcing it.",
           });
         }
       }
@@ -939,7 +1050,10 @@ Deno.serve(async (request) => {
       data.channelUrl = savedLinks.channelUrl;
     }
     if (body.action === "updates-set" &&
-        (body.deliveryMode || body.enforceMinimumVersion !== undefined)) {
+        (body.deliveryMode || body.enforceMinimumVersion !== undefined ||
+          body.requireReleaseIdentity !== undefined ||
+          body.qengineAuthorizationMinutes !== undefined ||
+          body.requireSignedQEngineGrant !== undefined)) {
       const { data: current, error: settingsError } = await supabase.rpc("get_premium_public_settings");
       if (settingsError || !current || typeof current !== "object") {
         return jsonResponse(500, { error: "Version policy saved, but delivery mode could not be loaded." });
@@ -953,6 +1067,17 @@ Deno.serve(async (request) => {
         ? body.enforceMinimumVersion
         : remoteConfig.enforceMinimumVersion === true;
       remoteConfig.enforceMinimumVersion = enforceMinimumVersion;
+      remoteConfig.requireReleaseIdentity = typeof body.requireReleaseIdentity === "boolean"
+        ? body.requireReleaseIdentity
+        : remoteConfig.requireReleaseIdentity === true;
+      remoteConfig.qengineAuthorizationMinutes = typeof body.qengineAuthorizationMinutes === "number"
+        ? body.qengineAuthorizationMinutes
+        : typeof remoteConfig.qengineAuthorizationMinutes === "number"
+          ? remoteConfig.qengineAuthorizationMinutes
+          : DEFAULT_QENGINE_AUTHORIZATION_MINUTES;
+      remoteConfig.requireSignedQEngineGrant = typeof body.requireSignedQEngineGrant === "boolean"
+        ? body.requireSignedQEngineGrant
+        : remoteConfig.requireSignedQEngineGrant === true;
       remoteConfig.updateFallbackUrl = typeof body.updateFallbackUrl === "string"
         ? body.updateFallbackUrl.trim()
         : typeof remoteConfig.updateFallbackUrl === "string"
@@ -980,6 +1105,9 @@ Deno.serve(async (request) => {
         ...saved,
         deliveryMode: remoteConfig.updateDeliveryMode,
         enforceMinimumVersion,
+        requireReleaseIdentity: remoteConfig.requireReleaseIdentity,
+        qengineAuthorizationMinutes: remoteConfig.qengineAuthorizationMinutes,
+        requireSignedQEngineGrant: remoteConfig.requireSignedQEngineGrant,
         updateFallbackUrl: remoteConfig.updateFallbackUrl,
         monthlyBandwidthLimitGb: remoteConfig.monthlyBandwidthLimitGb,
         redirectUrl: data.channelUrl,
@@ -1139,6 +1267,9 @@ Deno.serve(async (request) => {
       return jsonResponse(200, {
         adsPolicy: remoteConfig.adsPolicy,
         adsProvider: remoteConfig.adsProvider === "inmobi" ? "inmobi" : "startio",
+        startioAppId: typeof remoteConfig.startioAppId === "string"
+          ? remoteConfig.startioAppId
+          : "",
         inmobiAccountId: typeof remoteConfig.inmobiAccountId === "string"
           ? remoteConfig.inmobiAccountId
           : "",
@@ -1179,12 +1310,18 @@ Deno.serve(async (request) => {
       const inmobiAccountId = typeof body.inmobiAccountId === "string"
         ? body.inmobiAccountId.trim()
         : "";
+      const startioAppId = typeof body.startioAppId === "string"
+        ? body.startioAppId.trim()
+        : "";
       const inmobiInterstitialPlacementId = typeof body.inmobiInterstitialPlacementId === "string"
         ? body.inmobiInterstitialPlacementId.trim()
         : "";
       const performanceBackgroundDelaySeconds = Number(body.performanceBackgroundDelaySeconds);
       if (!adsProvider) {
         return jsonResponse(400, { error: "Choose Start.io or InMobi as the ad provider." });
+      }
+      if (startioAppId && !/^[A-Za-z0-9._-]{1,128}$/.test(startioAppId)) {
+        return jsonResponse(400, { error: "Enter a valid Start.io publisher App ID." });
       }
       if (inmobiAccountId && !/^[A-Za-z0-9._-]{1,128}$/.test(inmobiAccountId)) {
         return jsonResponse(400, { error: "Enter a valid InMobi app/account ID." });
@@ -1220,6 +1357,7 @@ Deno.serve(async (request) => {
         ...currentRemoteConfig,
         adsPolicy: data.adsPolicy ?? body.adsPolicy,
         adsProvider,
+        startioAppId,
         inmobiAccountId,
         inmobiInterstitialPlacementId,
         performanceBackgroundDelaySeconds,
@@ -1248,6 +1386,7 @@ Deno.serve(async (request) => {
       return jsonResponse(200, {
         adsPolicy: savedRemoteConfig.adsPolicy,
         adsProvider,
+        startioAppId,
         inmobiAccountId,
         inmobiInterstitialPlacementId,
         performanceBackgroundDelaySeconds,
@@ -1970,6 +2109,16 @@ Deno.serve(async (request) => {
       return jsonResponse(400, { error: "Invalid device identifier" });
     }
 
+    const { data: settings, error: settingsError } = await supabase.rpc("get_premium_public_settings");
+    if (settingsError || !settings || typeof settings !== "object") {
+      console.error("Could not load app release settings", settingsError?.message);
+      return jsonResponse(503, { error: "Could not load app release settings." });
+    }
+    const appSettings = settings as Record<string, unknown>;
+    const appRemoteConfig = appSettings.remoteConfig && typeof appSettings.remoteConfig === "object"
+      ? appSettings.remoteConfig as Record<string, unknown>
+      : {};
+
     const hasTelemetry =
       typeof body.deviceModel === "string" &&
       typeof body.cpu === "string" &&
@@ -1991,11 +2140,6 @@ Deno.serve(async (request) => {
     if (error || !data || typeof data.accessAllowed !== "boolean") {
       return jsonResponse(500, { error: "Could not verify app access" });
     }
-    const { data: settings } = await supabase.rpc("get_premium_public_settings");
-    const appSettings = settings && typeof settings === "object" ? settings as Record<string, unknown> : {};
-    const appRemoteConfig = appSettings.remoteConfig && typeof appSettings.remoteConfig === "object"
-      ? appSettings.remoteConfig as Record<string, unknown>
-      : {};
     const packageRelease = getPackageRelease(appRemoteConfig, appPackageId);
     const legacyRelease = appPackageId === "com.antutu.ABenchMark" && packageRelease === null;
     const selectedRelease = packageRelease ?? (legacyRelease ? appSettings : null);
@@ -2011,13 +2155,45 @@ Deno.serve(async (request) => {
     const minimumVersionRequired = appRemoteConfig.enforceMinimumVersion === true
       ? releaseLatest
       : releaseMinimum;
+    const configuredAuthorizationMinutes = appRemoteConfig.qengineAuthorizationMinutes;
+    const qengineAuthorizationMinutes = Number.isSafeInteger(configuredAuthorizationMinutes) &&
+        Number(configuredAuthorizationMinutes) >= 1 &&
+        Number(configuredAuthorizationMinutes) <= MAX_QENGINE_AUTHORIZATION_MINUTES
+      ? Number(configuredAuthorizationMinutes)
+      : DEFAULT_QENGINE_AUTHORIZATION_MINUTES;
+    const requireSignedQEngineGrant = appRemoteConfig.requireSignedQEngineGrant === true;
+    let qengineGrant: { payload: string; signature: string } | null = null;
+    if (data.accessAllowed === true && requireSignedQEngineGrant) {
+      const grantPrivateKey = Deno.env.get("QSPOOF_QENGINE_GRANT_PRIVATE_KEY");
+      if (!grantPrivateKey) {
+        console.error("Signed QEngine grants are enabled but the signing key is not configured");
+        return jsonResponse(503, { error: "QEngine authorization is temporarily unavailable." });
+      }
+      try {
+        qengineGrant = await createQEngineGrant(
+          grantPrivateKey,
+          body.androidId.trim(),
+          appPackageId,
+          typeof body.appVersion === "string" ? body.appVersion : "",
+          Number.isSafeInteger(body.versionCode) ? Number(body.versionCode) : 0,
+          qengineAuthorizationMinutes,
+        );
+      } catch (error) {
+        console.error("Could not sign QEngine authorization grant", error);
+        return jsonResponse(503, { error: "QEngine authorization is temporarily unavailable." });
+      }
+    }
     const result = {
       ...data,
       minimumVersionCode: minimumVersionRequired,
       latestVersionCode: releaseLatest,
+      appVersion: APP_RELEASE_IDENTITY,
       accessCheckIntervalHours: data.premium === true
         ? appSettings.premiumAccessCheckIntervalHours ?? 6
         : appSettings.normalAccessCheckIntervalHours ?? 6,
+      qengineAuthorizationMinutes,
+      requireSignedQEngineGrant,
+      qengineGrant,
       displayVersion: selectedRelease?.displayVersion ?? "",
       releaseNotes: selectedRelease?.releaseNotes ?? "",
       apkSha256: selectedRelease?.apkSha256 ?? "",

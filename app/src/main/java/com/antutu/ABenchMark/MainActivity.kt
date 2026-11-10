@@ -34,6 +34,13 @@ import java.util.Locale
 
 class MainActivity : Activity() {
 
+    private companion object {
+        const val ACTION_PREVIEW_UPDATE_NOTICE = "com.antutu.ABenchMark.DEBUG_UPDATE_PREVIEW"
+    }
+
+    private val isQEngineVerificationRequest: Boolean
+        get() = intent?.action == QEngineAuthorization.ACTION_REVERIFY
+
     private val OVERLAY_PERMISSION_REQ_CODE = 0
     private val UPDATE_INSTALL_PERMISSION_REQ_CODE = 1
     private val UPDATE_DOWNLOAD_NONE = -1L
@@ -51,9 +58,11 @@ class MainActivity : Activity() {
     private var redirectStarted = false
     private var updateDialogShowing = false
     private var updateFallbackAttempted = false
+    private var updatePreviewOnly = false
     private var updateDownloadId = UPDATE_DOWNLOAD_NONE
     private var updateFallbackUrl = ""
     private var updateSha256 = ""
+    private var networkValidated = false
     private var updateDialog: Dialog? = null
     private var updateButton: Button? = null
     private var requiredUpdate = false
@@ -61,22 +70,18 @@ class MainActivity : Activity() {
     private var openChannelForInstalledVersion = false
     private var overlayPermissionCheckStarted = false
     private var connectivityCallbackRegistered = false
-    private val offlineCheck = Runnable {
-        // Access is revalidated by PremiumAccess when the configured cache expires.
-    }
-
     private val connectivityCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
             if (network != connectivityManager.activeNetwork) return
-            if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
-                mainHandler.removeCallbacks(offlineCheck)
-            } else {
-                scheduleOfflineCheck()
+            val isValidated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            if (isValidated && !networkValidated && appStarted) {
+                verifyAppAccess()
             }
+            networkValidated = isValidated
         }
 
         override fun onLost(network: Network) {
-            scheduleOfflineCheck()
+            if (network == connectivityManager.activeNetwork) networkValidated = false
         }
     }
 
@@ -84,6 +89,26 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         if (!OfficialRelease.hasValidSignature(this)) {
             finishAndRemoveTask()
+            return
+        }
+
+        if (BuildConfig.DEBUG && intent?.action == ACTION_PREVIEW_UPDATE_NOTICE) {
+            updatePreviewOnly = true
+            setContentView(View(this))
+            showLatestReleaseNotice(
+                BuildConfig.VERSION_CODE + 1,
+                BuildConfig.VERSION_NAME,
+                "This is a local preview of the in-app update dialog.",
+                "No download is performed in preview mode.",
+                "",
+                "",
+                "",
+                "",
+                org.json.JSONObject()
+                    .put("title", "Update available")
+                    .put("message", "Preview the real QSpoof update dialog before publishing.")
+                    .put("downloadButtonText", "Preview only")
+            )
             return
         }
 
@@ -132,7 +157,6 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
-        mainHandler.removeCallbacks(offlineCheck)
         mainHandler.removeCallbacks(updateDownloadPoll)
         if (connectivityCallbackRegistered) {
             connectivityManager.unregisterNetworkCallback(connectivityCallback)
@@ -148,6 +172,33 @@ class MainActivity : Activity() {
         PremiumAccess.checkAppAccess(this) { result ->
             accessCheckInProgress = !result.isFinalCheck
             if (isFinishing) return@checkAppAccess
+            if (result.isFinalCheck && result.serverVerified) {
+                if (QEngineAuthorization.shouldGrant(result)) {
+                    if (!QEngineAuthorization.grant(this, result)) {
+                        QEngineAuthorization.revoke(this)
+                        Toast.makeText(
+                            this,
+                            "Could not save QEngine authorization",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    QEngineAuthorization.revoke(this)
+                }
+            }
+            if (isQEngineVerificationRequest && result.isFinalCheck) {
+                setResult(
+                    if (result.error == null && result.serverVerified &&
+                        result.allowed && !result.updateRequired
+                    ) {
+                        RESULT_OK
+                    } else {
+                        RESULT_CANCELED
+                    }
+                )
+                finish()
+                return@checkAppAccess
+            }
             if (result.error != null) {
                 exitAndRedirect("Could not verify access online. Opening Telegram…")
                 return@checkAppAccess
@@ -169,11 +220,6 @@ class MainActivity : Activity() {
                 return@checkAppAccess
             }
             if (!appStarted) startApp()
-            if (openChannelForInstalledVersion) {
-                openChannelForInstalledVersion = false
-                openTelegramChannel()
-                return@checkAppAccess
-            }
             if (result.latestVersionCode > BuildConfig.VERSION_CODE &&
                 result.updateUrl.isNotBlank() &&
                 shouldShowReleaseNotice(result.latestVersionCode)
@@ -190,6 +236,11 @@ class MainActivity : Activity() {
                     result.remoteConfig.optJSONObject("updatePopup")
                 )
             }
+            if (openChannelForInstalledVersion) {
+                openChannelForInstalledVersion = false
+                openTelegramChannel()
+                return@checkAppAccess
+            }
             ensureOverlayPermission()
         }
     }
@@ -199,11 +250,6 @@ class MainActivity : Activity() {
             connectivityManager.registerDefaultNetworkCallback(connectivityCallback)
             connectivityCallbackRegistered = true
         }
-    }
-
-    private fun scheduleOfflineCheck() {
-        mainHandler.removeCallbacks(offlineCheck)
-        mainHandler.postDelayed(offlineCheck, 500L)
     }
 
     private fun hasValidatedInternet(): Boolean {
@@ -277,6 +323,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         if (updateDialogShowing) refreshUpdateButton()
+        if (appStarted) verifyAppAccess()
     }
 
     private fun startPerformanceEngine() {
@@ -300,7 +347,6 @@ class MainActivity : Activity() {
     private fun openLinkAndExit(url: String) {
         if (redirectStarted) return
         redirectStarted = true
-        mainHandler.removeCallbacks(offlineCheck)
         val safeUrl = url.takeIf { it.startsWith("https://") } ?: telegramChannelUrl
         val linkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(safeUrl)).apply {
             addCategory(Intent.CATEGORY_BROWSABLE)
@@ -388,7 +434,12 @@ class MainActivity : Activity() {
             updateSha256 = apkSha256
             requiredUpdate = false
             updateDialogShowing = true
-            downloadButton.setOnClickListener { startOrInstallUpdate(updateUrl, redirectUrl) }
+            if (updatePreviewOnly) {
+                downloadButton.isEnabled = false
+                downloadButton.text = "Preview only"
+            } else {
+                downloadButton.setOnClickListener { startOrInstallUpdate(updateUrl, redirectUrl) }
+            }
             refreshUpdateButton()
         }
         dialog.setOnDismissListener {
@@ -716,6 +767,11 @@ class MainActivity : Activity() {
 
     private fun refreshUpdateButton() {
         val button = updateButton ?: return
+        if (updatePreviewOnly) {
+            button.isEnabled = false
+            button.text = "Preview only"
+            return
+        }
         when (queryDownloadStatus(
             getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager,
             updateDownloadId

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".ExtractedQEngineLauncherActivity"
+            android:excludeFromRecents="true"
+            android:icon="@drawable/original_app_icon"
+            android:label="${engineLabel}"
+            android:taskAffinity="${engineTaskAffinity}">
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".LaunchAppTileService"
+            android:exported="true"
+            android:icon="@drawable/original_app_icon"
+            android:label="${engineLabel}"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

@@ -5,4 +5,10 @@
     <string name="performance_service_notification_title">Performance service active</string>
     <string name="performance_service_notification_text">The performance overlay is running</string>
     <string name="performance_service_stop_action">Stop</string>
+    <string name="qengine_notification_channel_name">Performance Service</string>
+    <string name="qengine_notification_title">⚡ Automated Monster Mode Active</string>
+    <string name="qengine_notification_text">Hardware-accelerated performance surface active.</string>
+    <string name="qengine_stop_action">⏹️ Stop Monster Mode</string>
+    <string name="qengine_reverify_title">QEngine verification required</string>
+    <string name="qengine_reverify_text">Tap to open QSpoof and verify access before continuing.</string>
 </resources>

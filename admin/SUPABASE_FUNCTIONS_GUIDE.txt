@@ -1,0 +1,597 @@
+QSPOOF SUPABASE FUNCTION GUIDE
+Snapshot: 2026-11-10
+Purpose: handoff notes for safely editing this repository's Supabase integration.
+
+======================================================================
+1. READ THIS BEFORE CHANGING OR DEPLOYING ANYTHING
+======================================================================
+
+This is a snapshot of the workspace and live Supabase project on the date
+above. Verify live function versions and compare live source with the local
+entrypoints before making production changes.
+
+Live project ref: aearzrtzrtyvuywjcwni
+Live Edge Functions observed:
+  premium        ACTIVE, version 85, verify_jwt=false
+  premium-config ACTIVE, version 2,  verify_jwt=false
+
+The local Edge Function copies are NOT guaranteed to match production. The
+live premium function has previously been observed to differ substantially
+from this workspace. The live premium-config function also must be compared
+before deploying. Never deploy a local copy just because it builds: a deploy
+replaces the live function and can remove production-only compatibility,
+authorization, or release behavior.
+
+The browser admin page is admin/premium.html. It is a static file; editing
+this workspace copy does not publish it to its hosting location.
+
+The repository is migration-based (supabase/migrations), not a schema
+declaration project. Read the relevant migration history before changing an
+RPC or table. Do not edit an old migration that has already run in production;
+create a new migration for a schema change.
+
+One notable admin incident: the live private.qspoof_write_freeze was observed
+enabled. Its trigger blocks non-analytics writes. A narrowly scoped migration
+was applied to let admin login bookkeeping writes proceed while leaving other
+writes paused:
+  supabase/migrations/20261109202001_admin_session_writes_during_freeze.sql
+The live trigger's allowlist includes premium_admin_login_attempts,
+premium_admin_sessions, premium_admin_trusted_browsers, and premium_admin_audit.
+Do not disable the freeze or broaden its allowlist without checking with the
+project owner and reviewing the current production trigger.
+
+The live migration ledger also contains several entries named
+"noop_invalid_skip" from prior verification calls. They were no-op SELECT
+queries; a cleanup attempt was cancelled and did not run. Do not try to repair
+the ledger by deleting migration history without an explicit, reviewed plan.
+
+======================================================================
+2. FILE MAP AND REQUEST ROUTING
+======================================================================
+
+Active local Edge Function entrypoints:
+  supabase/functions/premium/index.ts
+  supabase/functions/premium-config/index.ts
+
+Legacy/alternate local file:
+  supabase/functions/premium/mobile.ts
+This is a separate, older mobile-only implementation. The active
+premium/index.ts does not import it. Do not assume changes to mobile.ts affect
+the deployed route. Compare its behavior before removing or repurposing it.
+
+Admin UI:
+  admin/premium.html
+It sends POST JSON to /functions/v1/premium or /functions/v1/premium-config.
+The routing helper is in the page's inline JavaScript near directAuthRequest
+and callPremium.
+
+Android client:
+  app/src/main/java/com/antutu/ABenchMark/PremiumAccess.kt
+It sends POST JSON to premium-config only for action "public-config"; other
+app actions go to premium. It sends installed versionCode, appVersion and
+packageId with requests.
+
+Both functions use CORS with Access-Control-Allow-Origin: *. Both require the
+request apikey header to equal the project's publishable API key. That key is
+intended to be present in clients; it is not a service-role secret and does
+not, by itself, authenticate an administrator or prove a device identity.
+Supabase gateway JWT verification is disabled for both functions, so the
+function-level checks described below are essential.
+
+Both active functions create a service-role Supabase client from runtime
+environment variables. Never put SUPABASE_SERVICE_ROLE_KEY, SMTP/API
+credentials, private signing keys, or other secrets in HTML, Android code,
+responses, logs, migrations, or this guide. Configure Edge Function secrets
+in Supabase's function secrets settings; Supabase reserves the SUPABASE_
+prefix for injected variables.
+
+======================================================================
+3. PREMIUM FUNCTION: ROUTES AND ACTIONS
+======================================================================
+
+Endpoint:
+  POST /functions/v1/premium
+  GET  /functions/v1/premium?action=update-download[&packageId=...]
+
+The POST request body is a JSON object with an "action" string. This is a
+single action-dispatch function, not one Edge Function per action.
+
+3.1 Health and public configuration
+
+  health
+    Returns service identity, server time, release identity, source build
+    fallback, and advertised function capabilities. Use it for health and
+    capability verification; it is not an admin login.
+
+  public-config
+    Reads public settings and returns a download endpoint when an APK is
+    configured. premium-config has a second public-config action used by the
+    Android client's fallback configuration path.
+
+3.2 Mobile client version/release gate
+
+Actions treated as mobile/version-gated include:
+  app-access, public-config, donors, submit, status, self-delink,
+  app-email-otp-send, app-email-otp-verify, app-device-profile-get,
+  app-device-profile-set, device-usage, supported-devices-get
+
+The caller supplies versionCode, appVersion and packageId. Supported package
+IDs are com.antutu.ABenchMark and com.ludashi.benchmark. Local code enforces
+at least the hard-coded legacy floor (currently 9), then applies configured
+per-package release minimum/latest policy and optional exact release identity
+5.0. If enforceMinimumVersion is enabled, latest version becomes the required
+version. A 426 response communicates a required update.
+
+Do not trust client-supplied package/version/Android ID as cryptographic
+attestation. Keep server-side checks and RPC validation. The app-access path
+calls check_app_startup, then attaches update policy, remote config, popups,
+access-check interval, and QEngine authorization settings.
+
+3.3 APK download (GET)
+
+  update-download
+    Selects package release metadata, creates a short-lived signed Storage
+    URL, checks APK metadata/size, reserves bandwidth through
+    reserve_app_update_bandwidth, and streams the APK including range support.
+    The configured monthly bandwidth is split: APK downloads are capped at
+    40% of that monthly budget. If the Supabase download cannot proceed, a
+    configured HTTPS fallback may be used. Supported package IDs are
+    com.antutu.ABenchMark and com.ludashi.benchmark.
+
+    The public admin/browser download link may carry the publishable apikey in
+    the URL. Do not add a service key to that URL. Keep no-store and APK
+    content/security headers and ensure range reservations do not undercount.
+
+3.4 Admin login, sessions, profiles, and account management
+
+  admin-entry-gate
+    Legacy bootstrap/registration gate. It checks credentials, can initialize
+    the owner account only if not already initialized, and returns a
+    browser-bound short-lived registration token. This is a sensitive legacy
+    bootstrap path; do not extend or expose it casually.
+
+  admin-login / admin-login-password
+    Legacy names normalized to admin-login-start.
+  admin-login-start
+    Validates email/browser ID; supports owner alias handling and password
+    verification, creates a hashed-token session and trusted browser.
+  admin-login-verify
+    Currently returns HTTP 410; the legacy OTP setup path is disabled.
+  admin-session
+    Resumes/validates an admin session against session and browser hashes.
+  admin-logout
+    Revokes current admin session.
+  admin-profile-update
+    Updates an administrator's profile through credential/profile RPCs.
+  admin-create-admin-start / admin-create-admin-verify
+    Owner-only OTP registration workflow; second action verifies email OTP
+    before the manage_premium_admin create RPC.
+  admin-sessions-list
+    Lists current admin's active sessions; owner can inspect another user.
+  admin-session-revoke
+    Revokes one session by UUID.
+  admin-sessions-revoke-others / admin-sessions-revoke-all
+    Revokes selected/other sessions; non-owner is restricted to their own
+    account.
+  admin-list-admins
+    Lists admin accounts.
+  admin-set-admin-permissions
+    Updates role permissions through manage_premium_admin.
+  admin-reset-admin-password
+    Resets an admin password through manage_premium_admin.
+  admin-account-enable / admin-account-disable
+    Changes account enabled state through manage_premium_admin.
+  admin-remove-admin
+    Removes an admin through manage_premium_admin.
+  admin-create-admin
+    Legacy direct creation is rejected with HTTP 428; use OTP workflow.
+  admin-audit-list
+    Reads bounded admin audit history.
+
+  Admin session tokens are random, held client-side, hashed before database
+  storage/lookup and bound to a browser ID hash. Authorization also checks
+  enabled profile, role/permission, and audit logging. Do not replace these
+  with browser-supplied role fields. Session, trusted-browser, login-attempt
+  and audit writes are affected by the temporary write-freeze trigger.
+
+3.5 Admin release/configuration actions
+
+  updates-get / updates-set
+    Reads/writes version policy, release identity, QEngine authorization
+    duration (default 30 minutes, max 10,080), signed-grant requirement,
+    update messaging and release metadata. Per-package releases are nested in
+    remoteConfig.packageReleases.
+  links-get / links-set
+    Reads/writes Telegram and related public links.
+  app-popups-get / app-popups-set
+    Reads/writes remote app popups (bounded list, HTTPS destinations, allowed
+    Storage image paths, display limits and cooldowns).
+  admin-apk-upload-url
+    Authenticated admin operation to obtain signed APK upload details.
+  admin-apk-publish
+    Publishes uploaded APK metadata/configuration.
+  admin-popup-image-upload-url
+    Gets a signed promotion-image upload URL.
+
+  Keep the admin form, action payload, function validation, database RPC and
+  app response schema in sync. The current admin UI has package-specific
+  upload/publish concepts; verify the selected function actually consumes
+  packageId before changing release publishing.
+
+3.6 Ads and app access policy
+
+  admin-ads-get
+    Returns ad policy/provider and remote provider config.
+  admin-ads-set
+    Legacy boolean toggle.
+  admin-ads-config-set
+    Validates and writes ad formats/limits, provider, InMobi identifiers, and
+    performance background delay.
+  admin-app-access-get / admin-app-access-set
+    Reads/writes premium-only switch and normal/premium server revalidation
+    intervals (1..168 hours).
+
+  Ads policy and provider data may be in different persisted fields: the
+  policy RPC and remoteConfig update are separate calls. Preserve existing
+  remoteConfig keys when updating one setting, or unrelated config can be
+  lost.
+
+3.7 Premium payment, entitlement, and reference administration
+
+  donors
+    Returns approved donor display names with partial masking honored.
+  admin-premium-list
+    Lists manually registered/unclaimed premium references.
+  admin-premium-add
+    Validates and adds a reference/display name.
+  admin-premium-remove
+    Removes/unpins a reference depending on current implementation.
+  admin-email-premium-add
+    Grants premium to a verified app email.
+  admin-clear-data
+    Clears premium user records (destructive; does not mean deleting admin
+    accounts or app settings).
+  admin-list
+    Lists pending payment requests for review.
+  admin-list-active
+    Lists active entitlements and linked donor/device/email metadata.
+  admin-approve / admin-approve-reference
+    Approves a pending request or claims/approves a reference.
+  admin-reject
+    Rejects a pending request.
+  admin-revoke
+    Revokes a reference- or email-based entitlement.
+  admin-unlink-reference
+    Clears device registration/claim while retaining the reference.
+
+  Permission checks are mapped by permissionForAction in premium/index.ts.
+  Owner bypasses named permission checks; legacy permission aliases exist.
+  Do not weaken role checks or assume every action shares one permission.
+
+3.8 Analytics, inventory, and supported-device catalog
+
+  admin-analytics
+    Returns usage and version analytics.
+  admin-analytics-period-devices
+    Returns devices for a selected period/date.
+  admin-device-inventory
+    Returns registered-device inventory.
+  supported-devices-get
+    Public supported-device catalog.
+  admin-supported-devices-get / admin-supported-devices-set
+    Admin catalog management.
+
+3.9 Device-facing profile, feedback, email, usage, and payment actions
+
+  app-feedback-get / app-feedback-set
+    Reads/saves a device's yes/no compatibility vote.
+  app-email-otp-send / app-email-otp-verify
+    Sends/verifies email ownership. Provider selection may be Supabase Auth
+    or Brevo. OTP rate limits and hashed challenge state are database-backed.
+  app-device-profile-get / app-device-profile-set
+    Reads/updates display name and verified email profile.
+  device-usage
+    Records validated usage telemetry.
+  status
+    Returns current device premium state.
+  self-delink
+    Removes device's own premium link/grant through the correct RPC.
+  submit
+    Validates payment reference and display-name fields; can claim an
+    existing grant or create a pending payment request.
+
+  These actions use the public API key and a client-supplied Android ID; the
+  function hashes the ID via hash_premium_device_id before most database
+  access. Keep raw IDs out of logs. Device ID/version values are client input,
+  not proof of device integrity.
+
+======================================================================
+4. PREMIUM-CONFIG FUNCTION
+======================================================================
+
+Endpoint: POST /functions/v1/premium-config
+Request body: JSON object with "action".
+
+  health
+    Returns service identity, time, configured/build ID, capabilities.
+  public-config
+    Reads get_premium_public_settings and constructs public download URL.
+  admin-app-access-get / admin-app-access-set
+    Reads/writes premium-only policy and separate normal/premium intervals
+    (1..168 hours).
+  admin-ads-get / admin-ads-config-set
+    Reads/writes ad policy, provider identifiers and background delay.
+  app-popups-get / app-popups-set
+    Reads/writes up to 20 validated remote popups.
+  admin-update-popup-get / admin-update-popup-set
+    Reads/writes forced-update dialog content under remoteConfig.updatePopup.
+  admin-popup-image-upload-url
+    Creates signed promotion image upload details.
+  admin-apk-upload-url / admin-apk-publish
+    Creates upload URL and persists uploaded release configuration.
+
+Every non-public configuration action maps to a permission, validates the
+adminToken plus browserId against get_premium_admin_session, checks owner or
+permission, and records an admin audit attempt. Admin profile lookup hashes
+the token and browser ID and includes the request IP when present.
+
+IMPORTANT PACKAGE RELEASE CONTRACT:
+The local premium-config APK upload/publish implementation was observed not
+to consume packageId, even though the admin UI has package-specific release
+controls. premium/index.ts has package-aware release behavior. Do not route a
+package-specific release operation through premium-config until this mismatch
+is fixed and tested end-to-end.
+
+======================================================================
+5. DATABASE RPC DEPENDENCIES REFERENCED BY EDGE FUNCTIONS
+======================================================================
+
+The active entrypoints call these database RPCs. Implementations and grants
+are in supabase/migrations; search those migrations before changing call
+arguments, return shapes, permissions, SECURITY DEFINER status, or RLS.
+
+Public settings/config:
+  get_premium_public_settings
+  set_app_access_policy
+  set_premium_ads_policy
+  set_app_remote_config
+  set_app_update_config
+  set_app_telegram_links
+  set_app_popups
+  get_app_update_bandwidth_usage
+  reserve_app_update_bandwidth
+
+Admin identity, accounts, sessions, audit:
+  get_premium_admin_profile
+  get_premium_admin_password_state
+  verify_premium_admin_password
+  update_premium_admin_credentials
+  manage_premium_admin
+  create_premium_admin_session
+  get_premium_admin_session
+  set_premium_admin_session_label
+  revoke_premium_admin_session
+  revoke_premium_admin_session_by_id
+  revoke_premium_admin_sessions_except
+  list_premium_admin_sessions
+  record_premium_admin_audit
+  get_premium_admin_audit
+  premium_admin_permission
+  is_premium_admin
+  is_premium_admin_browser_trusted
+  set_qspoof_master_password
+
+Access, identity, profiles, feedback, OTP:
+  hash_premium_device_id
+  check_app_startup
+  get_app_device_profile
+  set_app_device_profile
+  get_app_feedback_vote
+  set_app_feedback_vote
+  begin_app_email_otp
+  complete_app_email_otp
+  verify_app_email_otp
+  record_app_device_usage
+  delink_premium_device
+  delink_app_email_premium_grant
+
+Premium references/grants/payments:
+  add_premium_reference
+  claim_premium_reference
+  approve_premium_request
+  admin_unlink_premium_reference
+  grant_app_premium_by_verified_email
+  list_app_email_premium_grants
+  revoke_app_email_premium_grant
+  clear_premium_user_data
+
+Analytics, inventory, catalogs:
+  get_app_supported_device_catalog
+  set_app_supported_device_catalog
+  get_admin_usage_period_devices
+  get_admin_device_inventory
+  get_admin_device_profiles
+  get_app_usage_analytics
+  get_app_version_analytics
+
+Complete function-name inventory declared by the checked-in migrations
+(including private trigger helpers and historical/possibly retired APIs):
+
+  private.bump_app_version_daily
+  private.bump_app_version_weekly
+  private.capture_app_device_presence
+  private.qspoof_block_non_analytics_writes
+  private.revoke_admin_sessions_after_email_change
+  private.track_app_device_version_usage
+
+  public.add_premium_reference
+  public.admin_unlink_premium_reference
+  public.approve_premium_request
+  public.begin_app_email_otp
+  public.check_app_startup
+  public.claim_premium_reference
+  public.clear_premium_user_data
+  public.close_app_beta
+  public.complete_app_email_otp
+  public.create_premium_admin_session
+  public.delink_app_email_premium_grant
+  public.get_admin_device_inventory
+  public.get_admin_device_profiles
+  public.get_admin_usage_period_devices
+  public.get_app_beta_access_logs
+  public.get_app_device_profile
+  public.get_app_feedback_vote
+  public.get_app_supported_device_catalog
+  public.get_app_update_bandwidth_usage
+  public.get_app_usage_analytics
+  public.get_app_version_analytics
+  public.get_premium_admin_audit
+  public.get_premium_admin_password_state
+  public.get_premium_admin_profile
+  public.get_premium_admin_session
+  public.get_premium_public_settings
+  public.grant_app_premium_by_verified_email
+  public.hash_premium_device_id
+  public.is_premium_admin
+  public.is_premium_admin_browser_trusted
+  public.list_app_email_premium_grants
+  public.manage_premium_admin
+  public.premium_admin_permission
+  public.record_app_beta_access
+  public.record_app_device_usage
+  public.record_premium_admin_audit
+  public.reserve_app_update_bandwidth
+  public.revoke_app_email_premium_grant
+  public.revoke_premium_admin_session
+  public.set_app_access_policy
+  public.set_app_beta_config
+  public.set_app_device_profile
+  public.set_app_feedback_vote
+  public.set_app_popups
+  public.set_app_remote_config
+  public.set_app_supported_device_catalog
+  public.set_app_telegram_links
+  public.set_app_update_config
+  public.set_premium_ads_config
+  public.set_premium_ads_enabled
+  public.set_premium_ads_policy
+  public.set_premium_only_access
+  public.set_qspoof_master_password
+  public.update_premium_admin_credentials
+  public.verify_app_email_otp
+  public.verify_premium_admin_password
+
+This is the exhaustive name inventory found in the repository migrations at
+the snapshot date, not proof that every definition is active in production.
+Some functions are historical beta/analytics helpers, replaced by later
+versions, or not called by either active Edge Function. A declaration in a
+migration does not prove that the function is currently present, granted, or
+callable. Inspect the live database catalog/advisors and applied migration
+history before relying on any one of them.
+
+======================================================================
+6. IMPORTANT SETTINGS AND CONTRACTS
+======================================================================
+
+Release:
+  APP_RELEASE_IDENTITY is 5.0 in local premium/index.ts.
+  Supported package IDs: com.antutu.ABenchMark,
+                         com.ludashi.benchmark.
+  Hard-coded legacy minimum is 9; configured minimum/latest values layer on it.
+  Strict minimum enforcement and release identity gate are remotely
+  configurable. Check package-specific and legacy fallback behavior.
+
+QEngine:
+  Default authorization window: 30 minutes.
+  Maximum: 10,080 minutes.
+  Signed grants are opt-in. Enabling them requires
+  QSPOOF_QENGINE_GRANT_PRIVATE_KEY to be installed as a Supabase Edge
+  Function secret and its matching public key in Android. Do not turn on the
+  remote requirement before both sides are deployed and verified.
+
+App access revalidation:
+  Normal/premium intervals are separate, 1..168 hours. They are distinct
+  from the QEngine authorization window in minutes.
+
+Ads:
+  Provider configuration includes Start.io or InMobi in the server contract.
+  Do not assume a stored provider means that provider SDK is enabled in both
+  Android package variants; inspect Android initialization and the dashboard
+  config together.
+
+Storage:
+  APK bucket: app-updates.
+  Promotion image bucket: app-promotions.
+  Image URL validation only accepts expected public bucket object paths and
+  JPEG/PNG/WebP extensions.
+  Storage upload/upsert permissions require the matching database/storage
+  grants and policies; do not bypass by exposing service credentials.
+
+======================================================================
+7. ENVIRONMENT VARIABLE NAMES (NEVER VALUES)
+======================================================================
+
+Supabase-injected:
+  SUPABASE_URL
+  SUPABASE_SERVICE_ROLE_KEY
+
+Optional/release:
+  QSPOOF_FUNCTION_BUILD_ID
+  QSPOOF_QENGINE_GRANT_PRIVATE_KEY
+
+Email:
+  APP_EMAIL_PROVIDER (defaults to supabase_auth in local code)
+  BREVO_API_KEY
+  BREVO_SENDER_EMAIL
+  BREVO_SENDER_NAME
+
+Never copy secret values into this file or send them to a device as part of a
+diagnostic bundle. A function health response should report only whether
+configuration/capabilities are available, never secret contents.
+
+======================================================================
+8. SAFE CHANGE AND VERIFICATION CHECKLIST
+======================================================================
+
+Before changing a contract:
+  1. Read the exact action branch, helper, and RPC implementation.
+  2. Search app callers and admin/premium.html for action name, request fields,
+     expected response keys, and status-code handling.
+  3. Check migration history and current live RPC/function definitions.
+  4. Preserve unrelated remoteConfig keys when merging updates.
+  5. Preserve admin permission checks, browser-bound sessions, auditing,
+     throttles, and destructive-operation confirmation.
+  6. Keep service-role and signing secrets server-only.
+  7. Check both package variants and old client compatibility before changing
+     version gates or release response shape.
+  8. Test local source and a safe live read/health check; do not use production
+     destructive actions as a smoke test.
+  9. Compare deployed function source/version before deploying. Supabase CLI
+     v3 runs database commands locally unless --remote is used and requires
+     explicit consent (--yes) for hosted mutations. Read the installed
+     version's --help before choosing deploy flags.
+ 10. After a deployment, query live Edge Function versions and health again;
+     update admin/premium.html deployment badge only from verified values.
+
+Do not make "success-shaped" fallbacks for RPC errors. Surface errors, log
+safe context, and return a non-success status. Never log passwords, OTPs,
+session tokens, raw Android IDs, service keys, or private grant keys.
+
+======================================================================
+9. SNAPSHOT FINGERPRINTS
+======================================================================
+
+These fingerprints are for the local workspace files copied/documented here;
+they are not the deployed function source hashes:
+  premium/index.ts:
+    f7d739c1f669018d266dc55aa4b758fd99e89141c32ba5c2dd83b510a878e3e1
+  premium-config/index.ts:
+    2332a3891522001485fb58d1ff0a0c3c3cae097acf0e28484022a5ba6b5dea36
+  premium/mobile.ts (legacy file):
+    a10e24734bc722b1bb9ccf1cfc16c5fa2a2fb7142e24742e7de732563c07aca
+  admin/premium.html:
+    bc113a57bffd012b12f428599e046faf5f03ac76e82aa0be9846427ad72a2e88
+
+Recompute hashes after any edit. Treat the deployed version as authoritative
+for production until the live and local sources have been deliberately
+reconciled.

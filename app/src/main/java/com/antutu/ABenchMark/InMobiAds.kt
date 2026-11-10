@@ -20,6 +20,7 @@ object InMobiAds {
     private var launchAnimationFinished = false
     private var launchAdDisplayed = false
     private var generation = 0
+    private var launchProvider: AdsProvider? = null
     private var initializedAccountId: String? = null
     private var initializingAccountId: String? = null
     private val initializationCallbacks = mutableListOf<(Boolean) -> Unit>()
@@ -27,6 +28,16 @@ object InMobiAds {
     fun preloadLaunchAd(activity: Activity): Boolean {
         if (!PremiumAccess.canLoadLaunchInterstitial(activity) || activity.isFinishing) return false
         val config = PremiumAccess.lastRemoteConfig(activity)
+        val provider = adsProvider(config) ?: return false
+        launchProvider = provider
+        if (provider == AdsProvider.START_IO) {
+            generation += 1
+            launchAd = null
+            launchActivity = null
+            StartIoAds.release()
+            return StartIoAds.preloadLaunchAd(activity)
+        }
+        StartIoAds.release()
         val accountId = config.optString("inmobiAccountId").trim()
         val placementId = config.optString("inmobiInterstitialPlacementId").toLongOrNull()
             ?: return false
@@ -47,6 +58,10 @@ object InMobiAds {
     }
 
     fun showLaunchAdIfReady() {
+        if (launchProvider == AdsProvider.START_IO) {
+            StartIoAds.showLaunchAdIfReady()
+            return
+        }
         launchAnimationFinished = true
         showReadyLaunchAd()
     }
@@ -54,6 +69,10 @@ object InMobiAds {
     fun showInterstitialForMenu(activity: Activity): Boolean {
         if (!PremiumAccess.canLoadLaunchInterstitial(activity) || activity.isFinishing) return false
         val config = PremiumAccess.lastRemoteConfig(activity)
+        val provider = adsProvider(config) ?: return false
+        if (provider == AdsProvider.START_IO) {
+            return StartIoAds.showInterstitialForMenu(activity)
+        }
         val accountId = config.optString("inmobiAccountId").trim()
         val placementId = config.optString("inmobiInterstitialPlacementId").toLongOrNull()
             ?: return false
@@ -93,11 +112,21 @@ object InMobiAds {
 
     fun release() {
         generation += 1
+        launchProvider = null
         launchAd = null
         launchActivity = null
         launchAnimationFinished = false
         launchAdDisplayed = false
+        StartIoAds.release()
     }
+
+    private fun adsProvider(config: JSONObject): AdsProvider? =
+        AdsProviderSelection.select(
+            configuredProvider = config.optString("adsProvider").takeIf(String::isNotBlank),
+            inmobiAccountId = config.optString("inmobiAccountId"),
+            inmobiPlacementId = config.optString("inmobiInterstitialPlacementId"),
+            startIoAppId = config.optString("startioAppId")
+        )
 
     private fun initialize(activity: Activity, accountId: String, callback: (Boolean) -> Unit) {
         val initializedFor = initializedAccountId

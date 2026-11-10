@@ -2,9 +2,15 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <queries>
+        <package android:name="com.antutu.ABenchMark" />
+    </queries>
+
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
@@ -23,10 +29,30 @@
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
 
         <activity
+            android:name=".QEngineLauncherActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:icon="@drawable/engine_logo"
+            android:label="${engineLabel}"
+            android:resizeableActivity="true"
+            android:taskAffinity="${engineTaskAffinity}"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+
+        <activity
+            android:name=".ExtractedQEngineLauncherActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:icon="@drawable/original_app_icon"
+            android:label="${engineLabel}"
+            android:taskAffinity="${engineTaskAffinity}" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
 
-            <intent-filter>
+            <intent-filter android:priority="-100">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -51,22 +77,20 @@
             android:name=".RefreshRateActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".QSpoofActivationActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:icon="@drawable/original_app_icon"
-            android:label="QEngine"
-            android:taskAffinity="${engineTaskAffinity}"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name=".PerformanceService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Performance overlay service" />
+
+        </service>
+
+        <service
+            android:name=".QEnginePerformanceService"
+            android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse">
 
@@ -86,10 +110,6 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
-
-        <service
-            android:name=".QSpoofOverlayService"
-            android:exported="false" />
 
     </application>
 

@@ -25,8 +25,8 @@ android {
         applicationId = "com.antutu.ABenchMark"
         minSdk = 30
         targetSdk = 36
-        versionCode = 13
-        versionName = "5.0"
+        versionCode = 15
+        versionName = "v5.0"
         buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl.escapeBuildConfig()}\"")
         buildConfigField(
             "String",
@@ -46,12 +46,21 @@ android {
             dimension = "distribution"
             applicationId = "com.antutu.ABenchMark"
             manifestPlaceholders["appLabel"] = "QSpoof"
+            manifestPlaceholders["engineLabel"] = "QEngine"
             manifestPlaceholders["engineTaskAffinity"] = "com.antutu.ABenchMark.engine"
+        }
+        create("antutuFull") {
+            dimension = "distribution"
+            applicationId = "com.antutu.benchmark.full"
+            manifestPlaceholders["appLabel"] = "QSpoof"
+            manifestPlaceholders["engineLabel"] = "QEngine"
+            manifestPlaceholders["engineTaskAffinity"] = "com.antutu.benchmark.full.engine"
         }
         create("ludashi") {
             dimension = "distribution"
             applicationId = "com.ludashi.benchmark"
-            manifestPlaceholders["appLabel"] = "QSpoof"
+            manifestPlaceholders["appLabel"] = "Qspoof"
+            manifestPlaceholders["engineLabel"] = "Qengine"
             manifestPlaceholders["engineTaskAffinity"] = "com.ludashi.benchmark.engine"
         }
     }
@@ -77,6 +86,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -97,7 +109,11 @@ android {
 }
 
 dependencies {
+    implementation("androidx.activity:activity:1.13.0")
+    implementation("androidx.core:core:1.18.0")
+    implementation("androidx.fragment:fragment:1.8.6")
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.inmobi.monetization:inmobi-ads-kotlin:10.8.3")
+    implementation("com.startapp:inapp-sdk:5.4.0")
     testImplementation(libs.junit)
 }

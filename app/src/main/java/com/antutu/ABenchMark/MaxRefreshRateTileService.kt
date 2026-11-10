@@ -1,12 +1,15 @@
 package com.antutu.ABenchMark
 
-import android.hardware.display.DisplayManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.drawable.Icon
+import android.hardware.display.DisplayManager
+import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.view.Display
@@ -33,6 +36,11 @@ class MaxRefreshRateTileService : TileService() {
         }
 
         val isMaxActive = Rms.selectedRate(this) == maxRate
+        if (!isMaxActive && !QEngineAuthorization.isAuthorized(this)) {
+            openQspoofForVerification()
+            return
+        }
+
         val succeeded = if (isMaxActive) Rms.reset() else Rms.vote(this, maxRate)
         if (!succeeded) {
             tile.state = Tile.STATE_UNAVAILABLE
@@ -55,43 +63,63 @@ class MaxRefreshRateTileService : TileService() {
         } else {
             val isMaxActive = Rms.selectedRate(this) == maxRate
             tile.state = if (isMaxActive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-            tile.subtitle = if (isMaxActive) "$maxRate Hz active" else "Tap for $maxRate Hz"
+            tile.subtitle = when {
+                isMaxActive -> "$maxRate active"
+                !QEngineAuthorization.isAuthorized(this) -> "Open QSpoof to verify"
+                else -> "Tap for $maxRate"
+            }
         }
         val isMaxActive = maxRate > 0 && Rms.selectedRate(this) == maxRate
-        tile.label = if (isMaxActive) "$maxRate Hz" else "QHz"
+        tile.label = "QHz"
         tile.icon = createQHzIcon(maxRate, isMaxActive)
         tile.updateTile()
     }
 
+    private fun openQspoofForVerification() {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        if (launchIntent == null) {
+            Toast.makeText(this, "Could not open QSpoof to verify access", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        launchIntent.addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
+        )
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val pendingIntent = PendingIntent.getActivity(
+                    this,
+                    0,
+                    launchIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                startActivityAndCollapse(pendingIntent)
+            } else {
+                startActivityAndCollapse(launchIntent)
+            }
+        } catch (error: SecurityException) {
+            Toast.makeText(this, "Could not open QSpoof to verify access", Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun createQHzIcon(maxRate: Int, isMaxActive: Boolean): Icon {
-        val bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
-            typeface = Typeface.create("sans-serif", Typeface.BOLD)
+            typeface = Typeface.create("sans-serif-black", Typeface.NORMAL)
         }
-        if (!isMaxActive || maxRate <= 0) {
-            paint.textAlign = Paint.Align.CENTER
-            paint.textSize = 34f
-            val baseline = 48f - (paint.ascent() + paint.descent()) / 2f
-            canvas.drawText("QHz", 48f, baseline, paint)
-        } else {
-            val rateText = maxRate.toString()
-            paint.textSize = 43f
-            paint.textAlign = Paint.Align.LEFT
-            val rateWidth = paint.measureText(rateText)
-            val suffixPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
-                textAlign = Paint.Align.LEFT
-                textSize = 9f
-                typeface = Typeface.create("sans-serif", Typeface.BOLD)
-            }
-            val totalWidth = rateWidth + suffixPaint.measureText("Hz") + 2f
-            val startX = (96f - totalWidth) / 2f
-            val baseline = 48f - (paint.ascent() + paint.descent()) / 2f
-            canvas.drawText(rateText, startX, baseline, paint)
-            canvas.drawText("Hz", startX + rateWidth + 2f, baseline - 12f, suffixPaint)
+        val text = if (isMaxActive && maxRate > 0) maxRate.toString() else "QHz"
+        paint.textSize = if (text == "QHz") 60f else 76f
+        paint.textAlign = Paint.Align.CENTER
+        val textWidth = paint.measureText(text)
+        if (textWidth > 116f) {
+            paint.textScaleX = 116f / textWidth
         }
+        val baseline = 64f - (paint.ascent() + paint.descent()) / 2f
+        canvas.drawText(text, 64f, baseline, paint)
         return Icon.createWithBitmap(bitmap)
     }
 

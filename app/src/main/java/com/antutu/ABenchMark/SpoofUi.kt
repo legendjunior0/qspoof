@@ -1109,9 +1109,11 @@ object SpoofUi {
         val cardHeight = dp(activity, 112)
         val front = createCard()
         addBrandMark(front, 55)
+        val appBrand = if (BuildConfig.FLAVOR == "ludashi") "Qspoof" else "QSpoof"
+        val engineName = "$appBrand Engine"
         addTitle(
             front,
-            "QSpoof Engine",
+            engineName,
             "Performance Spoofer & Optimizer",
             "Tap controls • Swipe to switch",
             "v5.0"
@@ -1122,7 +1124,7 @@ object SpoofUi {
             orientation = LinearLayout.VERTICAL
             visibility = View.GONE
             rotationX = -85f
-            contentDescription = "Your Profile. Swipe down to return to QSpoof Engine."
+            contentDescription = "Your Profile. Swipe down to return to $engineName."
         }
         val profileHeader = LinearLayout(activity).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -1152,7 +1154,7 @@ object SpoofUi {
             clipChildren = false
             addView(front, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, cardHeight))
             addView(back, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, cardHeight))
-            contentDescription = "QSpoof Engine and Your Profile card. Tap the QSpoof card for controls. Swipe up or down to switch cards."
+            contentDescription = "$engineName and Your Profile card. Tap the $appBrand card for controls. Swipe up or down to switch cards."
         }
         var showingProfile = false
         var cardAnimationRunning = false
